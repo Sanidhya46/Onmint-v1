@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:ui_components/ui_components.dart';
 import 'package:api_client/api_client.dart';
 import '../../config/app_colors.dart';
 import '../booking/user_unified_tracking_screen.dart';
 import 'pharmacist_order_tracking_screen.dart';
+import '../booking/order_request_screen.dart';
+import '../booking/order_detail_file.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -91,26 +94,59 @@ class _BookingsScreenState extends State<BookingsScreen>
   void _viewBookingDetails(Map<String, dynamic> request) {
     final serviceType = request['serviceType'] ?? 'Unknown';
     final bookingId = request['_id']?.toString() ?? request['id']?.toString() ?? '';
+    final status = request['status']?.toString().toLowerCase() ?? '';
     
     bool isPharmacy = serviceType.toLowerCase() == 'pharmacist' || 
                       serviceType.toLowerCase() == 'pharmacy' || 
-                      request['medicines'] != null;
+                      serviceType.toLowerCase() == 'medicine' ||
+                      (request['medicines'] != null && (request['medicines'] as List).isNotEmpty);
 
-    if (isPharmacy) {
-      Navigator.pushNamed(
-        context,
-        '/pharmacist-tracking?id=$bookingId'
-      ).then((_) => _loadBookings());
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UserUnifiedTrackingScreen(
-            bookingId: bookingId,
-            serviceType: serviceType,
+    if (status == 'requested' || status == 'pending' || status == 'waiting for pharmacist') {
+      if (isPharmacy) {
+        Navigator.pushNamed(
+          context,
+          '/pharmacist-tracking?id=$bookingId'
+        ).then((_) => _loadBookings());
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OrderRequestScreen(
+              bookingId: bookingId,
+              bookingData: request,
+              serviceType: serviceType,
+            ),
           ),
-        ),
-      ).then((_) => _loadBookings());
+        ).then((_) => _loadBookings());
+      }
+    } else {
+      if (isPharmacy) {
+        Navigator.pushNamed(
+          context,
+          '/pharmacist-tracking?id=$bookingId'
+        ).then((_) => _loadBookings());
+      } else {
+        if (serviceType.toLowerCase() == 'doctor' || serviceType.toLowerCase() == 'consultation') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderDetailFile(
+                bookingId: bookingId,
+              ),
+            ),
+          ).then((_) => _loadBookings());
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => UserUnifiedTrackingScreen(
+                bookingId: bookingId,
+                serviceType: serviceType,
+              ),
+            ),
+          ).then((_) => _loadBookings());
+        }
+      }
     }
   }
 
@@ -256,7 +292,21 @@ class _BookingsScreenState extends State<BookingsScreen>
     String statusLabel;
     bool isCompleted = false;
 
-    if (statusRaw == 'requested' || statusRaw == 'pending') {
+    bool isMedicineOffersPending = false;
+    if (serviceType.toString().toLowerCase() == 'medicine') {
+      final offersList = request['offers'];
+      final isPrescr = request['isPrescriptionBased'] == true;
+      if (isPrescr && offersList is List && offersList.isNotEmpty) {
+        if (statusRaw == 'requested' || statusRaw == 'pending' || statusRaw == 'waiting for pharmacist') {
+          isMedicineOffersPending = true;
+        }
+      }
+    }
+
+    if (isMedicineOffersPending) {
+      statusColor = Colors.orange;
+      statusLabel = 'Approve';
+    } else if (statusRaw == 'requested' || statusRaw == 'pending') {
       statusColor = Colors.orange;
       statusLabel = 'Pending';
     } else if (statusRaw == 'accepted') {
@@ -280,13 +330,15 @@ class _BookingsScreenState extends State<BookingsScreen>
       final dt = DateTime.tryParse(request['updatedAt'].toString());
       if (dt != null) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        completedDateStr = '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+        final timeStr = DateFormat('hh:mm a').format(dt.toLocal());
+        completedDateStr = '${dt.day} ${months[dt.month - 1]} ${dt.year} • $timeStr';
       }
     } else if (dateStr != null) {
       final dt = DateTime.tryParse(dateStr.toString());
       if (dt != null) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        completedDateStr = '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+        final timeStr = DateFormat('hh:mm a').format(dt.toLocal());
+        completedDateStr = '${dt.day} ${months[dt.month - 1]} ${dt.year} • $timeStr';
       }
     }
 

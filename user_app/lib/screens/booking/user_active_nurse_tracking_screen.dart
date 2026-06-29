@@ -422,16 +422,25 @@ class _UserActiveNurseTrackingScreenState
           const SizedBox(height: 24),
           Row(
             children: [
-              _buildProgressStep('Accepted', Icons.check, stepIndex >= 0,
-                  isFirst: true),
+              Expanded(
+                flex: 2,
+                child: _buildProgressStep('Accepted', Icons.check, stepIndex >= 0, isFirst: true),
+              ),
               _buildProgressLine(stepIndex >= 1),
-              _buildProgressStep(
-                  'On The Way', Icons.two_wheeler, stepIndex >= 1),
+              Expanded(
+                flex: 2,
+                child: _buildProgressStep('On The Way', Icons.two_wheeler, stepIndex >= 1),
+              ),
               _buildProgressLine(stepIndex >= 2),
-              _buildProgressStep('Reached', Icons.location_on, stepIndex >= 2),
+              Expanded(
+                flex: 2,
+                child: _buildProgressStep('Reached', Icons.location_on, stepIndex >= 2),
+              ),
               _buildProgressLine(stepIndex >= 3),
-              _buildProgressStep('Completed', Icons.flag, stepIndex >= 3,
-                  isLast: true),
+              Expanded(
+                flex: 2,
+                child: _buildProgressStep('Completed', Icons.flag, stepIndex >= 3, isLast: true),
+              ),
             ],
           ),
         ],

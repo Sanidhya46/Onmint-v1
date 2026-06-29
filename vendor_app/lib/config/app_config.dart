@@ -3,7 +3,7 @@ import 'app_colors.dart';
 
 class AppConfig {
   static const String appName = 'OnMint Vendor';
-  static const String apiBaseUrl = 'http://localhost:5000/api/v1';
+  static const String apiBaseUrl = 'https://api.onmint.in/api/v1';
   static const bool isDevelopmentMode = true;
   
   // Vendor roles

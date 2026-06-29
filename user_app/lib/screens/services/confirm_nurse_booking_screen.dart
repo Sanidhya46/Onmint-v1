@@ -190,15 +190,7 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
                   fit: BoxFit.fitWidth,
                   alignment: Alignment.topCenter,
                 ),
-                Positioned(
-                  top: MediaQuery.of(context).padding.top > 0 ? MediaQuery.of(context).padding.top : 10,
-                  right: 16,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back,
-                        color: Colors.black87, size: 24),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
+                // Positioned removed
               ],
             ),
             Column(

@@ -214,152 +214,197 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
       }
     }
     
-    final patientGender = booking.patientDetails?.gender ?? '';
+    final patientGender = booking.patientDetails?.gender ?? 'Male';
+    final consultationType = booking.consultationType ?? 'Video Consultation';
     
     Color statusColor;
-    IconData statusIcon;
+    String statusLabel;
+    bool isCompleted = false;
     
     switch (type) {
       case 'requested':
         statusColor = Colors.orange;
-        statusIcon = Icons.pending;
+        statusLabel = 'Pending';
         break;
       case 'accepted':
-        statusColor = Colors.blue;
-        statusIcon = Icons.check_circle;
+        statusColor = const Color(0xFF1565C0);
+        statusLabel = 'Accepted';
         break;
       case 'completed':
         statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
+        statusLabel = 'Completed';
+        isCompleted = true;
         break;
       default:
         statusColor = Colors.grey;
-        statusIcon = Icons.info;
+        statusLabel = type.toUpperCase();
     }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
+    String completedDateStr = '';
+    if (isCompleted && booking.scheduledTime != null) {
+      final dt = booking.scheduledTime!;
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      completedDateStr = '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.zero,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: InkWell(
-        onTap: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AppointmentDetailsScreen(
-                appointmentId: booking.id,
-              ),
-            ),
-          );
-          if (result == true) {
-            _loadAllBookings();
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _navigateToDetails(booking.id),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // Avatar
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: statusColor.withOpacity(0.1),
-                    child: Icon(
-                      statusIcon,
-                      color: statusColor,
-                      size: 24,
-                    ),
+                    backgroundColor: Colors.blue.shade50,
+                    backgroundImage: booking.patientDetails?.profilePicture != null &&
+                            booking.patientDetails!.profilePicture!.isNotEmpty
+                        ? NetworkImage(booking.patientDetails!.profilePicture!)
+                        : AssetImage(patientGender.toLowerCase() == 'female'
+                            ? 'assets/images/female_profile.png'
+                            : 'assets/images/male_profile.png') as ImageProvider,
                   ),
                   const SizedBox(width: 12),
+                  // Details
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          patientName,
+                          patientName.isNotEmpty ? patientName : 'Patient Name',
                           style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF152238),
+                            height: 1.1,
                           ),
                         ),
-                        if (patientPhone.isNotEmpty)
-                          Text(
-                            patientPhone,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.person_outline, size: 12, color: Colors.grey),
+                            const SizedBox(width: 2),
+                            Text(
+                              '${patientAge > 0 ? "$patientAge Years" : "--"}',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.grey.shade600),
                             ),
-                          ),
-                        // Show age and gender
-                        if (patientAge > 0 || patientGender.isNotEmpty)
-                          Text(
-                            '${patientAge > 0 ? '$patientAge years' : ''} ${patientGender.isNotEmpty ? '• $patientGender' : ''}'.trim(),
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[500],
+                            const SizedBox(width: 8),
+                            Icon(patientGender.toLowerCase() == 'female' ? Icons.female : Icons.male, size: 12, color: Colors.grey),
+                            const SizedBox(width: 2),
+                            Text(
+                              patientGender,
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.grey.shade600),
                             ),
-                          ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.medical_services_outlined, size: 12, color: Colors.grey),
+                            const SizedBox(width: 2),
+                            Text(
+                              consultationType,
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey),
+                            const SizedBox(width: 2),
+                            Text(
+                              '${_formatDate(booking.scheduledTime)} • ${_formatTime(booking.scheduledTime)}',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      type.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
+                  const SizedBox(width: 8),
+                  // Status Badge
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: statusColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              statusLabel,
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 10,
+                                color: statusColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          if (isCompleted && completedDateStr.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'Completed on\n$completedDateStr',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.grey.shade600, height: 1.1),
+                            ),
+                          ],
+                        ],
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.chevron_right, color: Colors.black54, size: 18),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              const Divider(),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
-                  const SizedBox(width: 8),
-                  Text(
-                    _formatDate(booking.scheduledTime),
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                  const SizedBox(width: 8),
-                  Text(
-                    _formatTime(booking.scheduledTime),
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-              if (booking.notes != null && booking.notes!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
+            ),
+            if (booking.notes != null && booking.notes!.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Colors.grey[500]!.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.note, size: 16, color: Colors.grey[600]),
-                      const SizedBox(width: 8),
+                      Icon(Icons.note, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           booking.notes!,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             color: Colors.grey[700],
                           ),
                         ),
@@ -367,93 +412,90 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
                     ],
                   ),
                 ),
-              ],
-              if (booking.price > 0) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.currency_rupee, size: 16, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text(
-                      '₹${booking.price.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              if (type == 'requested') ...[
-                const SizedBox(height: 12),
-                Row(
+              ),
+            ],
+            if (type == 'requested') ...[
+              Divider(color: Colors.grey.shade200, height: 1, thickness: 1),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton.icon(
+                      child: OutlinedButton(
                         onPressed: () => _quickReject(booking.id),
-                        icon: const Icon(Icons.close, size: 18),
-                        label: const Text('Reject'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
+                        child: const Text('Reject', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton.icon(
+                      child: ElevatedButton(
                         onPressed: () => _quickAccept(booking.id),
-                        icon: const Icon(Icons.check, size: 18),
-                        label: const Text('Accept'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
+                        child: const Text('Accept', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
                 ),
-              ],
-              if (type == 'accepted') ...[
-                const SizedBox(height: 12),
-                // Check if prescription exists - show Complete Appointment button
-                if (booking.prescription != null)
-                  ElevatedButton.icon(
-                    onPressed: () => _navigateToDetails(booking.id),
-                    icon: const Icon(Icons.check_circle, size: 18),
-                    label: const Text('Complete Appointment'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 40),
-                    ),
-                  )
-                // Check if video call is completed but no prescription yet
-                else if (booking.videoCallCompleted == true)
-                  ElevatedButton.icon(
-                    onPressed: () => _navigateToDetails(booking.id),
-                    icon: const Icon(Icons.note_add, size: 18),
-                    label: const Text('Create Prescription'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 40),
-                    ),
-                  )
-                // Default - start consultation
-                else
-                  ElevatedButton.icon(
-                    onPressed: () => _navigateToDetails(booking.id),
-                    icon: const Icon(Icons.arrow_forward, size: 18),
-                    label: const Text('Start Consultation'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 40),
-                    ),
-                  ),
-              ],
+              ),
             ],
-          ),
+            if (type == 'accepted') ...[
+              Divider(color: Colors.grey.shade200, height: 1, thickness: 1),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: () {
+                  if (booking.prescription != null) {
+                    return ElevatedButton(
+                      onPressed: () => _navigateToDetails(booking.id),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 36),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text('Complete Appointment', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    );
+                  } else if (booking.videoCallCompleted == true) {
+                    return ElevatedButton(
+                      onPressed: () => _navigateToDetails(booking.id),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 36),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text('Create Prescription', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    );
+                  } else {
+                    return ElevatedButton(
+                      onPressed: () => _navigateToDetails(booking.id),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1565C0),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 36),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text('Start Consultation', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    );
+                  }
+                }(),
+              ),
+            ],
+          ],
         ),
       ),
     );

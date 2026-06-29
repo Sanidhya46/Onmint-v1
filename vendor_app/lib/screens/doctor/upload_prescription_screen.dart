@@ -116,233 +116,296 @@ class _UploadPrescriptionScreenState extends State<UploadPrescriptionScreen> {
   Widget build(BuildContext context) {
     final patient = widget.appointment?['patient'] ?? {};
     final patientName = patient['fullName'] ?? 'Patient';
+    final gender = patient['gender'] ?? 'Male';
     final age = (widget.appointment?['patientAge'] ?? patient['age'] ?? '28').toString();
     final price = widget.appointment?['price'] ?? widget.appointment?['totalAmount'] ?? 300;
 
-    String dateStr = 'N/A';
-    String timeStr = 'N/A';
+    String dateStr = '13 May 2025'; // Default mock to match design if not available
+    String timeStr = '06:45 PM';
     if (widget.appointment?['endTime'] != null) {
       final d = DateTime.tryParse(widget.appointment!['endTime']);
       if (d != null) {
         dateStr = '${d.day} ${_getMonth(d.month)} ${d.year}';
-        timeStr = '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+        final hour = d.hour > 12 ? d.hour - 12 : d.hour;
+        final period = d.hour >= 12 ? 'PM' : 'AM';
+        timeStr = '${hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')} $period';
       }
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text('Upload Prescription'),
+        title: const Text('Upload Prescription', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.blue[100],
-                        ),
-                        child: const Icon(Icons.person, size: 32, color: Colors.blue),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Consultation Completed Banner
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: Color(0xFF2E7D32), size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Consultation Completed', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          const SizedBox(height: 4),
+                          Text('Please upload your prescription to help us serve you better.', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Patient Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 28,
+                          backgroundImage: AssetImage('assets/images/logos/doctor_logo.png'), // Mock photo
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(patientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.male, size: 14, color: Colors.grey[600]),
+                                  const SizedBox(width: 4),
+                                  Text('$gender  •  $age Years', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[600]),
+                                  const SizedBox(width: 4),
+                                  Text('3.1 km away', style: TextStyle(color: Colors.grey[700], fontSize: 13)), // Mock distance
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(height: 1),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              patientName,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              children: [
+                                const Icon(Icons.calendar_today_outlined, size: 16, color: Colors.black54),
+                                const SizedBox(width: 8),
+                                Text(dateStr, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+                              ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$age years old',
-                              style: TextStyle(color: Colors.grey[600]),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.access_time_outlined, size: 16, color: Colors.black54),
+                                const SizedBox(width: 8),
+                                Text(timeStr, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+                              ],
                             ),
                           ],
                         ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text('₹$price', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2E7D32))),
+                            const SizedBox(height: 4),
+                            Text('Consultation Fee', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Upload Section
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Upload Prescription', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text('Upload a clear prescription (JPG, PNG or PDF)', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                    const SizedBox(height: 16),
+                    
+                    GestureDetector(
+                      onTap: _isUploading ? null : _pickFile,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          // Custom dashed border logic using simple solid border for standard flutter if dotted_border not available
+                          border: Border.all(color: Colors.grey[400]!, style: BorderStyle.solid),
+                        ),
+                        child: _fileName != null
+                            ? Column(
+                                children: [
+                                  const Icon(Icons.check_circle, size: 40, color: Colors.green),
+                                  const SizedBox(height: 12),
+                                  Text(_fileName!, style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                                  const SizedBox(height: 4),
+                                  Text('($_fileSize KB)', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.file_upload_outlined, size: 32, color: Colors.black87),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text('Tap to upload', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                  const SizedBox(height: 4),
+                                  Text('or choose a file from your device', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                                  const SizedBox(height: 8),
+                                  Text('JPG, PNG or PDF (Max 5 MB)', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                                ],
+                              ),
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Note Section
+              const Text('Add a Note (Optional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _noteController,
+                maxLength: 200,
+                decoration: InputDecoration(
+                  hintText: 'Add any additional information...',
+                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.all(16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Submit Button
+              ElevatedButton.icon(
+                onPressed: _isUploading ? null : _uploadPrescription,
+                icon: _isUploading
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Icon(Icons.upload, color: Colors.white, size: 20),
+                label: const Text('Upload Prescription Photo', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E7D32),
+                  minimumSize: const Size(double.infinity, 54),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Secure info
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.verified_user_outlined, size: 14, color: Colors.grey[600]),
+                  const SizedBox(width: 6),
+                  Text('Your file is secure and private.', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Why upload prescription block
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline, color: Color(0xFF2E7D32), size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const Text('Why upload prescription?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          const SizedBox(height: 4),
                           Text(
-                            'Appointment Date',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                          ),
-                          Text(
-                            dateStr,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            'Helps doctors understand your treatment better and provide accurate follow-up.',
+                            style: TextStyle(color: Colors.grey[700], fontSize: 13, height: 1.4),
                           ),
                         ],
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Consultation Fee',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                          ),
-                          Text(
-                            '₹$price',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1565C0),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Upload Prescription',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.grey.shade50,
-                    ),
-                    child: _fileName != null
-                        ? Column(
-                            children: [
-                              const Icon(Icons.check_circle, size: 48, color: Colors.green),
-                              const SizedBox(height: 8),
-                              Text(
-                                _fileName!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '($_fileSize KB)',
-                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                              ),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: _isUploading ? null : _pickFile,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                ),
-                                child: const Text('Change File'),
-                              ),
-                            ],
-                          )
-                        : GestureDetector(
-                            onTap: _isUploading ? null : _pickFile,
-                            child: Column(
-                              children: [
-                                const Icon(Icons.cloud_upload_outlined, size: 48, color: Colors.grey),
-                                const SizedBox(height: 12),
-                                const Text(
-                                  'Tap to select prescription image',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'JPG, PNG (Max 5 MB)',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Notes (Optional)',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _noteController,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      hintText: 'Add any notes about the prescription...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.all(12),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: _isUploading ? null : _uploadPrescription,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1565C0),
-                      ),
-                      child: _isUploading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Text(
-                              'Upload Prescription Photo',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
@@ -353,3 +416,4 @@ class _UploadPrescriptionScreenState extends State<UploadPrescriptionScreen> {
     return months[month - 1];
   }
 }
+

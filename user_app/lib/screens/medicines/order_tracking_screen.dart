@@ -73,9 +73,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
   Future<void> _rejectOrder() async {
     try {
-      await _apiClient.patch(
-        '/realTimeBooking/${widget.orderId}/status',
-        data: {'status': 'cancelled'},
+      await _apiClient.post(
+        '/realtime-booking/${widget.orderId}/cancel',
+        data: {'reason': 'Cancelled by user'},
       );
       ToastUtils.showSuccess('Order cancelled successfully');
       _loadOrder();

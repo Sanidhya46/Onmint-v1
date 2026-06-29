@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import '../services/doctor_detail_screen.dart';
+import '../booking/confirm_doctor_booking_screen.dart';
 
 class DoctorSummaryScreen extends StatefulWidget {
   final String categoryTitle;
@@ -56,37 +57,15 @@ class _DoctorSummaryScreenState extends State<DoctorSummaryScreen> {
   }
 
   Future<void> _handlePayAndConsult() async {
-    setState(() => _isBooking = true);
-    try {
-      final bookingData = {
-        'serviceType': 'doctor',
-        'category': widget.categoryTitle,
-        'specialization': widget.categoryTitle,
-        'description':
-            'Online consultation for ${widget.categoryTitle} - ${widget.symptomName}',
-        'urgency': 'medium',
-        'address': 'Online',
-        'isEmergency': false,
-        'consultationType': 'video-call'
-      };
-
-      await _apiClient.patient.createRealtimeBooking(bookingData);
-
-      if (mounted) {
-        setState(() => _isBooking = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Booking request sent successfully!')),
-        );
-        Navigator.pop(context); // Go back
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isBooking = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send request: $e')),
-        );
-      }
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ConfirmDoctorBookingScreen(
+          categoryTitle: widget.categoryTitle,
+          symptomName: widget.symptomName,
+        ),
+      ),
+    );
   }
 
   @override

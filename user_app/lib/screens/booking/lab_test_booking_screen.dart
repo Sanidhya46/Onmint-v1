@@ -250,28 +250,88 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
 
                       // State & City
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildFieldLabel('State'),
-                                TextFormField(
-                                  key: ValueKey(_selectedState),
-                                  initialValue: _selectedState ?? '',
-                                  onChanged: (val) => _selectedState = val,
-                                  style: const TextStyle(fontSize: 12, color: Colors.black87),
-                                  decoration: InputDecoration(
-                                    hintText: 'State',
-                                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 11),
-                                    prefixIcon: Icon(Icons.map_outlined, color: Colors.purple[400], size: 18),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
-                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
-                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.purple[700]!, width: 1.5)),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                    isDense: true,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.grey[300]!),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                                  child: Autocomplete<String>(
+                                    initialValue: TextEditingValue(text: _selectedState ?? ''),
+                                    optionsBuilder: (TextEditingValue textEditingValue) {
+                                      if (textEditingValue.text.isEmpty) return IndianStatesData.states;
+                                      return IndianStatesData.states.where((s) =>
+                                          s.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                                    },
+                                    onSelected: (String selection) {
+                                      setState(() {
+                                        _selectedState = selection;
+                                        _selectedCity = null;
+                                      });
+                                    },
+                                    fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                                      return TextField(
+                                        controller: controller,
+                                        focusNode: focusNode,
+                                        style: const TextStyle(fontSize: 12, color: Colors.black87),
+                                        decoration: InputDecoration(
+                                          hintText: 'State',
+                                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 11),
+                                          border: InputBorder.none,
+                                          icon: Icon(Icons.map_outlined, color: Colors.purple[400], size: 18),
+                                          isDense: true,
+                                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                                          suffixIcon: controller.text.isNotEmpty
+                                              ? GestureDetector(
+                                                  onTap: () {
+                                                    controller.clear();
+                                                    setState(() { _selectedState = null; _selectedCity = null; });
+                                                  },
+                                                  child: Icon(Icons.close, size: 14, color: Colors.grey[400]))
+                                              : null,
+                                        ),
+                                        onChanged: (val) {
+                                          if (!IndianStatesData.states.contains(val)) {
+                                            setState(() { _selectedState = null; _selectedCity = null; });
+                                          }
+                                        },
+                                      );
+                                    },
+                                    optionsViewBuilder: (context, onSelected, options) {
+                                      return Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Material(
+                                          elevation: 4,
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: ConstrainedBox(
+                                            constraints: const BoxConstraints(maxHeight: 200),
+                                            child: ListView.builder(
+                                              padding: EdgeInsets.zero,
+                                              shrinkWrap: true,
+                                              itemCount: options.length,
+                                              itemBuilder: (context, index) {
+                                                final option = options.elementAt(index);
+                                                return InkWell(
+                                                  onTap: () => onSelected(option),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                                    child: Text(option, style: const TextStyle(fontSize: 12)),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],
@@ -283,22 +343,81 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildFieldLabel('City *'),
-                                TextFormField(
-                                  key: ValueKey(_selectedCity),
-                                  initialValue: _selectedCity ?? '',
-                                  onChanged: (val) => _selectedCity = val,
-                                  style: const TextStyle(fontSize: 12, color: Colors.black87),
-                                  decoration: InputDecoration(
-                                    hintText: 'City',
-                                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 11),
-                                    prefixIcon: Icon(Icons.location_city, color: Colors.purple[400], size: 18),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
-                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey[300]!)),
-                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.purple[700]!, width: 1.5)),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                    isDense: true,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: _selectedState == null ? Colors.grey.shade100 : Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.grey[300]!),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                                  child: Autocomplete<String>(
+                                    key: ValueKey(_selectedState),
+                                    initialValue: TextEditingValue(text: _selectedCity ?? ''),
+                                    optionsBuilder: (TextEditingValue textEditingValue) {
+                                      if (_selectedState == null) return const Iterable<String>.empty();
+                                      final cities = IndianStatesData.getCitiesForState(_selectedState!);
+                                      if (textEditingValue.text.isEmpty) return cities;
+                                      return cities.where((c) =>
+                                          c.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                                    },
+                                    onSelected: (String selection) {
+                                      setState(() { _selectedCity = selection; });
+                                    },
+                                    fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                                      return TextField(
+                                        controller: controller,
+                                        focusNode: focusNode,
+                                        enabled: _selectedState != null,
+                                        style: const TextStyle(fontSize: 12, color: Colors.black87),
+                                        decoration: InputDecoration(
+                                          hintText: _selectedState == null ? 'Select state' : 'City',
+                                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 11),
+                                          border: InputBorder.none,
+                                          icon: Icon(Icons.location_city, color: Colors.purple[400], size: 18),
+                                          isDense: true,
+                                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                                          suffixIcon: controller.text.isNotEmpty
+                                              ? GestureDetector(
+                                                  onTap: () {
+                                                    controller.clear();
+                                                    setState(() { _selectedCity = null; });
+                                                  },
+                                                  child: Icon(Icons.close, size: 14, color: Colors.grey[400]))
+                                              : null,
+                                        ),
+                                        onChanged: (val) {
+                                          final cities = IndianStatesData.getCitiesForState(_selectedState!);
+                                          if (!cities.contains(val)) setState(() { _selectedCity = null; });
+                                        },
+                                      );
+                                    },
+                                    optionsViewBuilder: (context, onSelected, options) {
+                                      return Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Material(
+                                          elevation: 4,
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: ConstrainedBox(
+                                            constraints: const BoxConstraints(maxHeight: 200),
+                                            child: ListView.builder(
+                                              padding: EdgeInsets.zero,
+                                              shrinkWrap: true,
+                                              itemCount: options.length,
+                                              itemBuilder: (context, index) {
+                                                final option = options.elementAt(index);
+                                                return InkWell(
+                                                  onTap: () => onSelected(option),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                                    child: Text(option, style: const TextStyle(fontSize: 12)),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],

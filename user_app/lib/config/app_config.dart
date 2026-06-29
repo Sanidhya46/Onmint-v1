@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppConfig {
   static const String appName = 'OnMint';
-  static const String apiBaseUrl = 'http://localhost:5000/api/v1';
+  static const String apiBaseUrl = 'https://api.onmint.in/api/v1';
 
   // Development mode
   static const bool developmentMode = true;

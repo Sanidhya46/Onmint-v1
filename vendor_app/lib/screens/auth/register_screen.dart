@@ -13,6 +13,13 @@ import '../../config/app_config.dart';
 import '../../data/indian_states_cities.dart';
 import '../../widgets/terms_privacy_dialog.dart';
 
+part 'roles/doctor_registration.dart';
+part 'roles/nurse_registration.dart';
+part 'roles/ambulance_registration.dart';
+part 'roles/pathology_registration.dart';
+part 'roles/blood_bank_registration.dart';
+part 'roles/pharmacist_registration.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
 
@@ -24,6 +31,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   int _currentStep = 0;
   bool _isLoading = false;
   bool _isFetchingLocation = false;
+
+  void updateState(VoidCallback fn) {
+    if (mounted) setState(fn);
+  }
 
   // Step 1 Fields
   final _formKey1 = GlobalKey<FormState>();
@@ -149,9 +160,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _doctorExperienceController = TextEditingController();
   final _doctorRegNumberController = TextEditingController();
   final _doctorFeeController = TextEditingController();
-  String? _selectedSpecialization = 'Internal Medicine';
+  String? _selectedSpecialization = 'General Physician';
   final List<String> _specializations = [
-    'Internal Medicine',
     'General Physician',
     'Dermatology',
     'Gynecology',
@@ -159,7 +169,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'Sexology',
     'Stomach & Digestion',
     'Pediatrics',
-    'Orthodpedic'
+    'Orthopedic'
   ];
   final Map<String, bool> _doctorConsultationTypeState = {
     'Video Call': true,
@@ -199,7 +209,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'pharmacist',
     'bloodbank',
     'pathology',
-    'labtest',
   ];
   final List<String> _countryCodes = [
     '+91',
@@ -265,8 +274,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SnackBar(content: Text('Please select a service')));
         return;
       }
-      if (_selectedRole != 'labtest' &&
-          _selectedRole != 'pathology' &&
+      if (_selectedRole != 'pathology' &&
           _selectedRole != 'ambulance' &&
           _selectedRole != 'nurse' &&
           _selectedRole != 'pharmacist' &&
@@ -318,12 +326,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final pickedFile = result.files.first;
       XFile file;
 
-      if (pickedFile.bytes != null) {
-        // Web support
-        file = XFile.fromData(pickedFile.bytes!, name: pickedFile.name);
-      } else if (pickedFile.path != null) {
+      if (pickedFile.path != null) {
         // Native support
         file = XFile(pickedFile.path!);
+      } else if (pickedFile.bytes != null) {
+        // Web support
+        file = XFile.fromData(pickedFile.bytes!, name: pickedFile.name);
       } else {
         return;
       }
@@ -463,7 +471,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } else if (backendRole == 'doctor') {
         reqData['experience'] = int.tryParse(_doctorExperienceController.text.trim()) ?? 0;
         reqData['licenseNumber'] = _doctorRegNumberController.text.trim();
-        reqData['specialization'] = _selectedSpecialization ?? 'Internal Medicine';
+        reqData['specialization'] = _selectedSpecialization ?? 'General Physician';
         reqData['consultationFee'] = int.tryParse(_doctorFeeController.text.trim()) ?? 0;
         
         List<String> consultationTypes = [];
@@ -532,6 +540,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (_bloodBankFrontPhoto != null) namedFilesToUpload['profilePicture'] = _bloodBankFrontPhoto!;
         if (_bloodBankLicenseCert != null) namedFilesToUpload['license'] = _bloodBankLicenseCert!;
         if (_bloodBankInchargeAadhaar != null) namedFilesToUpload['idProof'] = _bloodBankInchargeAadhaar!;
+        if (_gstCert != null) namedFilesToUpload['certificate'] = _gstCert!;
+      } else if (backendRole == 'pharmacist') {
+        if (_pharmacistRegistrationCert != null) namedFilesToUpload['license'] = _pharmacistRegistrationCert!;
         if (_gstCert != null) namedFilesToUpload['certificate'] = _gstCert!;
       } else {
         if (_labLicense != null) namedFilesToUpload['license'] = _labLicense!;
@@ -694,288 +705,263 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildStep1() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bottomHeight = screenHeight * 0.60;
+    final s = (bottomHeight / 480).clamp(0.8, 1.2);
+
     return Scaffold(
       backgroundColor: Colors.blue.shade50,
-      body: Column(
-        children: [
-          Image.asset(
-            'images/register_login/top_banner.jpeg',
-            width: double.infinity,
-            fit: BoxFit.fitWidth,
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius:
-                      BorderRadius.circular(24), // Larger border radius
-                  boxShadow: const [
-                    BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 10,
-                        offset: Offset(0, 5))
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Form(
-                    key: _formKey1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF0033CC),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: const Icon(Icons.person_outline,
-                                          color: Colors.white, size: 24),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    const Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Create Your Profile',
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black),
-                                          ),
-                                          Text(
-                                            'Please fill in your details to continue',
-                                            style: TextStyle(
-                                                fontSize: 10, color: Colors.grey),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                const SizedBox(height: 6), // Tighter gap
-
-                                Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildTextField(
-                                      controller: _nameController,
-                                      icon: Icons.person_outline,
-                                      label: 'Full Name',
-                                      hint: 'Enter your full name',
-                                      validator: (v) =>
-                                          v!.isEmpty ? 'Required' : null,
-                                    ),
-                                    const SizedBox(
-                                        height:
-                                            4), // Drastically reduced vertical padding
-
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          flex: 4,
-                                          child: _buildTextField(
-                                            controller: _ageController,
-                                            icon: Icons.calendar_month_outlined,
-                                            label: 'Age',
-                                            hint: 'Enter your age',
-                                            keyboardType: TextInputType.number,
-                                            validator: (v) =>
-                                                v!.isEmpty ? 'Required' : null,
-                                          ),
+      resizeToAvoidBottomInset: true, // Let the view resize
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ──── TOP: Image Banner ────
+                    SizedBox(
+                      height: 180 * s,
+                      width: double.infinity,
+                      child: Image.asset(
+                        'assets/images/register_login/top_banner12.jpeg',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    
+                    // ──── BOTTOM: Form Container ────
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 12 * s, right: 12 * s, bottom: 12 * s, top: 12 * s),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24 * s),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 10,
+                                offset: Offset(0, 5),
+                              )
+                            ],
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(16 * s, 20 * s, 16 * s, 16 * s),
+                            child: Form(
+                              key: _formKey1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 12 * s, vertical: 10 * s),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF0033CC),
+                                          borderRadius: BorderRadius.circular(10),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          flex: 5,
-                                          child: _buildFieldContainer(
-                                            icon: Icons.transgender,
-                                            label: 'Gender',
-                                            child: DropdownButtonHideUnderline(
-                                              child: DropdownButton<String>(
-                                                isExpanded: true,
-                                                value: _selectedGender,
-                                                hint: Text('Select gender',
-                                                    style: TextStyle(
-                                                        fontSize: 11,
-                                                        color: Colors
-                                                            .grey.shade400)),
-                                                items: _genders
-                                                    .map((g) => DropdownMenuItem(
-                                                        value: g,
-                                                        child: Text(g, overflow: TextOverflow.ellipsis,
-                                                            style:
-                                                                const TextStyle(
-                                                                    fontSize:
-                                                                        12))))
-                                                    .toList(),
-                                                onChanged: (v) => setState(
-                                                    () => _selectedGender = v),
-                                              ),
+                                        child: const Icon(Icons.person_outline,
+                                            color: Colors.white, size: 24),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Create Your Profile',
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black),
                                             ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-
-                                    _buildFieldContainer(
-                                      icon: Icons.favorite_border,
-                                      label: 'Choose Your Service',
-                                      child: DropdownButtonHideUnderline(
-                                        child: DropdownButton<String>(
-                                          isExpanded: true,
-                                          value: _selectedRole,
-                                          hint: Text('Select a service',
+                                            SizedBox(height: 2),
+                                            Text(
+                                              'Enter basic details to get registered',
                                               style: TextStyle(
                                                   fontSize: 11,
-                                                  color: Colors.grey.shade400)),
-                                          items: _services
-                                              .map((s) => DropdownMenuItem(
-                                                  value: s,
-                                                  child: Text(s.toUpperCase(), overflow: TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                          fontSize: 12))))
-                                              .toList(),
-                                          onChanged: (v) =>
-                                              setState(() => _selectedRole = v),
+                                                  color: Colors.grey),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  _buildTextField(
+                                    controller: _nameController,
+                                    icon: Icons.person_outline,
+                                    label: 'Full Name',
+                                    hint: 'Enter your full name',
+                                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 4,
+                                        child: _buildTextField(
+                                          controller: _ageController,
+                                          icon: Icons.cake_outlined,
+                                          label: 'Age',
+                                          hint: 'Age',
+                                          keyboardType: TextInputType.number,
+                                          validator: (v) => v!.isEmpty ? 'Required' : null,
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-
-                                    _buildTextField(
-                                      controller: _phoneController,
-                                      icon: Icons.call_outlined,
-                                      label: 'Mobile Number',
-                                      hint: 'Enter mobile number',
-                                      keyboardType: TextInputType.phone,
-                                      prefixWidget: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const SizedBox(width: 4),
-                                          DropdownButtonHideUnderline(
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        flex: 5,
+                                        child: _buildFieldContainer(
+                                          icon: Icons.transgender,
+                                          label: 'Gender',
+                                          child: DropdownButtonHideUnderline(
                                             child: DropdownButton<String>(
-                                              value: _selectedCountryCode,
-                                              items: _countryCodes
-                                                  .map((c) => DropdownMenuItem(
-                                                      value: c,
-                                                      child: Text(c, overflow: TextOverflow.ellipsis,
-                                                          style: const TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color: Color(
-                                                                  0xFF0033CC),
-                                                              fontSize: 12))))
+                                              isExpanded: true,
+                                              value: _selectedGender,
+                                              hint: Text('Select gender',
+                                                  style: TextStyle(
+                                                      fontSize: 11,
+                                                      color: Colors.grey.shade400)),
+                                              items: _genders
+                                                  .map((g) => DropdownMenuItem(
+                                                      value: g,
+                                                      child: Text(g, overflow: TextOverflow.ellipsis,
+                                                          style: const TextStyle(fontSize: 12))))
                                                   .toList(),
-                                              onChanged: (v) => setState(() =>
-                                                  _selectedCountryCode = v!),
-                                              icon: const SizedBox.shrink(),
+                                              onChanged: (v) => setState(() => _selectedGender = v),
                                             ),
                                           ),
-                                          const SizedBox(width: 4),
-                                        ],
+                                        ),
                                       ),
-                                      validator: (v) => v!.length != 10
-                                          ? 'Enter valid 10 digit number'
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 4),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
 
-                                    _buildTextField(
-                                      controller: _emailController,
-                                      icon: Icons.mail_outline,
-                                      label: 'Email Address',
-                                      hint: 'Enter email address',
-                                      keyboardType: TextInputType.emailAddress,
-                                      validator: (v) => !v!.contains('@')
-                                          ? 'Enter valid email'
-                                          : null,
-                                    ),
-                                    const SizedBox(height: 4),
-
-                                    _buildTextField(
-                                      controller: _passwordController,
-                                      icon: Icons.lock_outline,
-                                      label: 'Create Password',
-                                      hint: 'Enter your password',
-                                      obscureText: _obscurePassword,
-                                      suffixWidget: GestureDetector(
-                                        onTap: () => setState(() =>
-                                            _obscurePassword =
-                                                !_obscurePassword),
-                                        child: Icon(
-                                            _obscurePassword
-                                                ? Icons.visibility_off
-                                                : Icons.visibility,
-                                            color: Colors.black87,
-                                            size: 20),
-                                      ),
-                                      validator: (v) {
-                                        if (v == null || v.isEmpty)
-                                          return 'Required';
-                                        if (v.length < 8) return 'Min 8 chars';
-                                        if (!RegExp(r'[A-Z]').hasMatch(v))
-                                          return 'Needs uppercase';
-                                        if (!RegExp(r'[a-z]').hasMatch(v))
-                                          return 'Needs lowercase';
-                                        if (!RegExp(r'[0-9]').hasMatch(v))
-                                          return 'Needs number';
-                                        if (!RegExp(r'[@#$%^&*(),.?":{}|<>]')
-                                            .hasMatch(v))
-                                          return 'Needs special char';
-                                        return null;
-                                      },
-                                    ),
-                                  ],
-                                ),
-
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: Checkbox(
-                                        value: _termsAccepted,
-                                        onChanged: (v) =>
-                                            setState(() => _termsAccepted = v!),
-                                        activeColor: const Color(0xFF0033CC),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(4)),
+                                  _buildFieldContainer(
+                                    icon: Icons.favorite_border,
+                                    label: 'Choose Your Service',
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        value: _selectedRole,
+                                        hint: Text('Select a service',
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey.shade400)),
+                                        items: _services
+                                            .map((s) => DropdownMenuItem(
+                                                value: s,
+                                                child: Text(s.toUpperCase(), overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(fontSize: 12))))
+                                            .toList(),
+                                        onChanged: (v) => setState(() => _selectedRole = v),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text.rich(
-                                        TextSpan(
-                                          text: 'I agree to the ',
-                                          style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.black87),
-                                          children: [
-                                            TextSpan(
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  _buildTextField(
+                                    controller: _phoneController,
+                                    icon: Icons.call_outlined,
+                                    label: 'Mobile Number',
+                                    hint: 'Enter mobile number',
+                                    keyboardType: TextInputType.phone,
+                                    prefixWidget: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const SizedBox(width: 4),
+                                        DropdownButtonHideUnderline(
+                                          child: DropdownButton<String>(
+                                            value: _selectedCountryCode,
+                                            items: _countryCodes
+                                                .map((c) => DropdownMenuItem(
+                                                    value: c,
+                                                    child: Text(c, overflow: TextOverflow.ellipsis,
+                                                        style: const TextStyle(
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Color(0xFF0033CC),
+                                                            fontSize: 12))))
+                                                .toList(),
+                                            onChanged: (v) => setState(() => _selectedCountryCode = v!),
+                                            icon: const SizedBox.shrink(),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                      ],
+                                    ),
+                                    validator: (v) => v!.length != 10 ? 'Enter valid 10 digit number' : null,
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  _buildTextField(
+                                    controller: _emailController,
+                                    icon: Icons.mail_outline,
+                                    label: 'Email Address',
+                                    hint: 'Enter email address',
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: (v) => !v!.contains('@') ? 'Enter valid email' : null,
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  _buildTextField(
+                                    controller: _passwordController,
+                                    icon: Icons.lock_outline,
+                                    label: 'Create Password',
+                                    hint: 'Enter your password',
+                                    obscureText: _obscurePassword,
+                                    suffixWidget: GestureDetector(
+                                      onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                                      child: Icon(
+                                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                          color: Colors.black87,
+                                          size: 20),
+                                    ),
+                                    validator: (v) {
+                                      if (v == null || v.isEmpty) return 'Required';
+                                      if (v.length < 8) return 'Min 8 chars';
+                                      if (!RegExp(r'[A-Z]').hasMatch(v)) return 'Needs uppercase';
+                                      if (!RegExp(r'[a-z]').hasMatch(v)) return 'Needs lowercase';
+                                      if (!RegExp(r'[0-9]').hasMatch(v)) return 'Needs number';
+                                      if (!RegExp(r'[@#$%^&*(),.?":{}|<>]').hasMatch(v)) return 'Needs special char';
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: Checkbox(
+                                          value: _termsAccepted,
+                                          onChanged: (v) => setState(() => _termsAccepted = v!),
+                                          activeColor: const Color(0xFF0033CC),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text.rich(
+                                          TextSpan(
+                                            text: 'I agree to the ',
+                                            style: const TextStyle(fontSize: 10, color: Colors.black87),
+                                            children: [
+                                              TextSpan(
                                                 text: 'Terms & Conditions',
                                                 style: const TextStyle(
                                                     color: Color(0xFF0033CC),
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    fontWeight: FontWeight.bold),
                                                 recognizer: TapGestureRecognizer()
                                                   ..onTap = () async {
                                                     final approved = await showTermsPrivacyDialog(context);
@@ -983,14 +969,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                       setState(() => _termsAccepted = true);
                                                     }
                                                   },
-                                            ),
-                                            const TextSpan(text: ' and '),
-                                            TextSpan(
+                                              ),
+                                              const TextSpan(text: ' and '),
+                                              TextSpan(
                                                 text: 'Privacy Policy',
                                                 style: const TextStyle(
                                                     color: Color(0xFF0033CC),
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    fontWeight: FontWeight.bold),
                                                 recognizer: TapGestureRecognizer()
                                                   ..onTap = () async {
                                                     final approved = await showTermsPrivacyDialog(context, isPrivacyPolicy: true);
@@ -998,70 +983,65 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                       setState(() => _termsAccepted = true);
                                                     }
                                                   },
-                                            ),
-                                          ],
+                                              ),
+                                            ],
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.visible,
                                         ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.visible,
+                                      )
+                                    ],
+                                  ),
+                                  
+                                  const Spacer(),
+                                  const SizedBox(height: 20),
+
+                                  SizedBox(
+                                    height: 42,
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF0033CC),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                        elevation: 0,
                                       ),
-                                    )
-                                  ],
-                                ),
-                              ],
+                                      onPressed: _nextStep,
+                                      child: const Text('CONTINUE',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text('Already have an account? ',
+                                          style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                      InkWell(
+                                        onTap: () => Navigator.pushReplacementNamed(context, '/login'),
+                                        child: const Text('Login',
+                                            style: TextStyle(
+                                                color: Color(0xFF0033CC),
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12)),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              height:
-                                  42, // Slightly reduced continue button height
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0033CC),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                  elevation: 0,
-                                ),
-                                onPressed: _nextStep,
-                                child: const Text('CONTINUE',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text('Already have an account? ',
-                                    style: TextStyle(
-                                        color: Colors.grey, fontSize: 12)),
-                                InkWell(
-                                  onTap: () => Navigator.pushReplacementNamed(
-                                      context, '/login'),
-                                  child: const Text('Login',
-                                      style: TextStyle(
-                                          color: Color(0xFF0033CC),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -1124,312 +1104,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
 
-  Widget _buildBloodBankStep2() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 0),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Blood Bank Details',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Tell us about your blood bank and license information',
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-                child: Form(
-                  key: _formKey2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: const [
-                              BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 4))
-                            ]),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildTextField(
-                              label: 'Blood Bank Name',
-                              hint: 'Enter blood bank name',
-                              controller: _bloodBankNameController,
-                              icon: Icons.local_hospital_outlined,
-                              validator: (val) => val == null || val.trim().isEmpty ? 'Please enter blood bank name' : null,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildTextField(
-                              label: 'License Number',
-                              hint: 'ex. DL-123456',
-                              controller: _bloodBankLicenseController,
-                              icon: Icons.description_outlined,
-                              validator: (val) => val == null || val.trim().isEmpty ? 'Please enter license number' : null,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildTextField(
-                              label: 'Blood Bank In-charge Name',
-                              hint: 'Enter in-charge name',
-                              controller: _bloodBankInchargeController,
-                              icon: Icons.person_outline,
-                              validator: (val) => val == null || val.trim().isEmpty ? 'Please enter in-charge name' : null,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildTextField(
-                              label: 'Emergency Contact No.',
-                              hint: 'Enter mobile number',
-                              controller: _bloodBankContactController,
-                              icon: Icons.phone_outlined,
-                              keyboardType: TextInputType.phone,
-                              validator: (val) => val == null || val.trim().isEmpty ? 'Please enter contact number' : null,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text('Services Available',
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87)),
-                            const Text('Select all that apply',
-                                style: TextStyle(fontSize: 11, color: Colors.grey)),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
-                              children: _bloodBankServicesState.keys.map((service) {
-                                bool isSelected = _bloodBankServicesState[service]!;
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _bloodBankServicesState[service] = !isSelected;
-                                    });
-                                  },
-                                  child: Container(
-                                    width: (MediaQuery.of(context).size.width - 84) / 2,
-                                    height: 48,
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey.shade200),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          service.contains('Collection') ? Icons.water_drop_outlined :
-                                          service.contains('Supply') ? Icons.bloodtype_outlined :
-                                          service.contains('Emergency') ? Icons.emergency_outlined :
-                                          Icons.science_outlined,
-                                          color: const Color(0xFF0033CC),
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(service,
-                                              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w500)),
-                                        ),
-                                        Icon(
-                                          isSelected ? Icons.check_box : Icons.check_box_outline_blank,
-                                          color: isSelected ? const Color(0xFF0033CC) : Colors.grey,
-                                          size: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 24),
-                            _buildTextField(
-                              label: 'Address',
-                              hint: 'Enter complete address',
-                              controller: _addressController,
-                              icon: Icons.location_on_outlined,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildLocationRow(),
-                            const SizedBox(height: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade200),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Row(
-                                      children: [
-                                        const Expanded(
-                                          flex: 1,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Current Location',
-                                                style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black87),
-                                              ),
-                                              Text(
-                                                'Detect your blood bank location on map',
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    fontSize: 10, color: Colors.grey),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          flex: 1,
-                                          child: TextButton.icon(
-                                  onPressed: _isFetchingLocation ? null : _getCurrentLocation,
-                                  icon: _isFetchingLocation 
-                                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0033CC)))
-                                      : const Icon(Icons.my_location, size: 16, color: Color(0xFF0033CC)),
-                                  label: Text(
-                                    _isFetchingLocation ? 'Fetching...' : 'Use Current Location',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(0xFF0033CC)),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.blue.shade100.withOpacity(0.5
-                                ),
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 8, vertical: 8),
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(6)),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    height: 120,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                      borderRadius: BorderRadius.circular(8),
-                                      image: const DecorationImage(
-                                        image: AssetImage(
-                                            'images/register_login/map_placeholder.png'),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    child: _currentPosition != null
-                                        ? Center(
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                const Icon(Icons.location_on,
-                                                    color: Colors.red, size: 40),
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                      horizontal: 8, vertical: 4),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(4),
-                                                    boxShadow: const [
-                                                      BoxShadow(
-                                                          color: Colors.black12,
-                                                          blurRadius: 4)
-                                                    ],
-                                                  ),
-                                                  child: Text(
-                                                    '${_currentPosition!.latitude.toStringAsFixed(4)}, ${_currentPosition!.longitude.toStringAsFixed(4)}',
-                                                    style: const TextStyle(
-                                                        fontSize: 10,
-                                                        fontWeight: FontWeight.bold),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          )
-                                        : null,
-                                  ),
-                                  const SizedBox(height: 8),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black12, offset: Offset(0, -2), blurRadius: 10)
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey2.currentState!.validate() && _selectedState != null) {
-                    _nextStep();
-                  } else if (_selectedState == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please select a state')));
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0033CC),
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('NEXT',
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildBloodBankStep2() => buildBloodBankStep2(this);
+
+
   Widget _buildLocationRow() {
     final cities = _selectedState != null
         ? IndianStatesData.getCitiesForState(_selectedState!)
@@ -1629,24 +1306,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF000B22))),
               const SizedBox(height: 6),
-              TextFormField(
-                controller: _pincodeController,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(fontSize: 12),
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12), // Match height of dropdowns
-                  hintText: 'Enter pincode',
-                  hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                child: TextFormField(
+                  controller: _pincodeController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(fontSize: 12),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    hintText: 'Enter pincode',
+                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                    border: InputBorder.none,
+                    suffixIcon: const SizedBox.shrink(),
+                    suffixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                  ),
+                  validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                ),
               ),
             ],
           ),
@@ -1655,1053 +1336,79 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildStep2() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 0),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Lab Details & Location',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Enter your lab information',
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Form(
-          key: _formKey2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Lab Details Section
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, 4))
-                    ]),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.science_outlined,
-                              color: Color(0xFF0033CC), size: 20),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Lab Details',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTextField(
-                      controller: _labNameController,
-                      icon: Icons.business,
-                      label: 'Lab / Pathology Name',
-                      hint: 'Enter lab or pathology name',
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _licenseController,
-                      icon: Icons.assignment_outlined,
-                      label: 'License Number',
-                      hint: 'ex. DL-123456',
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _ownerController,
-                      icon: Icons.person_outline,
-                      label: 'Owner Name',
-                      hint: 'Enter owner name',
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _labMobileController,
-                      icon: Icons.call_outlined,
-                      label: 'Mobile Number',
-                      hint: 'Enter mobile number',
-                      keyboardType: TextInputType.phone,
-                      prefixWidget: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 4),
-                          DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _selectedCountryCode,
-                              items: _countryCodes
-                                  .map((c) => DropdownMenuItem(
-                                      value: c,
-                                      child: Text(c, overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF0033CC),
-                                              fontSize: 12))))
-                                  .toList(),
-                              onChanged: (v) =>
-                                  setState(() => _selectedCountryCode = v!),
-                              icon: const SizedBox.shrink(),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                      ),
-                      validator: (v) =>
-                          v!.length != 10 ? 'Enter 10 digits' : null,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Service Location Section
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, 4))
-                    ]),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.location_on_outlined,
-                              color: Color(0xFF0033CC), size: 20),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Service Location',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTextField(
-                      controller: _addressController,
-                      icon: Icons.location_on_outlined,
-                      label: 'Full Address',
-                      hint: 'Enter full address',
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildLocationRow(),
-                    const SizedBox(height: 12),
-
-                    // Current Location Box
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text.rich(
-                                  TextSpan(
-                                      text: 'Current Location ',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87),
-                                      children: [
-                                        TextSpan(
-                                            text: '(Optional)',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.normal,
-                                                color: Colors.grey)),
-                                      ]),
-                                ),
-                                Text('Use your current location on map',
-                                    style: TextStyle(
-                                        fontSize: 10, color: Colors.grey)),
-                              ],
-                            ),
-                          ),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: TextButton.icon(
-                                    onPressed: _isFetchingLocation ? null : _getCurrentLocation,
-                                    icon: _isFetchingLocation 
-                                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0033CC)))
-                                        : const Icon(Icons.my_location, size: 16, color: Color(0xFF0033CC)),
-                                    label: Text(
-                                      _isFetchingLocation ? 'Fetching...' : 'Use Current Location',
-                                      
-                                      style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0033CC)),
-                                    ),
-                                    style: TextButton.styleFrom(
-                                backgroundColor:
-                                    Colors.blue.shade100.withOpacity(0.5
-                                  ),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6)),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Map Placeholder
-                    Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(8),
-                        image: const DecorationImage(
-                          image: AssetImage(
-                              'images/register_login/map_placeholder.png'), // Will fallback if not exists, but gives effect
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(6)),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.info_outline,
-                              size: 16, color: Color(0xFF0033CC)),
-                          SizedBox(width: 8),
-                          Text(
-                              'Drag the pin to set your exact service location',
-                              style: TextStyle(
-                                  fontSize: 11, color: Colors.black54)),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          height: 48,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0033CC),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: _nextStep,
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('NEXT',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold)),
-                SizedBox(width: 8),
-                Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildStep2() => buildPathologyStep2(this);
 
 
-  Widget _buildPharmacistStep2() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 0),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Pharmacy Details',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Tell us about your pharmacy and license information',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                child: Form(
-                  key: _formKey2,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))],
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                      _buildTextField(
-                        controller: _pharmacyNameController,
-                        icon: Icons.local_pharmacy_outlined,
-                        label: 'Medical Store Name',
-                        hint: 'Enter your store name',
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildTextField(
-                        controller: _licenseController,
-                        icon: Icons.description_outlined,
-                        label: 'License Number',
-                        hint: 'ex. DL-123456',
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildTextField(
-                        controller: _pharmacistNameController,
-                        icon: Icons.person_outline,
-                        label: 'Registered Pharmacist Name',
-                        hint: 'Enter pharmacist name',
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildTextField(
-                        controller: _pharmacistRegNumberController,
-                        icon: Icons.badge_outlined,
-                        label: 'Pharmacist Registration Number',
-                        hint: 'ex. PR-987654',
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text('Services Available', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      const SizedBox(height: 2),
-                      Text('Select all that apply', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: _pharmacistServicesState.keys.map((service) {
-                          bool isSelected = _pharmacistServicesState[service]!;
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _pharmacistServicesState[service] = !isSelected;
-                              });
-                            },
-                            child: Container(
-                              width: (MediaQuery.of(context).size.width - 84) / 2, // Adjusted for padding
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade200),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    service.contains('Prescription') ? Icons.medication_outlined :
-                                    service.contains('Generic') ? Icons.medical_information_outlined :
-                                    service.contains('Healthcare') ? Icons.health_and_safety_outlined :
-                                    Icons.monitor_heart_outlined,
-                                    color: const Color(0xFF0033CC),
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      service,
-                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 16,
-                                    height: 16,
-                                    decoration: BoxDecoration(
-                                      color: isSelected ? const Color(0xFF0033CC) : Colors.white,
-                                      border: Border.all(color: isSelected ? const Color(0xFF0033CC) : Colors.grey.shade300),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 12) : null,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text('Store Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      const SizedBox(height: 12),
-                      _buildTextField(
-                        controller: _addressController,
-                        icon: Icons.location_on_outlined,
-                        label: '',
-                        hint: 'Enter complete address',
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildLocationRow(),
-                      const SizedBox(height: 12),
-                      // Current Location Box
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Expanded(
-                              flex: 1,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Current Location',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87),
-                                  ),
-                                  Text('Detect your pharmacy location on map',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontSize: 10, color: Colors.grey)),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              flex: 1,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: TextButton.icon(
-                                    onPressed: _isFetchingLocation ? null : _getCurrentLocation,
-                                    icon: _isFetchingLocation 
-                                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0033CC)))
-                                        : const Icon(Icons.my_location, size: 16, color: Color(0xFF0033CC)),
-                                    label: Text(
-                                      _isFetchingLocation ? 'Fetching...' : 'Use Current Location',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF0033CC)),
-                                    ),
-                                    style: TextButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.blue.shade100.withOpacity(0.5
-                                  ),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 8),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6)),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Map Placeholder
-                      Container(
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(8),
-                          image: const DecorationImage(
-                            image: AssetImage(
-                                'images/register_login/map_placeholder.png'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        child: _currentPosition != null
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.location_on,
-                                        color: Colors.red, size: 40),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(4),
-                                        boxShadow: const [
-                                          BoxShadow(
-                                              color: Colors.black12,
-                                              blurRadius: 4)
-                                        ],
-                                      ),
-                                      child: Text(
-                                        '${_currentPosition!.latitude.toStringAsFixed(4)}, ${_currentPosition!.longitude.toStringAsFixed(4)}',
-                                        style: const TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black12, offset: Offset(0, -2), blurRadius: 10)
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey2.currentState!.validate() && _selectedState != null) {
-                    setState(() => _currentStep = 2);
-                  } else if (_selectedState == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please select state')));
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0033CC),
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('NEXT',
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, color: Colors.white),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPharmacistStep3() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 1),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Upload Documents',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Please upload the required documents\nto verify your pharmacy',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                key: const ValueKey('step3_scroll'),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                child: Column(
-                  children: [
-                    _buildDocUploadCard(
-                      title: 'Store Front Photo',
-                      subtitle: 'Upload clear photo of your medical store',
-                      icon: Icons.store_outlined,
-                      isMandatory: true,
-                      file: _profilePhoto, // using profilePhoto for store front
-                      onTap: () => _pickImage('profile'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'Drug License Certificate',
-                      subtitle: 'Upload valid drug license certificate',
-                      icon: Icons.description_outlined,
-                      isMandatory: true,
-                      file: _labLicense, // reusing variable
-                      onTap: () => _pickImage('license'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'Pharmacist Registration Certificate',
-                      subtitle: 'Upload pharmacist registration certificate',
-                      icon: Icons.person_pin_outlined,
-                      isMandatory: true,
-                      file: _pharmacistRegistrationCert,
-                      onTap: () => _pickImage('pharmacist_reg'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'Owner Aadhaar / PAN Card',
-                      subtitle: 'Upload identity proof',
-                      icon: Icons.badge_outlined,
-                      isMandatory: true,
-                      file: _govId,
-                      onTap: () => _pickImage('govid'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'GST Certificate (Optional)',
-                      subtitle: 'Upload if available',
-                      icon: Icons.request_quote_outlined,
-                      isMandatory: false,
-                      file: _gstCert,
-                      onTap: () => _pickImage('gst'),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          const Row(
-                            children: [
-                              Icon(Icons.verified_user_outlined,
-                                  color: Color(0xFF0033CC), size: 20),
-                              SizedBox(width: 12),
-                              Expanded(
-                                  child: Text(
-                                      'Your documents are securely stored and used only for verification.',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.black87,
-                                          height: 1.4))),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          const Divider(color: Colors.black12, height: 1),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Icon(Icons.access_time,
-                                  color: Colors.grey.shade600, size: 20),
-                              SizedBox(width: 12),
-                              const Expanded(
-                                  child: Text(
-                                      'Verification usually takes 24-48 hours.',
-                                      style: TextStyle(
-                                          fontSize: 12, color: Colors.black87))),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      height: 48,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0033CC),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
-                            : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('SUBMIT FOR VERIFICATION',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
 
-  Widget _buildBloodBankStep3() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 1),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Upload Documents',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Please upload the required documents\nto verify your blood bank',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                key: const ValueKey('step3_scroll'),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _buildDocUploadCard(
-                      title: 'Blood Bank Front Photo',
-                      subtitle: 'Upload clear photo of your blood bank',
-                      icon: Icons.storefront_outlined,
-                      isMandatory: true,
-                      file: _bloodBankFrontPhoto,
-                      onTap: () => _pickImage('bb_front'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'Blood Bank License Certificate',
-                      subtitle: 'Upload valid blood bank license certificate',
-                      icon: Icons.description_outlined,
-                      isMandatory: true,
-                      file: _bloodBankLicenseCert,
-                      onTap: () => _pickImage('bb_license'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'Owner / In-charge Aadhaar Card',
-                      subtitle: 'Upload identity proof of owner or person in charge',
-                      icon: Icons.badge_outlined,
-                      isMandatory: true,
-                      file: _bloodBankInchargeAadhaar,
-                      onTap: () => _pickImage('bb_aadhaar'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'GST Certificate',
-                      subtitle: 'Upload if available',
-                      icon: Icons.receipt_long_outlined,
-                      isMandatory: false,
-                      file: _gstCert,
-                      onTap: () => _pickImage('gst'),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.verified_user_outlined, color: Color(0xFF0033CC), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('Your documents are securely stored and used only for verification.', style: TextStyle(fontSize: 12, color: Colors.black87)),
-                              ),
-                            ],
-                          ),
-                          const Divider(height: 24),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.access_time, color: Color(0xFF0033CC), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('Verification usually takes 24-48 hours.', style: TextStyle(fontSize: 12, color: Colors.black87)),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      height: 48,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0033CC),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
-                            : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('SUBMIT FOR VERIFICATION',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward, color: Colors.white),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget _buildStep3() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 1),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Upload Documents',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Please upload the required documents',
-                style: TextStyle(color: Colors.grey, fontSize: 12)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        key: const ValueKey('step3_scroll'),
+  Widget _buildPharmacistStep2() => buildPharmacistStep2(this);
+
+
+
+  Widget _buildSubmitSection() {
+    return SafeArea(
+      child: Container(
+        color: Colors.white,
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            _buildDocUploadCard(
-              title: 'Profile Photo',
-              subtitle: 'Upload your clear profile photo',
-              icon: Icons.person,
-              isMandatory: true,
-              file: _profilePhoto,
-              onTap: () => _pickImage('profile'),
-            ),
-            const SizedBox(height: 8),
-            _buildDocUploadCard(
-              title: 'Government ID',
-              subtitle: '(Aadhaar Card or PAN Card)',
-              icon: Icons.badge_outlined,
-              isMandatory: true,
-              file: _govId,
-              onTap: () => _pickImage('govid'),
-            ),
-            const SizedBox(height: 8),
-            _buildDocUploadCard(
-              title: 'Lab License Certificate',
-              subtitle: 'Upload your valid pathology/lab license certificate',
-              icon: Icons.workspace_premium_outlined,
-              isMandatory: true,
-              file: _labLicense,
-              onTap: () => _pickImage('license'),
-            ),
-            const SizedBox(height: 8),
-            _buildDocUploadCard(
-              title: 'GST Certificate',
-              subtitle: 'Upload if available',
-              icon: Icons.receipt_long_outlined,
-              isMandatory: false,
-              file: _gstCert,
-              onTap: () => _pickImage('gst'),
-            ),
-            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12)),
-              child: const Column(
+                color: Colors.blue.shade50.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.verified_user_outlined,
-                          color: Color(0xFF0033CC)),
-                      SizedBox(width: 12),
-                      Expanded(
-                          child: Text(
-                              'Your documents are securely stored and used only for verification.',
-                              style: TextStyle(fontSize: 12))),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                        child: const Icon(Icons.verified_user_outlined, color: Color(0xFF0033CC), size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text('Your documents are securely stored and used only for verification.', style: TextStyle(fontSize: 12, color: Colors.black87, height: 1.4)),
+                      ),
                     ],
                   ),
-                  SizedBox(height: 12),
+                  const Divider(height: 16),
                   Row(
                     children: [
-                      Icon(Icons.access_time, color: Color(0xFF0033CC)),
-                      SizedBox(width: 12),
-                      Expanded(
-                          child: Text('Verification usually takes 24-48 hours.',
-                              style: TextStyle(fontSize: 12))),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                        child: const Icon(Icons.access_time, color: Color(0xFF0033CC), size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text('Verification usually takes 24-48 hours.', style: TextStyle(fontSize: 12, color: Colors.black87)),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             Container(
               width: double.infinity,
               height: 48,
-              margin: const EdgeInsets.symmetric(vertical: 8),
               child: ElevatedButton(
+                onPressed: _isLoading ? null : _submit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0033CC),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
-                onPressed: _isLoading ? null : _submit,
                 child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('SUBMIT FOR VERIFICATION',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold)),
+                          Text('SUBMIT FOR VERIFICATION', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                           SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, color: Colors.white),
+                          Icon(Icons.arrow_forward, color: Colors.white, size: 18),
                         ],
                       ),
               ),
@@ -2711,6 +1418,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
+
+  Widget _buildPharmacistStep3() => buildPharmacistStep3(this);
+
+
+
+
+  Widget _buildBloodBankStep3() => buildBloodBankStep3(this);
+
+
+  Widget _buildStep3() => buildPathologyStep3(this);
+
+
 
   Widget _buildDocUploadCard({
     required String title,
@@ -2834,1595 +1553,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildAmbulanceStep2() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 0),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Ambulance Details & Location',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Enter ambulance details',
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Form(
-          key: _ambulanceFormKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Ambulance Details Section
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, 4))
-                    ]),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.medical_services_outlined,
-                              color: Color(0xFF0033CC), size: 20),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Ambulance Details',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTextField(
-                      controller: _vehicleNumberController,
-                      icon: Icons.badge_outlined,
-                      label: 'Ambulance Registration Number',
-                      hint: 'ex. MH-01-AB-1234',
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildFieldContainer(
-                      icon: Icons.local_hospital_outlined,
-                      label: 'Ambulance Type',
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: _selectedAmbulanceType,
-                          hint: Text('Select ambulance type',
-                              style: TextStyle(
-                                  fontSize: 13, color: Colors.grey.shade400)),
-                          items: _ambulanceTypes
-                              .map((t) => DropdownMenuItem(
-                                  value: t,
-                                  child: Text(t, overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 14))))
-                              .toList(),
-                          onChanged: (val) =>
-                              setState(() => _selectedAmbulanceType = val),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _driverNameController,
-                      icon: Icons.person_outline,
-                      label: 'Driver Name',
-                      hint: 'ex. John Doe',
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _driverLicenseController,
-                      icon: Icons.card_membership_outlined,
-                      label: 'Driver License Number',
-                      hint: 'ex. DL-1234567890',
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _driverMobileController,
-                      icon: Icons.call_outlined,
-                      label: 'Driver Mobile Number',
-                      hint: 'Enter mobile number',
-                      keyboardType: TextInputType.phone,
-                      prefixWidget: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 4),
-                          DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _selectedCountryCode,
-                              items: _countryCodes
-                                  .map((c) => DropdownMenuItem(
-                                      value: c,
-                                      child: Text(c, overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF0033CC),
-                                              fontSize: 12))))
-                                  .toList(),
-                              onChanged: (v) =>
-                                  setState(() => _selectedCountryCode = v!),
-                              icon: const SizedBox.shrink(),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                      ),
-                      validator: (v) =>
-                          v!.length != 10 ? 'Enter 10 digits' : null,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
+  Widget _buildAmbulanceStep2() => buildAmbulanceStep2(this);
 
-              // Service Location Section
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, 4))
-                    ]),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.location_on_outlined,
-                              color: Color(0xFF0033CC), size: 20),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Service Location',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTextField(
-                      controller: _addressController,
-                      icon: Icons.location_on_outlined,
-                      label: 'Full Address',
-                      hint: 'Enter full address',
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildLocationRow(),
-                    const SizedBox(height: 12),
 
-                    // Current Location Box
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text.rich(
-                                  TextSpan(
-                                      text: 'Current Location ',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87),
-                                      children: [
-                                        TextSpan(
-                                            text: '(Optional)',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.normal,
-                                                color: Colors.grey)),
-                                      ]),
-                                ),
-                                Text('Use your current location on map',
-                                    style: TextStyle(
-                                        fontSize: 10, color: Colors.grey)),
-                              ],
-                            ),
-                          ),
-                          TextButton.icon(
-                                  onPressed: _isFetchingLocation ? null : _getCurrentLocation,
-                                  icon: _isFetchingLocation 
-                                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0033CC)))
-                                      : const Icon(Icons.my_location, size: 16, color: Color(0xFF0033CC)),
-                                  label: Text(
-                                    _isFetchingLocation ? 'Fetching...' : 'Use Current Location',
-                                    
-                                    style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0033CC)),
-                                  ),
-                                  style: TextButton.styleFrom(
-                              backgroundColor:
-                                  Colors.blue.shade100.withOpacity(0.5
-                                ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
 
-                    // Map Placeholder
-                    Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(8),
-                        image: const DecorationImage(
-                          image: AssetImage(
-                              'images/register_login/map_placeholder.png'), // Will fallback if not exists, but gives effect
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(6)),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.info_outline,
-                              size: 16, color: Color(0xFF0033CC)),
-                          SizedBox(width: 8),
-                          Text(
-                              'Drag the pin to set your exact service location',
-                              style: TextStyle(
-                                  fontSize: 11, color: Colors.black54)),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          height: 48,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0033CC),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: () {
-              if (_ambulanceFormKey.currentState!.validate()) {
-                if (_selectedAmbulanceType == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Please select ambulance type')));
-                  return;
-                }
-                if (_selectedState == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please select state')));
-                  return;
-                }
-                setState(() => _currentStep = 2);
-              }
-            },
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('NEXT',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold)),
-                SizedBox(width: 8),
-                Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildAmbulanceStep3() => buildAmbulanceStep3(this);
 
-  Widget _buildAmbulanceStep3() {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FE),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-          onPressed: () => setState(() => _currentStep = 1),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Upload Documents',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18)),
-            SizedBox(height: 4),
-            Text('Please upload the required documents\nto verify your profile',
-                textAlign: TextAlign.center,
-                style:
-                    TextStyle(color: Colors.grey, fontSize: 12, height: 1.2)),
-          ],
-        ),
-        centerTitle: true,
-        toolbarHeight: 80,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              key: const ValueKey('step3_scroll'),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _buildDocUploadCard(
-                    title: 'Profile Photo',
-                    subtitle: 'Upload your clear profile photo',
-                    icon: Icons.person,
-                    isMandatory: true,
-                    file: _profilePhoto,
-                    onTap: () => _pickImage('profile'),
-                  ),
-                  const SizedBox(height: 12),
 
-                  _buildDocUploadCard(
-                    title: 'Aadhaar Card / PAN Card',
-                    subtitle: 'Upload a valid Aadhaar or PAN Card',
-                    icon: Icons.badge_outlined,
-                    isMandatory: true,
-                    file: _govId,
-                    onTap: () => _pickImage('govid'),
-                  ),
-                  const SizedBox(height: 12),
 
-                  _buildDocUploadCard(
-                    title: 'Ambulance RC (Registration Certificate)',
-                    subtitle: 'Upload the vehicle registration certificate',
-                    icon: Icons.directions_car_outlined,
-                    isMandatory: true,
-                    file: _ambulanceRC,
-                    onTap: () => _pickImage('ambulanceRC'),
-                  ),
-                  const SizedBox(height: 12),
+  Widget _buildNurseStep2() => buildNurseStep2(this);
 
-                  _buildDocUploadCard(
-                    title: 'Driving License',
-                    subtitle: 'Upload a valid driving license',
-                    icon: Icons.assignment_ind_outlined,
-                    isMandatory: true,
-                    file: _drivingLicense,
-                    onTap: () => _pickImage('drivingLicense'),
-                  ),
-                  const SizedBox(height: 12),
 
-                  _buildDocUploadCard(
-                    title: 'Insurance Copy (Optional)',
-                    subtitle: 'Upload insurance document if any',
-                    icon: Icons.description_outlined,
-                    isMandatory: false,
-                    file: _insuranceCopy,
-                    onTap: () => _pickImage('insuranceCopy'),
-                  ),
-                  const SizedBox(height: 24),
 
-                  // Info Box
-                  Container(
-                    decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.verified_user_outlined,
-                                color: Color(0xFF0033CC), size: 20),
-                            SizedBox(width: 12),
-                            Expanded(
-                                child: Text(
-                                    'Your documents are securely stored and used only for verification.',
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.black87,
-                                        height: 1.4))),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(color: Colors.black12, height: 1),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Icon(Icons.access_time,
-                                color: Colors.grey.shade600, size: 20),
-                            SizedBox(width: 12),
-                            const Expanded(
-                                child: Text(
-                                    'Verification usually takes 24-48 hours.',
-                                    style: TextStyle(
-                                        fontSize: 12, color: Colors.black87))),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+  Widget _buildNurseStep3() => buildNurseStep3(this);
 
-                  // Bottom Button
-                  Container(
-                    width: double.infinity,
-                    height: 48,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0033CC),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: _isLoading ? null : _submit,
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2))
-                          : const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('SUBMIT FOR VERIFICATION',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold)),
-                                SizedBox(width: 8),
-                                Icon(Icons.arrow_forward,
-                                    color: Colors.white, size: 18),
-                              ],
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildNurseStep2() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 0),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Professional Details',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Tell us about your experience and services',
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: const [
-                              BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 4))
-                            ]),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Total Experience
-                            const Text('Total Experience (Years)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                            const SizedBox(height: 6),
-                            SizedBox(
-                              height: 45,
-                              child: TextFormField(
-                                controller: _nurseExperienceController,
-                                keyboardType: TextInputType.number,
-                                style: const TextStyle(fontSize: 12),
-                                decoration: InputDecoration(
-                                  hintText: 'Enter experience in years',
-                                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 11),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  suffixIcon: const Icon(Icons.work_outline, color: Colors.grey, size: 18),
-                                ),
-                                validator: (v) => v!.isEmpty ? 'Required' : null,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            // Registration Number
-                            const Text('Nursing Registration Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                            const SizedBox(height: 6),
-                            SizedBox(
-                              height: 45,
-                              child: TextFormField(
-                                controller: _nurseRegNumberController,
-                                style: const TextStyle(fontSize: 12),
-                                decoration: InputDecoration(
-                                  hintText: 'ex. NUR-987654',
-                                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 11),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: Colors.grey.shade300),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  suffixIcon: const Icon(Icons.badge_outlined, color: Colors.grey, size: 18),
-                                ),
-                                validator: (v) => v!.isEmpty ? 'Required' : null,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            
-                            // Services Provided
-                            const Text('Services You Provide', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                            const SizedBox(height: 2),
-                            Text('Select all that apply', style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
-                            const SizedBox(height: 10),
-                            
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: _nurseServicesState.keys.map((service) {
-                                bool isSelected = _nurseServicesState[service]!;
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _nurseServicesState[service] = !isSelected;
-                                    });
-                                  },
-                                  child: Container(
-                                    width: (MediaQuery.of(context).size.width - 84) / 2, // Adjusted for padding
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey.shade200),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          service.contains('Home') ? Icons.home_outlined :
-                                          service.contains('Elderly') ? Icons.elderly_outlined :
-                                          service.contains('Surgery') ? Icons.bed_outlined :
-                                          service.contains('Attendant') ? Icons.person_outline :
-                                          service.contains('Injection') ? Icons.vaccines_outlined :
-                                          Icons.medical_services_outlined,
-                                          color: const Color(0xFF0033CC),
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            service,
-                                            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
-                                        Container(
-                                          width: 14,
-                                          height: 14,
-                                          decoration: BoxDecoration(
-                                            color: isSelected ? const Color(0xFF0033CC) : Colors.white,
-                                            border: Border.all(color: isSelected ? const Color(0xFF0033CC) : Colors.grey.shade300),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 10) : null,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 20),
-                            const Divider(),
-                            const SizedBox(height: 16),
 
-                            // Location Header
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                      color: Colors.blue.shade50,
-                                      borderRadius: BorderRadius.circular(8)),
-                                  child: const Icon(Icons.location_on_outlined,
-                                      color: Color(0xFF0033CC), size: 20),
-                                ),
-                                const SizedBox(width: 10),
-                                const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Service Location',
-                                        style: TextStyle(
-                                            fontSize: 14, fontWeight: FontWeight.bold)),
-                                    Text('Where will you provide your services?',
-                                        style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _buildTextField(
-                              controller: _addressController,
-                              icon: Icons.location_on_outlined,
-                              label: 'Full Address',
-                              hint: 'Enter full address',
-                              validator: (v) => v!.isEmpty ? 'Required' : null,
-                            ),
-                            const SizedBox(height: 12),
-                            _buildLocationRow(),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Current Location',
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold)),
-                                TextButton.icon(
-                                  onPressed: _isFetchingLocation ? null : _getCurrentLocation,
-                                  icon: _isFetchingLocation 
-                                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0033CC)))
-                                      : const Icon(Icons.my_location, size: 16, color: Color(0xFF0033CC)),
-                                  label: Text(
-                                    _isFetchingLocation ? 'Fetching...' : 'Use Current Location',
-                                    
-                                    style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF0033CC)),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Colors.blue.shade50,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 8
-                                ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Text('Detect your current location on map',
-                                style: TextStyle(
-                                    fontSize: 11, color: Colors.grey)),
-                            const SizedBox(height: 12),
-                            Container(
-                              height: 120,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.shade300),
-                                image: const DecorationImage(
-                                  image: AssetImage(
-                                      'images/register_login/map_placeholder.png'),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              child: _currentPosition != null
-                                  ? Center(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.location_on,
-                                              color: Colors.red, size: 40),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                              boxShadow: const [
-                                                BoxShadow(
-                                                    color: Colors.black12,
-                                                    blurRadius: 4)
-                                              ],
-                                            ),
-                                            child: Text(
-                                              '${_currentPosition!.latitude.toStringAsFixed(4)}, ${_currentPosition!.longitude.toStringAsFixed(4)}',
-                                              style: const TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20), // Padding for bottom button
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // Bottom button
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black12, offset: Offset(0, -2), blurRadius: 10)
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey2.currentState!.validate() && _selectedState != null) {
-                    setState(() => _currentStep = 2);
-                  } else if (_selectedState == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please select state')));
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0033CC),
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('NEXT',
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, color: Colors.white),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildDoctorStep2() => buildDoctorStep2(this);
 
-  Widget _buildNurseStep3() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 1),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Upload Documents',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Please upload the required documents\nto verify your profile',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                key: const ValueKey('step3_scroll'),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _buildDocUploadCard(
-                      title: 'Profile Photo',
-                      subtitle: 'Upload your clear profile photo',
-                      icon: Icons.person_outline,
-                      isMandatory: true,
-                      file: _profilePhoto,
-                      onTap: () => _pickImage('profile'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'Government ID',
-                      subtitle: '(Aadhaar Card or PAN Card)',
-                      icon: Icons.badge_outlined,
-                      isMandatory: true,
-                      file: _govId,
-                      onTap: () => _pickImage('govid'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'Nursing Registration Certificate',
-                      subtitle: 'Upload your valid nursing registration certificate',
-                      icon: Icons.verified_user_outlined,
-                      isMandatory: true,
-                      file: _labLicense, // Reuse variable for registration cert
-                      onTap: () => _pickImage('license'),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDocUploadCard(
-                      title: 'Experience Certificate',
-                      subtitle: 'Upload if available',
-                      icon: Icons.description_outlined,
-                      isMandatory: false,
-                      file: _nurseExperienceCert,
-                      onTap: () => _pickImage('nurseExperience'),
-                    ),
-                    const SizedBox(height: 8),
-                    
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.verified_user_outlined, color: Color(0xFF0033CC), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('Your documents are securely stored and used only for verification.', style: TextStyle(fontSize: 12, color: Colors.black87)),
-                              ),
-                            ],
-                          ),
-                          const Divider(height: 24),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.access_time, color: Color(0xFF0033CC), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('Verification usually takes 24-48 hours.', style: TextStyle(fontSize: 12, color: Colors.black87)),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      height: 48,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0033CC),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
-                            : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('SUBMIT FOR VERIFICATION',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward, color: Colors.white),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildDoctorStep2() {
-// MARK_DOCTOR_START
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 0),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Professional Details',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Tell us about your experience and services',
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: const [
-                              BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 4))
-                            ]),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                      color: Colors.blue.shade50,
-                                      borderRadius: BorderRadius.circular(8)),
-                                  child: const Icon(Icons.person_outline,
-                                      color: Color(0xFF0033CC), size: 20),
-                                ),
-                                const SizedBox(width: 10),
-                                const Text('Professional Details',
-                                    style: TextStyle(
-                                        fontSize: 16, fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildTextField(
-                                    controller: _doctorExperienceController,
-                                    icon: Icons.work_outline,
-                                    label: 'Total Experience (Years)',
-                                    hint: '8',
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => v!.isEmpty ? 'Required' : null,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildTextField(
-                                    controller: _doctorRegNumberController,
-                                    icon: Icons.badge_outlined,
-                                    label: 'Medical Registration Number',
-                                    hint: 'ex. MED123456',
-                                    validator: (v) => v!.isEmpty ? 'Required' : null,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildFieldContainer(
-                                    icon: Icons.medical_services_outlined,
-                                    label: 'Specialization',
-                                    child: DropdownButtonHideUnderline(
-                                      child: DropdownButton<String>(
-                                        isExpanded: true,
-                                        value: _selectedSpecialization,
-                                        items: _specializations.map((s) => DropdownMenuItem(value: s, child: Text(s, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)))).toList(),
-                                        onChanged: (v) => setState(() => _selectedSpecialization = v),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildTextField(
-                                    controller: _doctorFeeController,
-                                    icon: Icons.currency_rupee,
-                                    label: 'Consultation Fee',
-                                    hint: '400',
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) => v!.isEmpty ? 'Required' : null,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            
-                            const Text('Consultation Type', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                            const SizedBox(height: 2),
-                            Text('Select all that apply', style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
-                            const SizedBox(height: 10),
-                            
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: _doctorConsultationTypeState.keys.map((service) {
-                                bool isSelected = _doctorConsultationTypeState[service]!;
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _doctorConsultationTypeState[service] = !isSelected;
-                                    });
-                                  },
-                                  child: Container(
-                                    width: (MediaQuery.of(context).size.width - 84) / 2, // Adjusted for padding
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey.shade200),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          service == 'Video Call' ? Icons.videocam_outlined : Icons.call_outlined,
-                                          color: const Color(0xFF0033CC),
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            service,
-                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
-                                        Container(
-                                          width: 16,
-                                          height: 16,
-                                          decoration: BoxDecoration(
-                                            color: isSelected ? const Color(0xFF0033CC) : Colors.white,
-                                            border: Border.all(color: isSelected ? const Color(0xFF0033CC) : Colors.grey.shade300),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 12) : null,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 8),
-
-                            const Text('Languages Spoken', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                            const SizedBox(height: 2),
-                            Text('Select all that apply', style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
-                            const SizedBox(height: 10),
-                            
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: _doctorLanguagesState.keys.map((lang) {
-                                bool isSelected = _doctorLanguagesState[lang]!;
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _doctorLanguagesState[lang] = !isSelected;
-                                    });
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey.shade200),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          lang,
-                                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          width: 14,
-                                          height: 14,
-                                          decoration: BoxDecoration(
-                                            color: isSelected ? const Color(0xFF0033CC) : Colors.white,
-                                            border: Border.all(color: isSelected ? const Color(0xFF0033CC) : Colors.grey.shade300),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 10) : null,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 8),
-                            const Divider(),
-                            const SizedBox(height: 10),
-
-                            // Location Header
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                      color: Colors.blue.shade50,
-                                      borderRadius: BorderRadius.circular(8)),
-                                  child: const Icon(Icons.location_on_outlined,
-                                      color: Color(0xFF0033CC), size: 20),
-                                ),
-                                const SizedBox(width: 10),
-                                const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Practice Location',
-                                        style: TextStyle(
-                                            fontSize: 14, fontWeight: FontWeight.bold)),
-                                    Text('Where will you provide your services?',
-                                        style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            _buildTextField(
-                              controller: _addressController,
-                              icon: Icons.location_on_outlined,
-                              label: 'Full Address',
-                              hint: 'Enter full address',
-                              validator: (v) => v!.isEmpty ? 'Required' : null,
-                            ),
-                            const SizedBox(height: 8),
-                            _buildLocationRow(),
-                            const SizedBox(height: 12),
-                            
-                            // Current Location Box
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                      Text.rich(
-                                        TextSpan(
-                                            text: 'Current Location ',
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87),
-                                            children: [
-                                              TextSpan(
-                                                  text: '(Optional)',
-                                                  style: TextStyle(
-                                                      fontWeight: FontWeight.normal,
-                                                      color: Colors.grey)),
-                                            ]),
-                                      ),
-                                      Text('Use your current location on map',
-                                          style: TextStyle(
-                                              fontSize: 10, color: Colors.grey)),
-                                    ],
-                                   ),
-                                   ),
-                                   TextButton.icon(
-                                    onPressed: _isFetchingLocation ? null : _getCurrentLocation,
-                                    icon: _isFetchingLocation
-                                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                                        : const Icon(Icons.my_location, size: 16, color: Color(0xFF0033CC)),
-                                    label: Text(_isFetchingLocation ? 'Fetching...' : 'Use Current Location',
-                                        style: const TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF0033CC))),
-                                    style: TextButton.styleFrom(
-                                      backgroundColor:
-                                          Colors.blue.shade100.withOpacity(0.5),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 8),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(6)),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-
-                            // Map Placeholder
-                            Container(
-                              height: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(8),
-                                image: const DecorationImage(
-                                  image: AssetImage(
-                                      'images/register_login/map_placeholder.png'), // Will fallback if not exists, but gives effect
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              child: _currentPosition != null
-                                  ? Center(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.location_on,
-                                              color: Colors.red, size: 40),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                              boxShadow: const [
-                                                BoxShadow(
-                                                    color: Colors.black12,
-                                                    blurRadius: 4)
-                                              ],
-                                            ),
-                                            child: Text(
-                                              '${_currentPosition!.latitude.toStringAsFixed(4)}, ${_currentPosition!.longitude.toStringAsFixed(4)}',
-                                              style: const TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                  color: Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(6)),
-                              child: Row(
-                                children: const [
-                                  Icon(Icons.info_outline,
-                                      size: 16, color: Color(0xFF0033CC)),
-                                  SizedBox(width: 8),
-                                  Text(
-                                      'Drag the pin to set your exact service location',
-                                      style: TextStyle(
-                                          fontSize: 11, color: Colors.black54)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8), // Padding for bottom button
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // Bottom button
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black12, offset: Offset(0, -2), blurRadius: 10)
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey2.currentState!.validate() && _selectedState != null) {
-                    _nextStep();
-                  } else if (_selectedState == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please select a state')));
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0033CC),
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('NEXT',
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   // MARK_DOCTOR_END
-  Widget _buildDoctorStep3() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => setState(() => _currentStep = 1),
-        ),
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Upload Documents',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            Text('Please upload the required documents\nto verify your profile',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                key: const ValueKey('step3_scroll'),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    _buildDocUploadCard(
-                      title: 'Profile Photo',
-                      subtitle: 'Upload a clear photo\nof your face',
-                      icon: Icons.person_outline,
-                      isMandatory: true,
-                      file: _profilePhoto,
-                      onTap: () => _pickImage('profile'),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildDocUploadCard(
-                      title: 'Aadhaar Card / PAN Card',
-                      subtitle: 'Upload clear copy of\nAadhaar Card or PAN Card',
-                      icon: Icons.badge_outlined,
-                      isMandatory: true,
-                      file: _govId,
-                      onTap: () => _pickImage('govid'),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildDocUploadCard(
-                      title: 'Medical Registration Certificate',
-                      subtitle: 'Upload your valid medical\nregistration certificate',
-                      icon: Icons.verified_user_outlined,
-                      isMandatory: true,
-                      file: _labLicense, // Using _labLicense for medical registration
-                      onTap: () => _pickImage('license'),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildDocUploadCard(
-                      title: 'MBBS Degree Certificate',
-                      subtitle: 'Upload your MBBS\ndegree certificate',
-                      icon: Icons.school_outlined,
-                      isMandatory: true,
-                      file: _doctorDegreeCert,
-                      onTap: () => _pickImage('doctorDegree'),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.verified_user_outlined, color: Color(0xFF0033CC), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('Your documents are securely stored\nand used only for verification.', style: TextStyle(fontSize: 12, color: Colors.black87)),
-                              ),
-                            ],
-                          ),
-                          const Divider(height: 16),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.access_time, color: Color(0xFF0033CC), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Text('Verification usually takes 24-48 hours.', style: TextStyle(fontSize: 12, color: Colors.black87)),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Bottom button
-                    Container(
-                      width: double.infinity,
-                      height: 48,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0033CC),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
-                            : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('SUBMIT FOR VERIFICATION',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildDoctorStep3() => buildDoctorStep3(this);
+
+
 
 }

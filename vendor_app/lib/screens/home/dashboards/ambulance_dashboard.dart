@@ -19,6 +19,7 @@ class _AmbulanceDashboardState extends State<AmbulanceDashboard> {
   DashboardStats? _dashboardData;
   List<Booking> _activeRequests = [];
   bool _isLoading = true;
+  bool _showAllRequests = false;
 
   @override
   void initState() {
@@ -60,285 +61,278 @@ class _AmbulanceDashboardState extends State<AmbulanceDashboard> {
       backgroundColor: Colors.white,
       body: _isLoading 
         ? const LoadingWidget(message: 'Loading dashboard...')
-        : Column(
-            children: [
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _loadDashboard,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                  // ─── RED HEADER + STATS CARD ──────────────────────────────
-                  SizedBox(
-                    height: 260,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Red header
-                        Container(
-                          width: double.infinity,
-                          height: 220,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFE52329),
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(24),
-                              bottomRight: Radius.circular(24),
-                            ),
-                          ),
-                          child: SafeArea(
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 24, right: 24, bottom: 40),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Circular profile image
-                                  Container(
-                                    width: 80,
-                                    height: 80,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                      border: Border.all(
-                                          color: Colors.white.withOpacity(0.8),
-                                          width: 2.5),
-                                      image: user?.profilePicture != null
-                                          ? DecorationImage(
-                                              image: NetworkImage(
-                                                  user!.profilePicture!),
-                                              fit: BoxFit.cover,
-                                            )
-                                          : null,
+        : RefreshIndicator(
+            onRefresh: _loadDashboard,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ─── RED HEADER + STATS CARD ──────────────────────────────
+                          SizedBox(
+                            height: 260,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                // Red header
+                                Container(
+                                  width: double.infinity,
+                                  height: 220,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFE52329),
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(24),
+                                      bottomRight: Radius.circular(24),
                                     ),
-                                    child: user?.profilePicture == null
-                                        ? const Icon(Icons.person,
-                                            size: 44, color: Color(0xFFE52329),)
-                                        : null,
                                   ),
-                                  const SizedBox(width: 18),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          user?.fullName ?? 'Driver',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 0.3,
+                                  child: SafeArea(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 24, right: 24, bottom: 40),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          // Circular profile image
+                                          Container(
+                                            width: 80,
+                                            height: 80,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.white,
+                                              border: Border.all(
+                                                  color: Colors.white.withOpacity(0.8),
+                                                  width: 2.5),
+                                              image: user?.profilePicture != null
+                                                  ? DecorationImage(
+                                                      image: NetworkImage(
+                                                          user!.profilePicture!),
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : null,
+                                            ),
+                                            child: user?.profilePicture == null
+                                                ? const Icon(Icons.person,
+                                                    size: 44, color: Color(0xFFE52329),)
+                                                : null,
                                           ),
+                                          const SizedBox(width: 18),
+                                          Expanded(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  user?.fullName ?? 'Driver',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.w700,
+                                                    letterSpacing: 0.3,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 5),
+                                                Text(
+                                                  _getVehicleNumber(user) ?? 'Ambulance Provider',
+                                                  style: const TextStyle(
+                                                    color: Colors.white70,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Pinned stats card
+                                Positioned(
+                                  bottom: -15,
+                                  left: 24,
+                                  right: 24,
+                                  child: Container(
+                                    height: 90,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.red.shade900.withOpacity(0.08),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 10),
                                         ),
-                                        const SizedBox(height: 5),
-                                        Text(
-                                          _getVehicleNumber(user) ?? 'Ambulance',
-                                          style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        _buildStatItem(
+                                          '${_activeRequests.length}', 
+                                          'Requests'
+                                        ),
+                                        Container(width: 1, height: 40, color: Colors.grey.shade200),
+                                        _buildStatItem(
+                                          '${_dashboardData?.activeVisits ?? 0}', 
+                                          'Active'
+                                        ),
+                                        Container(width: 1, height: 40, color: Colors.grey.shade200),
+                                        _buildStatItem(
+                                          '${_dashboardData?.completedRides ?? _dashboardData?.totalVisits ?? 0}', 
+                                          'Completed'
                                         ),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Stats card
-                        Positioned(
-                          bottom: 0,
-                          left: 20,
-                          right: 20,
-                          child: Container(
-                            height: 90,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: _buildStatColumn(
-                                    '${_activeRequests.length}',
-                                    "Requests",
-                                  ),
-                                ),
-                                _buildVerticalDivider(),
-                                Expanded(
-                                  child: _buildStatColumn(
-                                    '${_dashboardData?.activeVisits ?? 0}',
-                                    "Accepted",
-                                  ),
-                                ),
-                                _buildVerticalDivider(),
-                                Expanded(
-                                  child: _buildStatColumn(
-                                    '${_dashboardData?.completedRides ?? _dashboardData?.totalVisits ?? 0}',
-                                    "Completed",
-                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
+                          const SizedBox(height: 40),
 
-                  const SizedBox(height: 20),
-
-                  // ─── AMBULANCE REQUESTS HEADER ───────────────────────────────
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                    child: Column(
-                      children: [
-                      // Section Title
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
+                          // Requests title header row
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
                             child: Row(
                               children: [
-                                const Expanded(
-                                  child: Text(
-                                    'Ambulance Booking Requests',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
+                                const Text(
+                                  'Ride Requests',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF152238),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFE52329),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Text(
-                                    '${_activeRequests.length}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
+                                if (_activeRequests.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '${_activeRequests.length}',
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
+                                        color: Colors.red,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                ),
+                                const Spacer(),
+                                if (_activeRequests.length > 1)
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _showAllRequests = !_showAllRequests;
+                                      });
+                                    },
+                                    child: Text(
+                                      _showAllRequests ? 'View Less' : 'View All',
+                                      style: const TextStyle(
+                                        color: Color(0xFFE52329),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RideRequestsScreen(),
-                                ),
-                              ).then((_) => _loadDashboard());
-                            },
-                            child: const Text(
-                              'View All >',
-                              style: TextStyle(
-                                color: Color(0xFFE52329),
-                                fontWeight: FontWeight.bold,
+                          const SizedBox(height: 16),
+
+                          if (_activeRequests.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Center(child: Text('No requests right now.')),
+                            )
+                          else
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                children: _activeRequests
+                                    .take(_showAllRequests ? _activeRequests.length : 1)
+                                    .map((r) => _buildRequestCard(r))
+                                    .toList(),
                               ),
                             ),
+                          const Spacer(),
+
+                          // Manage consultations banner at the bottom
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF5F5), // Light red background
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.assignment, size: 32, color: Color(0xFFE52329)),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerLeft,
+                                            child: const Text(
+                                              'Manage Your Consultations Easily',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Check your requests, track consultations, and manage your progress all in one place.',
+                                            style: TextStyle(
+                                              color: Colors.grey[700],
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE52329))),
+                                    const SizedBox(width: 4),
+                                    Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE52329))),
+                                    const SizedBox(width: 4),
+                                    Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE52329))),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
+                          const SizedBox(height: 16),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      
-                      if (_activeRequests.isEmpty)
-                        const Center(child: Text('No requests right now.'))
-                      else
-                        ..._activeRequests.take(3).map((r) => _buildRequestCard(r)),
-
-                      const SizedBox(height: 20),
-                      
-                      ],
                     ),
                   ),
-          // Manage Consultations banner at the bottom
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF5F5), // Light red background
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.assignment, size: 32, color: Color(0xFFE52329),),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Manage Your Consultations Easily',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Check your requests, track consultations, and manage your progress all in one place.',
-                                style: TextStyle(
-                                  color: Colors.grey[700],
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE52329),)),
-                        const SizedBox(width: 4),
-                        Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE52329),)),
-                        const SizedBox(width: 4),
-                        Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE52329),)),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          ), // End inner Column
-        ), // End SingleChildScrollView
-      ), // End RefreshIndicator
-    ), // End Expanded
-  ],
-), // End outer Column
+                );
+              }
+            ),
+          ),
     );
   }
 
@@ -370,6 +364,33 @@ class _AmbulanceDashboardState extends State<AmbulanceDashboard> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildStatItem(String value, String label) {
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFFE52329),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

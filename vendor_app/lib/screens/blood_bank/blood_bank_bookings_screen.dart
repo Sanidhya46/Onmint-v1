@@ -304,9 +304,7 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
             context,
             MaterialPageRoute(builder: (context) => screen),
           );
-          if (result == true) {
-            _loadBookings();
-          }
+          _loadBookings();
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

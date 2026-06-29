@@ -14,25 +14,31 @@ class DoctorMainScreen extends StatefulWidget {
 
 class _DoctorMainScreenState extends State<DoctorMainScreen> {
   int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    const DoctorDashboard(),
-    const BookingsScreen(),
-    const EarningsScreen(),
-    const ProfileScreen(),
-  ];
+  final List<int> _refreshCounters = [0, 0, 0, 0];
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      DoctorDashboard(key: ValueKey(_refreshCounters[0])),
+      BookingsScreen(key: ValueKey(_refreshCounters[1])),
+      EarningsScreen(key: ValueKey(_refreshCounters[2])),
+      ProfileScreen(key: ValueKey(_refreshCounters[3])),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+            _refreshCounters[index]++;
+          });
+        },
         selectedItemColor: const Color(0xFF1565C0), // Blue matching screenshot
         unselectedItemColor: Colors.grey,
         items: const [

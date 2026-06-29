@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:intl/intl.dart';
 import 'package:user_app/screens/booking/lab_test_selection_screen.dart';
-import 'package:user_app/screens/booking/order_request_screen.dart';
+import 'package:user_app/screens/booking/order_detail_file.dart';
 
 class ConfirmLabTestBookingScreen extends StatefulWidget {
   final String address;
@@ -80,10 +80,9 @@ class _ConfirmLabTestBookingScreenState
         );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => OrderRequestScreen(
+            builder: (context) => OrderDetailFile(
               bookingId: '',
               bookingData: bookingData,
-              serviceType: 'lab test',
             ),
           ),
           (route) => route.isFirst,

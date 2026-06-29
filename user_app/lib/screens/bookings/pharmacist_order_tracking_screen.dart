@@ -15,6 +15,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
   final _apiClient = OnMintApiClient();
   Map<String, dynamic>? _booking;
   bool _isLoading = true;
+  bool _showAllMedicines = false;
 
   @override
   void initState() {
@@ -61,7 +62,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
 
     final status = _booking!['status']?.toString().toLowerCase() ?? '';
     bool isPending = status == 'requested' || status == 'pending';
-    bool isPrescriptionBased = _booking!['isPrescriptionBased'] ?? false;
+    bool isPrescriptionBased = _booking!['isPrescriptionBased'] == true || _booking!['isPrescriptionBased'] == 'true';
     List offers = _booking!['offers'] ?? [];
     
     bool hasOffers = isPrescriptionBased && offers.isNotEmpty && isPending;
@@ -148,9 +149,9 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
     setState(() => _isLoading = true);
     try {
       await _apiClient.initialize();
-      await _apiClient.patch(
-        '/realTimeBooking/${widget.bookingId}/status',
-        data: {'status': 'cancelled'},
+      await _apiClient.post(
+        '/realtime-booking/${widget.bookingId}/cancel',
+        data: {'reason': 'Cancelled by user'},
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order cancelled successfully')));
@@ -265,8 +266,11 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
            )
         ),
         
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 8,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,6 +281,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
               ],
             ),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.verified_user, color: Colors.green, size: 14),
                 const SizedBox(width: 4),
@@ -318,7 +323,12 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(vendor['pharmacyName'] ?? vendor['firstName'] ?? 'Pharmacy', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF001F4D))),
+                          Text(
+                            vendor['pharmacyName'] ?? vendor['firstName'] ?? 'Pharmacy',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF001F4D)),
+                          ),
                           const SizedBox(height: 2),
                           Text('2.1 km away', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                           const SizedBox(height: 4),
@@ -357,11 +367,14 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(height: 16),                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
                   children: [
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.electric_moped, color: Colors.green, size: 14),
                         const SizedBox(width: 6),
@@ -369,6 +382,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                       ],
                     ),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         OutlinedButton.icon(
                           onPressed: () {},
@@ -398,7 +412,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                       ],
                     )
                   ],
-                )
+                ),
               ],
             ),
           );
@@ -523,14 +537,19 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
   }
 
   Widget _buildPendingDetails() {
-    bool isPrescriptionBased = _booking!['isPrescriptionBased'] ?? false;
+    bool isPrescriptionBased = _booking!['isPrescriptionBased'] == true || _booking!['isPrescriptionBased'] == 'true';
     List medicines = _booking!['medicines'] ?? [];
     List prescriptionImages = _booking!['prescriptionImages'] ?? [];
     
     // For pending orders, we calculate amount from medicines array if it's not prescription
     double totalAmt = double.tryParse(_booking!['price']?.toString() ?? '0') ?? 0.0;
     if (totalAmt == 0.0 && !isPrescriptionBased) {
-      totalAmt = medicines.fold(0.0, (sum, med) => sum + ((double.tryParse(med['price']?.toString() ?? '0') ?? 0.0) * (int.tryParse(med['quantity']?.toString() ?? '1') ?? 1)));
+      totalAmt = medicines.fold(0.0, (sum, med) {
+        if (med is Map) {
+          return sum + ((double.tryParse(med['price']?.toString() ?? '0') ?? 0.0) * (int.tryParse(med['quantity']?.toString() ?? '1') ?? 1));
+        }
+        return sum;
+      });
     }
 
     return Column(
@@ -602,8 +621,10 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
               ] else ...[
                 const Text('Ordered Medicines', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF001F4D))),
                 const SizedBox(height: 16),
-                ...medicines.take(2).map((med) {
-                  final medicineDetails = med['medicineId'] ?? {};
+                ...medicines.take(_showAllMedicines ? medicines.length : (medicines.length > 5 ? 5 : medicines.length)).map((medRaw) {
+                  if (medRaw is! Map) return const SizedBox.shrink();
+                  final med = medRaw;
+                  final medicineDetails = med['medicineId'] is Map ? med['medicineId'] : {};
                   final medName = medicineDetails['name'] ?? med['name'] ?? 'Medicine';
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -634,17 +655,24 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                     ),
                   );
                 }).toList(),
-                if (medicines.length > 2) ...[
+                if (medicines.length > 5) ...[
                   const Divider(),
                   Center(
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          _showAllMedicines = !_showAllMedicines;
+                        });
+                      },
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: Text('View all ${medicines.length} medicines', style: const TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold)),
+                      child: Text(
+                        _showAllMedicines ? 'Show less' : 'View ${medicines.length - 5} more medicine(s)',
+                        style: const TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold)
+                      ),
                     ),
                   ),
                 ],
@@ -1115,7 +1143,12 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                   ],
                 ),
                 const SizedBox(height: 16),
-                ...medicines.take(5).map((med) => Padding(
+                ...medicines.take(5).map((medRaw) {
+                  if (medRaw is! Map) return const SizedBox.shrink();
+                  final med = medRaw;
+                  final double price = double.tryParse(med['price']?.toString() ?? '0') ?? 0.0;
+                  final int qty = int.tryParse(med['quantity']?.toString() ?? '1') ?? 1;
+                  return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
@@ -1131,15 +1164,15 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                       ),
                       Expanded(
                         flex: 2,
-                        child: Text('${med['quantity'] ?? 1} x ₹${med['price'] ?? 0}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                        child: Text('$qty x ₹$price', style: const TextStyle(fontSize: 10, color: Colors.grey)),
                       ),
                       Expanded(
                         flex: 1,
-                        child: Text('₹${(med['quantity'] ?? 1) * (med['price'] ?? 0)}', textAlign: TextAlign.right, style: const TextStyle(fontSize: 11, color: Colors.black87)),
+                        child: Text('₹${price * qty}', textAlign: TextAlign.right, style: const TextStyle(fontSize: 11, color: Colors.black87)),
                       ),
                     ],
                   ),
-                )).toList(),
+                );}).toList(),
                 if (medicines.length > 5) ...[
                   const Divider(),
                   Center(

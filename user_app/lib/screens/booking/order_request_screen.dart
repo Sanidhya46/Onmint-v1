@@ -331,7 +331,11 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+        }
         return false;
       },
       child: Scaffold(
@@ -341,7 +345,13 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A60)),
-          onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+            }
+          },
         ),
         title: const Text(
           'My Booking',

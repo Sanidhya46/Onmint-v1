@@ -660,7 +660,9 @@ class _AllMedicinesScreenState extends State<AllMedicinesScreen>
 
     // Fix relative URLs
     if (imageUrl != null && imageUrl.startsWith('/images/')) {
-      imageUrl = 'http://localhost:5000$imageUrl';
+      imageUrl = 'https://api.onmint.in$imageUrl';
+    } else if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
     }
 
     if (imageUrl != null && imageUrl.isNotEmpty) {

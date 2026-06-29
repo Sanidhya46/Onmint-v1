@@ -379,7 +379,7 @@ class _ActiveBookingScreenState extends State<ActiveBookingScreen> {
                     ),
                   ),
                   
-                  const SizedBox(height: 100), // Space for bottom button
+                  const SizedBox(height: 20), // Space for bottom button
                 ],
               ),
             ),

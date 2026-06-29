@@ -2,7 +2,7 @@
 class ApiConfig {
   /// Base URL for the backend API
   /// Update this to your actual backend URL
-  static const String baseUrl = 'http://localhost:5000/api/v1';
+  static const String baseUrl = 'https://api.onmint.in/api/v1';
   
   /// Mock mode for development (set to false to use real backend)
   static const bool mockMode = false;

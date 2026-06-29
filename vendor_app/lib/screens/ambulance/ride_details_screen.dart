@@ -154,10 +154,13 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
       }
     }
   }
@@ -202,10 +205,13 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
       }
     }
   }
@@ -223,10 +229,13 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
       }
     }
   }
@@ -245,10 +254,13 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e')),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
       }
     }
   }
@@ -276,27 +288,23 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _isRequested ? const Color(0xFFFCF3F3) : const Color(0xFFF6F6F6),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _isRequested ? const Color(0xFFF75555) : Colors.white,
-        foregroundColor: _isRequested ? Colors.white : Colors.black,
+        title: Text(
+          _isRequested ? 'Ambulance Request Details' : 'Ambulance Booking',
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+        ),
+        backgroundColor: const Color(0xFFF75555), // Red header
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: _isRequested ? Colors.white : Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context, true),
-        ),
-        title: Text(
-          _isRequested ? 'Ambulance Request Details' : 'Ambulance Booking',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: _isRequested ? Colors.white : Colors.black,
-          ),
         ),
         actions: _isRequested ? [] : [
           IconButton(
-            icon: const Icon(Icons.headset_mic_outlined, color: Colors.black),
+            icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
             onPressed: () {},
           ),
         ],
@@ -315,20 +323,20 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Request Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 12),
+                  const Text('Request Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 6),
                   _buildRequestSummaryCard(),
-                  const SizedBox(height: 20),
-                  const Text('Patient Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
+                  const Text('Patient Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 6),
                   _buildRequestPatientDetailsCard(),
-                  const SizedBox(height: 20),
-                  const Text('Service Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
+                  const Text('Service Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 6),
                   _buildRequestServiceDetailsCard(),
                 ],
               ),
@@ -394,42 +402,46 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2)),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 60, height: 60,
+            width: 50, height: 50,
             decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFEDF2F7)),
             child: ClipOval(
               child: patient['profilePicture'] != null
                   ? Image.network(patient['profilePicture'], fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.person, color: Colors.grey, size: 32))
-                  : const Icon(Icons.person, color: Colors.grey, size: 32),
+                      errorBuilder: (_, __, ___) => const Icon(Icons.person, color: Colors.grey, size: 28))
+                  : const Icon(Icons.person, color: Colors.grey, size: 28),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(fullName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(fullName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                const SizedBox(height: 2),
+                Text('$gender  •  $age Years', style: TextStyle(color: Colors.grey[700], fontSize: 11)),
                 const SizedBox(height: 4),
-                Text('$gender  •  $age Years', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-                const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: const Color(0xFFFCF3F3), borderRadius: BorderRadius.circular(6)),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(color: const Color(0xFFFCF3F3), borderRadius: BorderRadius.circular(4)),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.location_on_outlined, color: Colors.red, size: 12),
-                      const SizedBox(width: 4),
-                      Text('3.2 km away', style: const TextStyle(color: Colors.red, fontSize: 11, fontWeight: FontWeight.w500)),
+                      const Icon(Icons.location_on_outlined, color: Colors.red, size: 10),
+                      const SizedBox(width: 2),
+                      Text('3.2 km away', style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.w500)),
                     ],
                   ),
                 ),
@@ -439,9 +451,16 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('Requested On', style: TextStyle(color: Colors.grey[500], fontSize: 11)),
-              const SizedBox(height: 4),
-              Text(formattedDate, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+              Text('Requested On', style: TextStyle(color: Colors.grey[500], fontSize: 10)),
+              const SizedBox(height: 2),
+              SizedBox(
+                width: 90,
+                child: Text(
+                  formattedDate,
+                  textAlign: TextAlign.end,
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF152238)),
+                ),
+              ),
             ],
           ),
         ],
@@ -464,10 +483,14 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     final details = _ride!['notes'] ?? _ride!['requirements']?['description'] ?? 'Patient having chest pain and difficulty in breathing.';
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15, offset: const Offset(0, 4)),
+        ],
       ),
       child: Column(
         children: [
@@ -491,10 +514,14 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
 
   Widget _buildRequestServiceDetailsCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15, offset: const Offset(0, 4)),
+        ],
       ),
       child: Column(
         children: [
@@ -508,19 +535,19 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
 
   Widget _buildDetailItem(IconData icon, String label, String value, {Color color = Colors.grey}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: color),
-          const SizedBox(width: 12),
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 10),
           Expanded(
             flex: 2,
-            child: Text(label, style: TextStyle(color: Colors.grey[800], fontSize: 13)),
+            child: Text(label, style: TextStyle(color: Colors.grey[800], fontSize: 11)),
           ),
           Expanded(
             flex: 3,
-            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13), textAlign: TextAlign.right),
+            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11), textAlign: TextAlign.right),
           ),
         ],
       ),
@@ -746,7 +773,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
         : 'Unknown Patient';
     final gender = _ride!['patientGender'] ?? patient['gender'] ?? 'Female';
     final age = _ride!['patientAge'] ?? patient['age'] ?? '27';
-    final address = _safeAddress(_ride!['location'], 'Address not available');
+    final address = _safeAddress(_ride!['location'] ?? _ride!['pickupLocation'], 'Address not available');
     final price = (_ride!['price'] ?? 0).toStringAsFixed(0);
 
     String formattedDate = '--';
@@ -760,11 +787,11 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -772,8 +799,8 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 48,
+                height: 48,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Color(0xFFE8F1FF),
@@ -795,19 +822,19 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                       fullName,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.female, size: 12, color: Colors.grey),
+                        Icon(gender.toLowerCase() == 'female' ? Icons.female : Icons.male, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
                         Text(
                           '$gender  •  $age Years',
                           style: TextStyle(
                             color: Colors.grey[700],
-                            fontSize: 11,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -826,15 +853,15 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.location_on_outlined, size: 14, color: Colors.black87),
-                    const SizedBox(width: 6),
+                    const Icon(Icons.location_on_outlined, size: 16, color: Colors.black87),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         address,
                         style: const TextStyle(
                           color: Colors.black87,
-                          fontSize: 11,
-                          height: 1.3,
+                          fontSize: 12,
+                          height: 1.4,
                         ),
                       ),
                     ),
@@ -850,19 +877,35 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey[700]),
-                        const SizedBox(width: 4),
-                        Text(formattedDate, style: const TextStyle(fontSize: 11, color: Colors.black87)),
+                        Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey[700]),
+                        const SizedBox(width: 6),
+                        Text(formattedDate, style: const TextStyle(fontSize: 12, color: Colors.black87)),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Icon(Icons.access_time, size: 12, color: Colors.grey[700]),
-                        const SizedBox(width: 4),
-                        Text(formattedTime, style: const TextStyle(fontSize: 11, color: Colors.black87)),
+                        Icon(Icons.access_time, size: 14, color: Colors.grey[700]),
+                        const SizedBox(width: 6),
+                        Text(formattedTime, style: const TextStyle(fontSize: 12, color: Colors.black87)),
                       ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '₹$price',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E8E3E),
+                      ),
+                    ),
+                    const Text(
+                      'Service Fee',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                 ),
@@ -996,84 +1039,70 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     );
   }
   Widget _buildRouteCard() {
+    final pickup = _safeAddress(_ride!['location'] ?? _ride!['pickupLocation'], 'Pickup not specified');
+    final drop = _safeAddress(_ride!['dropLocation'] ?? _ride!['dropOffLocation'], 'Drop not specified');
+
     return Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade200),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final double width = constraints.maxWidth;
-          final double stepWidth = width / 4;
-          
-          return Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Positioned(
-                top: 14,
-                left: stepWidth / 2,
-                right: stepWidth / 2,
-                child: Row(
+              Column(
+                children: [
+                  const Icon(Icons.location_on, color: Color(0xFF1E8E3E), size: 20),
+                  Container(
+                    height: 30,
+                    width: 1,
+                    color: Colors.transparent,
+                    child: CustomPaint(painter: _DashedLinePainter()),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Container(height: 2, color: _currentStep >= 1 ? const Color(0xFF1E8E3E) : Colors.grey.shade400)),
-                    Expanded(child: Container(height: 2, color: _currentStep >= 2 ? const Color(0xFF1E8E3E) : Colors.grey.shade400)),
-                    Expanded(child: Container(height: 2, color: _currentStep >= 3 ? const Color(0xFF1E8E3E) : Colors.grey.shade400)),
+                    const Text('Pickup Point', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 4),
+                    Text(pickup, style: const TextStyle(fontSize: 12, color: Colors.black87, height: 1.4)),
                   ],
                 ),
               ),
-              Row(
-                children: [
-                  SizedBox(width: stepWidth, child: _buildStepNode(0, 'Accepted', _acceptedAt != null ? _fmt(_acceptedAt) : 'Just Now', _currentStep >= 0)),
-                  SizedBox(width: stepWidth, child: _buildStepNode(1, 'On The Way', _currentStep >= 1 ? (_onTheWayAt != null ? _fmt(_onTheWayAt) : _fmt(DateTime.now())) : '--:--', _currentStep >= 1)),
-                  SizedBox(width: stepWidth, child: _buildStepNode(2, 'At Pickup Point', _currentStep >= 2 ? (_atPickupAt != null ? _fmt(_atPickupAt) : _fmt(DateTime.now())) : '--:--', _currentStep >= 2)),
-                  SizedBox(width: stepWidth, child: _buildStepNode(3, 'At Drop Point', _currentStep >= 3 ? (_atDropAt != null ? _fmt(_atDropAt) : _fmt(DateTime.now())) : '--:--', _currentStep >= 3, isLast: true)),
-                ],
+            ],
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.location_on, color: Color(0xFFE52329), size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Drop Point', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 4),
+                    Text(drop, style: const TextStyle(fontSize: 12, color: Colors.black87, height: 1.4)),
+                  ],
+                ),
               ),
             ],
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildStepNode(int index, String title, String time, bool isCompleted, {bool isLast = false}) {
-    bool isOutline = !isCompleted && isLast;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isOutline ? Colors.white : (isCompleted ? const Color(0xFF1E8E3E) : Colors.grey.shade500),
-            border: isOutline ? Border.all(color: Colors.grey.shade400, width: 2) : null,
-          ),
-          child: isOutline 
-              ? null 
-              : const Icon(Icons.check, color: Colors.white, size: 14),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 10,
-            height: 1.2,
-            fontWeight: isCompleted ? FontWeight.bold : FontWeight.w500,
-            color: isCompleted ? const Color(0xFF1E8E3E) : Colors.grey.shade600,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          time,
-          style: TextStyle(
-            fontSize: 9,
-            color: Colors.grey.shade500,
-          ),
-        ),
-      ],
-    );
+    return const SizedBox.shrink();
   }
 
   // ── Action Shortcuts ──────────────────────────────────────────────
@@ -1342,15 +1371,19 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
 
     String label = '';
     VoidCallback? onPressed;
+    IconData? iconData;
 
     if (_isAccepted) {
-      label = 'Start Trip';
+      label = 'I Am On The Way';
+      iconData = Icons.directions_car;
       onPressed = _startRide;
     } else if (_isOnTheWay) {
       label = 'Reached Pickup Location';
+      iconData = Icons.location_on;
       onPressed = _arriveAtPickup;
     } else if (_isAtPickup) {
       label = 'Complete Trip';
+      iconData = Icons.check_circle;
       onPressed = _completeRide;
     } else {
       return const SizedBox.shrink();
@@ -1363,17 +1396,27 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
         top: false,
         child: SizedBox(
           width: double.infinity,
-          height: 48,
+          height: 52,
           child: ElevatedButton(
             onPressed: _isProcessing ? null : onPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFE52329),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
             ),
             child: _isProcessing
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (iconData != null) ...[
+                        Icon(iconData, color: Colors.white, size: 20),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ],
+                  ),
           ),
         ),
       ),

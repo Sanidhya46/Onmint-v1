@@ -29,6 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final List<int> _refreshCounters = [0, 0, 0, 0];
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +53,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final dashboardWidget = _getDashboardForRole(role);
 
     final screens = [
-      dashboardWidget,
-      _getBookingsScreenForRole(role),
-      const Center(child: Text('Earnings', style: TextStyle(fontSize: 18))),
-      const ProfileScreen(),
+      KeyedSubtree(key: ValueKey(_refreshCounters[0]), child: dashboardWidget),
+      KeyedSubtree(key: ValueKey(_refreshCounters[1]), child: _getBookingsScreenForRole(role)),
+      KeyedSubtree(key: ValueKey(_refreshCounters[2]), child: const Center(child: Text('Earnings', style: TextStyle(fontSize: 18)))),
+      KeyedSubtree(key: ValueKey(_refreshCounters[3]), child: const ProfileScreen()),
     ];
 
     bool hideAppBar = _selectedIndex == 3 || 
@@ -108,14 +109,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: screens,
-      ),
+      body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+            _refreshCounters[index]++;
+          });
+        },
         selectedItemColor: roleColor,
         unselectedItemColor: AppColors.textSecondary,
         showUnselectedLabels: true,

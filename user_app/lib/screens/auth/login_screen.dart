@@ -64,299 +64,292 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    // Allocate 35% for top banner, 65% for bottom form to prevent squishing
-    final topHeight = screenHeight * 0.35;
-    final bottomHeight = screenHeight * 0.65;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomHeight = screenHeight * 0.60;
+    final s = (bottomHeight / 480).clamp(0.8, 1.2);
 
     return Scaffold(
       backgroundColor: const Color(0xFFE6ECF4),
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          // ──── TOP: Image Banner ────
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: topHeight,
-            child: Image.asset(
-              'assets/images/register_login/login_top_banner.png',
-              width: double.infinity,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-
-          // ──── BOTTOM: Form Container ────
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-            // Move up when keyboard appears
-            top: topHeight - bottomInset,
-            left: 0,
-            right: 0,
-            height: bottomHeight,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final formHeight = constraints.maxHeight;
-                // Calculate scale factor: decreased base height to keep UI proportionally sized
-                final s = (formHeight / 480).clamp(0.0, 1.0);
-
-                return Padding(
-                  padding: EdgeInsets.only(left: 16 * s, right: 16 * s, bottom: 16 * s),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20 * s),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          blurRadius: 10 * s,
-                          offset: Offset(0, -4 * s),
-                        ),
-                      ],
+      resizeToAvoidBottomInset: true,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ──── TOP: Image Banner ────
+                    SizedBox(
+                      height: 180 * s,
+                      width: double.infinity,
+                      child: Image.asset(
+                        'assets/images/register_login/login_top_banner.png',
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.all(16 * s),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  'Welcome Back!',
-                                  style: TextStyle(
-                                    fontSize: 18 * s,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF152238),
-                                  ),
-                                ),
-                                SizedBox(height: 6 * s),
-                                Text(
-                                  'Login to access your healthcare services',
-                                  style: TextStyle(
-                                    fontSize: 11 * s,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 12 * s),
-
-                            _buildInputField(
-                              label: 'Mobile Number',
-                              hint: 'Enter your mobile number',
-                              controller: _usernameController,
-                              icon: Icons.phone_outlined,
-                              s: s,
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter phone no.';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            SizedBox(height: 4 * s),
-
-                            _buildInputField(
-                              label: 'Password',
-                              hint: 'Enter your password',
-                              controller: _passwordController,
-                              icon: Icons.lock_outline,
-                              obscureText: _obscurePassword,
-                              s: s,
-                              suffixIcon: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                                  color: Colors.grey.shade400,
-                                  size: 16 * s,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
+                    
+                    // ──── BOTTOM: Form Container ────
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16 * s, right: 16 * s, bottom: 16 * s, top: 16 * s),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20 * s),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                blurRadius: 10 * s,
+                                offset: Offset(0, -4 * s),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your password';
-                                }
-                                return null;
-                              },
-                            ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(16 * s),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        'Welcome Back!',
+                                        style: TextStyle(
+                                          fontSize: 18 * s,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xFF152238),
+                                        ),
+                                      ),
+                                      SizedBox(height: 6 * s),
+                                      Text(
+                                        'Login to access your healthcare services',
+                                        style: TextStyle(
+                                          fontSize: 11 * s,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
 
-                            SizedBox(height: 10 * s),
+                                  SizedBox(height: 12 * s),
 
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 16 * s,
-                                      height: 16 * s,
-                                      child: Checkbox(
-                                        value: _rememberMe,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _rememberMe = value ?? false;
-                                          });
+                                  _buildInputField(
+                                    label: 'Mobile Number',
+                                    hint: 'Enter your mobile number',
+                                    controller: _usernameController,
+                                    icon: Icons.phone_outlined,
+                                    s: s,
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return 'Please enter phone no.';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+
+                                  SizedBox(height: 4 * s),
+
+                                  _buildInputField(
+                                    label: 'Password',
+                                    hint: 'Enter your password',
+                                    controller: _passwordController,
+                                    icon: Icons.lock_outline,
+                                    obscureText: _obscurePassword,
+                                    s: s,
+                                    suffixIcon: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(
+                                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                        color: Colors.grey.shade400,
+                                        size: 16 * s,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscurePassword = !_obscurePassword;
+                                        });
+                                      },
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter your password';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+
+                                  SizedBox(height: 10 * s),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          SizedBox(
+                                            width: 16 * s,
+                                            height: 16 * s,
+                                            child: Checkbox(
+                                              value: _rememberMe,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _rememberMe = value ?? false;
+                                                });
+                                              },
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4 * s)),
+                                              side: BorderSide(color: Colors.grey.shade400),
+                                            ),
+                                          ),
+                                          SizedBox(width: 6 * s),
+                                          Text(
+                                            'Remember me',
+                                            style: TextStyle(
+                                              fontSize: 10 * s,
+                                              color: Colors.grey.shade700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      TextButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          'Forgot Password?',
+                                          style: TextStyle(
+                                            fontSize: 10 * s,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF0D6EFD),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const Spacer(),
+                                  SizedBox(height: 6 * s),
+
+                                  SizedBox(
+                                    height: 40 * s,
+                                    child: ElevatedButton(
+                                      onPressed: _isLoading ? null : _handleLogin,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF0D6EFD),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8 * s),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                      child: _isLoading
+                                          ? SizedBox(width: 18 * s, height: 18 * s, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                          : Text(
+                                              'LOGIN',
+                                              style: TextStyle(fontSize: 13 * s, fontWeight: FontWeight.bold),
+                                            ),
+                                    ),
+                                  ),
+
+                                  SizedBox(height: 8 * s),
+                                  
+                                  Row(
+                                    children: [
+                                      Expanded(child: Divider(color: Colors.grey.shade300)),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 8 * s),
+                                        child: Text(
+                                          'OR',
+                                          style: TextStyle(fontSize: 10 * s, color: Colors.grey.shade500),
+                                        ),
+                                      ),
+                                      Expanded(child: Divider(color: Colors.grey.shade300)),
+                                    ],
+                                  ),
+                                  
+                                  SizedBox(height: 8 * s),
+
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildSocialButton(
+                                          text: 'Google',
+                                          iconData: Icons.g_mobiledata,
+                                          iconColor: Colors.red,
+                                          s: s,
+                                          onPressed: () {},
+                                        ),
+                                      ),
+                                      SizedBox(width: 8 * s),
+                                      Expanded(
+                                        child: _buildSocialButton(
+                                          text: 'Apple',
+                                          iconData: Icons.apple,
+                                          iconColor: Colors.black,
+                                          s: s,
+                                          onPressed: () {},
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  SizedBox(height: 12 * s),
+                                  
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Don't have an account? ",
+                                        style: TextStyle(color: Colors.black87, fontSize: 11 * s),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context).pushReplacementNamed('/register');
                                         },
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4 * s)),
-                                        side: BorderSide(color: Colors.grey.shade400),
+                                        child: Text(
+                                          'Sign Up',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF0D6EFD),
+                                            fontSize: 11 * s,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(width: 6 * s),
-                                    Text(
-                                      'Remember me',
-                                      style: TextStyle(
-                                        fontSize: 10 * s,
-                                        color: Colors.grey.shade700,
+                                    ],
+                                  ),
+
+                                  SizedBox(height: 12 * s),
+                                  Center(
+                                    child: Text.rich(
+                                      TextSpan(
+                                        text: 'By logging in, you agree to our ',
+                                        style: TextStyle(fontSize: 9 * s, color: Colors.grey.shade500),
+                                        children: [
+                                          TextSpan(
+                                            text: 'Terms & Conditions',
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: const Color(0xFF0D6EFD)),
+                                          ),
+                                          const TextSpan(text: ' and '),
+                                          TextSpan(
+                                            text: 'Privacy Policy',
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: const Color(0xFF0D6EFD)),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Forgot Password?',
-                                    style: TextStyle(
-                                      fontSize: 10 * s,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF0D6EFD),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 6 * s),
-
-                            SizedBox(
-                              height: 40 * s,
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _handleLogin,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0D6EFD),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8 * s),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                child: _isLoading
-                                    ? SizedBox(width: 18 * s, height: 18 * s, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                    : Text(
-                                        'LOGIN',
-                                        style: TextStyle(fontSize: 13 * s, fontWeight: FontWeight.bold),
-                                      ),
+                                ],
                               ),
                             ),
-
-                            SizedBox(height: 8 * s),
-                            
-                            Row(
-                              children: [
-                                Expanded(child: Divider(color: Colors.grey.shade300)),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 8 * s),
-                                  child: Text(
-                                    'OR',
-                                    style: TextStyle(fontSize: 10 * s, color: Colors.grey.shade500),
-                                  ),
-                                ),
-                                Expanded(child: Divider(color: Colors.grey.shade300)),
-                              ],
-                            ),
-                            
-                            SizedBox(height: 8 * s),
-
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildSocialButton(
-                                    text: 'Google',
-                                    iconData: Icons.g_mobiledata,
-                                    iconColor: Colors.red,
-                                    s: s,
-                                    onPressed: () {},
-                                  ),
-                                ),
-                                SizedBox(width: 8 * s),
-                                Expanded(
-                                  child: _buildSocialButton(
-                                    text: 'Apple',
-                                    iconData: Icons.apple,
-                                    iconColor: Colors.black,
-                                    s: s,
-                                    onPressed: () {},
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 12 * s),
-                            
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Don't have an account? ",
-                                  style: TextStyle(color: Colors.black87, fontSize: 11 * s),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).pushReplacementNamed('/register');
-                                  },
-                                  child: Text(
-                                    'Sign Up',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF0D6EFD),
-                                      fontSize: 11 * s,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 12 * s),
-                            Center(
-                              child: Text.rich(
-                                TextSpan(
-                                  text: 'By logging in, you agree to our ',
-                                  style: TextStyle(fontSize: 9 * s, color: Colors.grey.shade500),
-                                  children: [
-                                    TextSpan(
-                                      text: 'Terms & Conditions',
-                                      style: TextStyle(fontWeight: FontWeight.bold, color: const Color(0xFF0D6EFD)),
-                                    ),
-                                    const TextSpan(text: ' and '),
-                                    TextSpan(
-                                      text: 'Privacy Policy',
-                                      style: TextStyle(fontWeight: FontWeight.bold, color: const Color(0xFF0D6EFD)),
-                                    ),
-                                  ],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+                  ],
+                ),
+              ),
+            );
+        },
       ),
     );
   }

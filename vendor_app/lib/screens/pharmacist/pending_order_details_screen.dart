@@ -545,9 +545,11 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Total Amount (with delivery)',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF001F4D)),
+                              const Expanded(
+                                child: Text(
+                                  'Total Amount (with delivery)',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF001F4D)),
+                                ),
                               ),
                               Text(
                                 '₹${totalAmount.toStringAsFixed(2)}',
@@ -585,9 +587,9 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.close),
-                        SizedBox(width: 8),
-                        Text('Reject Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Icon(Icons.close, size: 20),
+                        SizedBox(width: 4),
+                        Expanded(child: Text('Reject Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
                       ],
                     ),
                   ),
@@ -615,12 +617,17 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (!_offerSent) Icon(isPrescriptionBased ? Icons.send : Icons.check),
-                      if (!_offerSent) const SizedBox(width: 8),
-                      Text(isPrescriptionBased 
-                          ? (_offerSent ? 'Waiting for Patient Approval' : 'Send for Patient Approval') 
-                          : 'Accept Order', 
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      if (!_offerSent) Icon(isPrescriptionBased ? Icons.send : Icons.check, size: 20),
+                      if (!_offerSent) const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(isPrescriptionBased 
+                            ? (_offerSent ? 'Waiting for Approval' : 'Send for Approval') 
+                            : 'Accept Order', 
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                        ),
+                      ),
                     ],
                   ),
                 ),

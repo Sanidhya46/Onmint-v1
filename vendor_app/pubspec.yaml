@@ -66,6 +66,7 @@ dev_dependencies:
     sdk: flutter
   mockito: ^5.4.2
   build_runner: ^2.4.7
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -76,3 +77,10 @@ flutter:
     - assets/images/bloodbank/
     - assets/images/request_order/
     - assets/images/register_login/
+    - assets/images/register_login/top_banner12.jpeg
+    - assets/images/splash_screen.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/vendor_app_logo.png"

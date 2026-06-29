@@ -4,7 +4,7 @@ import '../../utils/app_colors.dart';
 
 // Import UserTimeSlot specifically from user_model to avoid conflicts
 import 'package:api_client/src/models/user_model.dart' show UserTimeSlot;
-import 'order_request_screen.dart';
+import 'package:user_app/screens/booking/order_request_screen.dart';
 
 class BookingFlowScreen extends StatefulWidget {
   final User provider;

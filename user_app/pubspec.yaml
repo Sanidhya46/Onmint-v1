@@ -67,6 +67,7 @@ dev_dependencies:
     sdk: flutter
   mockito: ^5.4.2
   build_runner: ^2.4.7
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -90,3 +91,12 @@ flutter:
     - assets/images/request_order/
     - assets/images/medicine/
     - assets/images/register_login/
+    - assets/images/register_login/register_top_banner.png
+    - assets/images/register_login/login_top_banner.png
+    - assets/images/splash_screen.png
+    - assets/images/Appointment_image.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/user_app_logo.png"

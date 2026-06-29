@@ -6,7 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../services/error_handler_service.dart';
 
-import '../booking/order_request_screen.dart';
+import 'package:user_app/screens/booking/order_detail_file.dart';
 
 class BookAppointmentScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -302,7 +302,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         };
       }
 
-      await _patientService.createBooking(bookingData);
+      final bookingResponse = await _patientService.createBooking(bookingData);
+      final bookingId = bookingResponse['_id'] ?? '';
 
       if (mounted) {
         ErrorHandlerService.showSuccess(
@@ -310,10 +311,9 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => OrderRequestScreen(
-              bookingId: '',
+            builder: (context) => OrderDetailFile(
+              bookingId: bookingId,
               bookingData: bookingData,
-              serviceType: 'doctor',
             ),
           ),
         );

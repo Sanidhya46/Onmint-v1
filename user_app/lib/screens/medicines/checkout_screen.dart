@@ -7,6 +7,7 @@ import '../../services/cart_service.dart';
 import '../../utils/app_colors.dart';
 import '../../data/indian_states_cities.dart';
 import '../booking/payment_success_screen.dart';
+import '../bookings/pharmacist_order_tracking_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -178,10 +179,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => PaymentSuccessScreen(
+            builder: (context) => PharmacistOrderTrackingScreen(
               bookingId: bookingId.toString(),
-              amount: cart.totalAmount,
-              paymentId: _paymentMethod == 'online' ? 'TXN-${DateTime.now().millisecondsSinceEpoch}' : 'COD',
             ),
           ),
         );

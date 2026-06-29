@@ -24,7 +24,7 @@ class OnMintAdminApp extends StatelessWidget {
     
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider(apiClient)),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => LocationProvider()),
         Provider.value(value: apiClient),
       ],

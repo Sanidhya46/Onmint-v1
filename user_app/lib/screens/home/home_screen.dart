@@ -7,13 +7,15 @@ import '../bookings/bookings_screen.dart';
 import '../booking/active_service_tracking_screen.dart';
 import 'package:provider/provider.dart';
 import '../../services/cart_service.dart';
-import '../../utils/app_colors.dart';
+import '../../utils/app_colors.dart'; 
 import '../medicines/widgets/cart_floating_bar.dart';
 import '../medicines/prescription_camera_screen.dart';
 import '../bookings/booking_details_screen.dart';
-import '../booking/order_request_screen.dart';
+import '../booking/order_detail_file.dart';
 import '../booking/user_unified_tracking_screen.dart';
 import '../bookings/pharmacist_order_tracking_screen.dart';
+import '../booking/order_request_screen.dart';
+import '../booking/user_active_consultation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -134,9 +136,10 @@ class _HomeScreenState extends State<HomeScreen>
         return Image.asset('assets/images/nurse.png', width: 36, height: 36, errorBuilder: (_,__,___) => const Icon(Icons.local_hospital, color: Colors.blue));
       case 'lab_test':
       case 'pathology':
-        return Image.asset('assets/images/lab_test.png', width: 36, height: 36, errorBuilder: (_,__,___) => const Icon(Icons.science, color: Colors.teal));
+        return Image.asset('assets/images/lab_test121.png', width: 36, height: 36, errorBuilder: (_,__,___) => const Icon(Icons.science, color: Colors.teal));
       case 'blood bank':
-        return const Icon(Icons.bloodtype, color: Colors.red, size: 30);
+      case 'bloodbank':
+        return Image.asset('assets/images/bloodbank/bloodbank.png', width: 36, height: 36, errorBuilder: (_,__,___) => const Icon(Icons.bloodtype, color: Colors.red, size: 30));
       case 'pharmacist':
       case 'medicine':
       case 'prescription':
@@ -165,21 +168,30 @@ class _HomeScreenState extends State<HomeScreen>
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => OrderRequestScreen(
+            builder: (context) => OrderDetailFile(
               bookingId: bookingId,
               bookingData: _activeBookingDetails!,
-              serviceType: _activeServiceType,
             ),
           ),
         );
       }
     } else {
-      if (_activeServiceType == 'doctor' || _activeServiceType == 'consultation') {
+      if ((_activeServiceType == 'doctor' || _activeServiceType == 'consultation') && status == 'in_progress') {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BookingDetailsScreen(
+            builder: (context) => UserActiveConsultationScreen(
               bookingId: bookingId,
+            ),
+          ),
+        );
+      } else if (_activeServiceType == 'bloodbank' || _activeServiceType == 'blood bank') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => UserUnifiedTrackingScreen(
+              bookingId: bookingId,
+              serviceType: _activeServiceType,
             ),
           ),
         );
@@ -187,9 +199,9 @@ class _HomeScreenState extends State<HomeScreen>
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => UserUnifiedTrackingScreen(
+            builder: (context) => OrderDetailFile(
               bookingId: bookingId,
-              serviceType: _activeServiceType,
+              bookingData: _activeBookingDetails!,
             ),
           ),
         );
@@ -262,6 +274,21 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                           // Icon
                           _activeImage,
+                          // Green dot if in progress
+                          if (_activeBookingDetails?['status']?.toString().toLowerCase() == 'in_progress')
+                            Positioned(
+                              top: 2,
+                              right: 2,
+                              child: Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     );

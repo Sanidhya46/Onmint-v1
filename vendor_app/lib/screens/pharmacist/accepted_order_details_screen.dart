@@ -177,6 +177,7 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
                       Text(
                         order['patientName'] ?? 'Unknown',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(

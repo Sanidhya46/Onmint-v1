@@ -8,6 +8,7 @@ import '../services/nurses_screen.dart';
 import '../booking/ambulance_booking_screen.dart';
 import '../booking/blood_request_screen.dart';
 import '../booking/lab_test_booking_screen.dart';
+import '../booking/user_active_consultation_screen.dart';
 
 /// Booking details screen for patients
 class BookingDetailsScreen extends StatefulWidget {
@@ -44,6 +45,22 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
         _booking = booking;
         _isLoading = false;
       });
+      
+      // Automatic redirect to live consultation if in progress
+      if (_booking?.status == 'in_progress') {
+        if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserActiveConsultationScreen(
+                  bookingId: widget.bookingId,
+                ),
+              ),
+            );
+          });
+        }
+      }
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -971,7 +988,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Service Progress',
+            'Status Track',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -979,57 +996,82 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: steps.asMap().entries.map((entry) {
-                final index = entry.key;
-                final step = entry.value;
-                final isActive = index <= currentIndex;
-                final isCurrent = index == currentIndex;
-
-                return Padding(
-                  padding:
-                      EdgeInsets.only(right: index < steps.length - 1 ? 8 : 0),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: isActive ? Colors.blue : Colors.grey[300],
-                          shape: BoxShape.circle,
-                          border: isCurrent
-                              ? Border.all(color: Colors.blue, width: 3)
-                              : null,
-                        ),
-                        child: Icon(
-                          step['icon'] as IconData,
-                          color: isActive ? Colors.white : Colors.grey[600],
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: 60,
-                        child: Text(
-                          step['label'] as String,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight:
-                                isCurrent ? FontWeight.bold : FontWeight.normal,
-                            color: isActive ? Colors.blue : Colors.grey[600],
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final stepWidth = constraints.maxWidth / steps.length;
+              return Stack(
+                children: [
+                  // Connecting line
+                  Positioned(
+                    top: 20, // Center of the 40px circle
+                    left: stepWidth / 2,
+                    right: stepWidth / 2,
+                    child: Container(
+                      height: 2,
+                      color: Colors.grey[300],
+                    ),
                   ),
-                );
-              }).toList(),
-            ),
+                  // Progress line (blue)
+                  if (currentIndex > 0)
+                    Positioned(
+                      top: 20,
+                      left: stepWidth / 2,
+                      width: stepWidth * currentIndex,
+                      child: Container(
+                        height: 2,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  // Steps
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: steps.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final step = entry.value;
+                      final isActive = index <= currentIndex;
+                      final isCurrent = index == currentIndex;
+
+                      return Expanded(
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: isActive ? Colors.blue : Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isActive ? Colors.blue : Colors.grey[300]!,
+                                  width: isCurrent ? 3 : 2,
+                                ),
+                              ),
+                              child: Icon(
+                                step['icon'] as IconData,
+                                color: isActive ? Colors.white : Colors.grey[400],
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              step['label'] as String,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight:
+                                    isCurrent ? FontWeight.bold : FontWeight.normal,
+                                color: isActive ? Colors.blue : Colors.grey[600],
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -1505,7 +1547,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
               ),
               const SizedBox(height: 12),
               
-              _buildDoctorProfileCard(),
+              _buildDoctorProfileCard(status),
               const SizedBox(height: 12),
               
               if (status == 'accepted') ...[
@@ -1656,7 +1698,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     );
   }
 
-  Widget _buildDoctorProfileCard() {
+  Widget _buildDoctorProfileCard(String status) {
     final doctor = _booking!.providerDetails;
     return Container(
       decoration: BoxDecoration(
@@ -1715,11 +1757,21 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             ),
           ),
           const Divider(height: 1),
-          _buildInfoRowDoc(Icons.work_outline, 'Experience', '${doctor?.experience ?? '8+'} Years'),
-          const Divider(height: 1),
-          _buildInfoRowDoc(Icons.medical_services_outlined, 'Specialization', doctor?.specialization ?? 'General Physician'),
-          const Divider(height: 1),
-          _buildInfoRowDoc(Icons.calendar_today_outlined, 'Consultation Time', _formatTime(_booking!.scheduledTime)),
+          if (status == 'completed') ...[
+            _buildInfoRowDoc(Icons.calendar_today_outlined, 'Consultation Date', _formatDate(_booking!.scheduledTime)),
+            const Divider(height: 1),
+            _buildInfoRowDoc(Icons.access_time_outlined, 'Consultation Time', _formatTime(_booking!.scheduledTime)),
+            const Divider(height: 1),
+            _buildInfoRowDoc(Icons.timer_outlined, 'Call Duration', '05:24'), // Mock duration as we don't have it in model
+          ] else ...[
+            _buildInfoRowDoc(Icons.work_outline, 'Experience', '${doctor?.experience ?? '8+'} Years'),
+            const Divider(height: 1),
+            _buildInfoRowDoc(Icons.medical_services_outlined, 'Specialization', doctor?.specialization ?? 'General Physician'),
+            const Divider(height: 1),
+            _buildInfoRowDoc(Icons.calendar_today_outlined, 'Consultation Date', _formatDate(_booking!.scheduledTime)),
+            const Divider(height: 1),
+            _buildInfoRowDoc(Icons.access_time_outlined, 'Consultation Time', _formatTime(_booking!.scheduledTime)),
+          ],
         ],
       ),
     );
@@ -1727,14 +1779,14 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   Widget _buildInfoRowDoc(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF1565C0), size: 16),
+          Icon(icon, color: const Color(0xFF1565C0), size: 18),
           const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
           const Spacer(),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
         ],
       ),
     );

@@ -44,6 +44,19 @@ class _UserActiveConsultationScreenState
     super.dispose();
   }
 
+  Map<String, dynamic> _getSafeProvider(Map<String, dynamic>? bookingData) {
+    if (bookingData == null) return {};
+    var p = bookingData['acceptedProvider'] ?? bookingData['provider'];
+    if (p is List) {
+      return p.isNotEmpty && p.first is Map ? Map<String, dynamic>.from(p.first) : {};
+    }
+    if (p is Map) {
+      return Map<String, dynamic>.from(p);
+    }
+    return {};
+  }
+
+
   void _setupSocketListeners() {
     _socketService.joinBooking(widget.bookingId);
 
@@ -55,7 +68,7 @@ class _UserActiveConsultationScreenState
 
     _consultationEndedSub = _socketService.consultationEnded.listen((data) {
       if (data['bookingId'] == widget.bookingId && mounted) {
-        final provider = _booking?['acceptedProvider'] ?? _booking?['provider'] ?? {};
+        final provider = _getSafeProvider(_booking);
         final fullName = provider['fullName'] ??
             '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
         Navigator.pushReplacement(
@@ -101,10 +114,23 @@ class _UserActiveConsultationScreenState
   }
 
   Future<void> _joinVideoCall() async {
-    final provider =
-        _booking!['acceptedProvider'] ?? _booking!['provider'] ?? {};
+    final provider = _getSafeProvider(_booking);
     final fullName = provider['fullName'] ??
         '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
+        
+    final videoCallLink = _booking!['videoCallLink'];
+
+    if (videoCallLink != null && videoCallLink.toString().isNotEmpty) {
+      final uri = Uri.parse(videoCallLink.toString());
+      try {
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          return;
+        }
+      } catch (e) {
+        debugPrint('Could not launch video call link: $e');
+      }
+    }
 
     await Navigator.push(
       context,
@@ -165,8 +191,7 @@ class _UserActiveConsultationScreenState
   }
 
   Widget _buildTopSection(String status) {
-    final provider =
-        _booking!['acceptedProvider'] ?? _booking!['provider'] ?? {};
+    final provider = _getSafeProvider(_booking);
     final fullName = provider['fullName'] ??
         '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
     final specialization = provider['specialization'] ?? 'Doctor';
@@ -596,8 +621,8 @@ class _UserActiveConsultationScreenState
     if (status == 'requested' || status == 'completed')
       return const SizedBox.shrink();
 
-    final provider = _booking!['acceptedProvider'] ?? _booking!['provider'];
-    final providerPhone = provider != null ? provider['phone'] : null;
+    final provider = _getSafeProvider(_booking);
+    final providerPhone = provider['phone'];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),

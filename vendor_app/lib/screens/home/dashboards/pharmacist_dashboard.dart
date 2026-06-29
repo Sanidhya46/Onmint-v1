@@ -124,10 +124,21 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
                   backgroundColor: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Image.asset(
-                      'images/logos/pharmacy_logo.png', // Fallback, using icon if not exist
-                      errorBuilder: (c, e, s) => const Icon(Icons.local_pharmacy, color: Colors.green, size: 40),
-                    ),
+                    child: user?.profilePictureUrl != null && user!.profilePictureUrl!.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(35),
+                            child: Image.network(
+                              user.profilePictureUrl!,
+                              fit: BoxFit.cover,
+                              width: 70,
+                              height: 70,
+                              errorBuilder: (c, e, s) => Image.asset('assets/images/logos/pharmacy_logo.png'),
+                            ),
+                          )
+                        : Image.asset(
+                            'assets/images/logos/pharmacy_logo.png', // Fallback, using icon if not exist
+                            errorBuilder: (c, e, s) => const Icon(Icons.local_pharmacy, color: Colors.green, size: 40),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -254,6 +265,22 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
               ),
             ),
           const Spacer(),
+          if (_pendingOrders.length > 1)
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _showAllOrders = !_showAllOrders;
+                });
+              },
+              child: Text(
+                _showAllOrders ? 'View Less' : 'View All',
+                style: const TextStyle(
+                  color: Color(0xFF0033CC),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -275,30 +302,9 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
     final displayOrders = _showAllOrders ? _pendingOrders : _pendingOrders.take(1).toList();
 
     return Column(
-      children: [
-        ...displayOrders.map((order) {
-          return _buildOrderCard(order);
-        }).toList(),
-        if (!_showAllOrders && _pendingOrders.length > 1)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextButton(
-              onPressed: () {
-                setState(() {
-                  _showAllOrders = true;
-                });
-              },
-              child: const Text(
-                'View All',
-                style: TextStyle(
-                  color: Color(0xFF0033CC),
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ),
-      ],
+      children: displayOrders.map((order) {
+        return _buildOrderCard(order);
+      }).toList(),
     );
   }
 
@@ -357,15 +363,20 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            order['patientName'] ?? 'Unknown Patient',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF001F4D),
+                          Expanded(
+                            child: Text(
+                              order['patientName'] ?? 'Unknown Patient',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF001F4D)),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.access_time, size: 14, color: Colors.grey),
                               const SizedBox(width: 4),
@@ -396,11 +407,15 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
                       const SizedBox(height: 8),
                       Text(
                         isDirect ? '$itemsCount Medicines Ordered' : 'Prescription Medicines',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${order['patientAge'] ?? 0} Years / ${order['patientGender'] ?? "Unknown"}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 11, color: Colors.grey),
                       ),
                     ],
@@ -459,33 +474,34 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
 
   Widget _buildInfoBanner() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
       decoration: BoxDecoration(
         color: const Color(0xFFF0F5FF),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.grey.shade100),
       ),
       child: Row(
         children: [
-          const Icon(Icons.assignment_add, size: 20, color: Color(0xFF0033CC)),
-          const SizedBox(width: 8),
-          Expanded(
+          const Icon(Icons.assignment_add, size: 28, color: Color(0xFF0033CC)),
+          const SizedBox(width: 12),
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
+                Text(
                   'Manage Your Orders Easily',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF001F4D),
                   ),
                 ),
-                const SizedBox(height: 2),
-                const Text(
+                SizedBox(height: 4),
+                Text(
                   'Check orders, deliveries, and inventory in one place.',
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: 11,
                     color: Colors.black54,
                   ),
                 ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'booking_details_screen.dart';
-import '../booking/order_request_screen.dart';
 import '../booking/order_detail_file.dart';
 import '../booking/user_unified_tracking_screen.dart';
+import '../booking/order_request_screen.dart';
 
 /// Booking history screen for patients
 class BookingHistoryScreen extends StatefulWidget {
@@ -261,15 +261,12 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
             context,
             MaterialPageRoute(
               builder: (context) {
-                if (sType == 'nurse' ||
-                    sType == 'ambulance' ||
-                    sType == 'pathology' ||
-                    sType == 'lab_test' ||
-                    sType == 'lab test') {
-                  return UserUnifiedTrackingScreen(
-                      bookingId: booking.id, serviceType: booking.serviceType);
+                if (sType == 'nurse' || sType == 'ambulance' || sType == 'pathology' || sType == 'lab_test' || sType == 'lab test' || sType == 'doctor' || sType == 'consultation') {
+                  return OrderDetailFile(bookingId: booking.id);
+                } else if (sType == 'bloodbank' || sType == 'blood bank') {
+                  return UserUnifiedTrackingScreen(bookingId: booking.id, serviceType: 'bloodbank');
                 }
-                return BookingDetailsScreen(bookingId: booking.id);
+                return OrderDetailFile(bookingId: booking.id);
               },
             ),
           );

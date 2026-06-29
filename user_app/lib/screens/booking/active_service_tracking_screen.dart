@@ -15,11 +15,18 @@ class ActiveServiceTrackingScreen extends StatelessWidget {
       case 'ambulance':
         return 'Ambulance';
       case 'doctor':
+      case 'consultation':
         return 'Doctor';
       case 'nurse':
         return 'Nurse';
       case 'lab_test':
+      case 'lab test':
+      case 'labtest':
+      case 'pathology':
         return 'Lab Test';
+      case 'bloodbank':
+      case 'blood bank':
+        return 'Blood Bank';
       default:
         return 'Service';
     }
@@ -30,11 +37,18 @@ class ActiveServiceTrackingScreen extends StatelessWidget {
       case 'ambulance':
         return 'ambulance provider';
       case 'doctor':
+      case 'consultation':
         return 'doctor';
       case 'nurse':
         return 'nurse provider';
       case 'lab_test':
+      case 'lab test':
+      case 'labtest':
+      case 'pathology':
         return 'lab partner';
+      case 'bloodbank':
+      case 'blood bank':
+        return 'blood bank';
       default:
         return 'provider';
     }
@@ -43,12 +57,17 @@ class ActiveServiceTrackingScreen extends StatelessWidget {
   Color get _themeColor {
     switch (serviceType) {
       case 'ambulance':
+      case 'bloodbank':
+      case 'blood bank':
         return Colors.red;
       case 'doctor':
-        return Colors.blue;
+      case 'consultation':
       case 'nurse':
         return Colors.blue;
       case 'lab_test':
+      case 'lab test':
+      case 'labtest':
+      case 'pathology':
         return Colors.teal;
       default:
         return const Color(0xFF0D47A1);
@@ -61,11 +80,18 @@ class ActiveServiceTrackingScreen extends StatelessWidget {
       case 'ambulance':
         return const Icon(Icons.airport_shuttle, size: 80, color: Colors.red);
       case 'doctor':
+      case 'consultation':
         return const Icon(Icons.person, size: 80, color: Colors.blue);
       case 'nurse':
         return const Icon(Icons.local_hospital, size: 80, color: Colors.blue);
       case 'lab_test':
+      case 'lab test':
+      case 'labtest':
+      case 'pathology':
         return const Icon(Icons.science, size: 80, color: Colors.teal);
+      case 'bloodbank':
+      case 'blood bank':
+        return const Icon(Icons.bloodtype, size: 80, color: Colors.red);
       default:
         return const Icon(Icons.medical_services, size: 80, color: Colors.blue);
     }

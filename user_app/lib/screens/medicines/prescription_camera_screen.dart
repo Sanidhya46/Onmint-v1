@@ -9,6 +9,7 @@ import 'package:auth_service/auth_service.dart';
 import '../bookings/pharmacist_order_tracking_screen.dart';
 import '../profile/addresses_screen.dart';
 import '../profile/edit_profile_screen.dart';
+import '../../data/indian_states_cities.dart';
 
 class PrescriptionCameraScreen extends StatefulWidget {
   final String source;
@@ -24,6 +25,9 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
   bool _isLoading = false;
   final TextEditingController _notesController = TextEditingController();
   
+  String? _selectedState;
+  String? _selectedCity;
+  
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
@@ -38,6 +42,16 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
         _pickFromGallery();
       });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final user = authProvider.currentUser;
+      if (user != null) {
+        if (user.city.isNotEmpty) _selectedCity = user.city;
+        if (user.state.isNotEmpty) _selectedState = user.state;
+        if (mounted) setState(() {});
+      }
+    });
   }
 
   Future<void> _initCamera() async {
@@ -164,6 +178,8 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
       final requestData = {
         'requirements': _notesController.text.isNotEmpty ? _notesController.text : 'Prescription Medicine Order',
         'location': '{"address":"$addressStr","coordinates":[72.8777,19.0760]}',
+        'city': _selectedCity ?? user?.city ?? 'Jhansi',
+        'state': _selectedState ?? user?.state ?? 'Uttar Pradesh',
         'patientName': user?.fullName ?? 'Amit Kumar',
         'patientAge': userAge,
         'patientGender': user?.gender ?? 'Male',
@@ -598,6 +614,8 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  _buildStateCitySelectors(),
                 ],
               ),
             ),
@@ -658,6 +676,197 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFieldLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6.0, left: 4.0),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStateCitySelectors() {
+    final cities = _selectedState != null
+        ? IndianStatesData.getCitiesForState(_selectedState!)
+        : <String>[];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildFieldLabel('State'),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                child: Autocomplete<String>(
+                  initialValue: TextEditingValue(text: _selectedState ?? ''),
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text.isEmpty) return IndianStatesData.states;
+                    return IndianStatesData.states.where((s) =>
+                        s.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                  },
+                  onSelected: (String selection) {
+                    setState(() {
+                      _selectedState = selection;
+                      _selectedCity = null;
+                    });
+                  },
+                  fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                    return TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: const TextStyle(fontSize: 12, color: Colors.black87),
+                      decoration: InputDecoration(
+                        hintText: 'Search state...',
+                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 11),
+                        border: InputBorder.none,
+                        icon: Icon(Icons.map_outlined, color: Colors.grey[500], size: 16),
+                        suffixIcon: controller.text.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  controller.clear();
+                                  setState(() { _selectedState = null; _selectedCity = null; });
+                                },
+                                child: Icon(Icons.close, size: 14, color: Colors.grey[400]))
+                            : null,
+                      ),
+                      onChanged: (val) {
+                        if (!IndianStatesData.states.contains(val)) {
+                          setState(() { _selectedState = null; _selectedCity = null; });
+                        }
+                      },
+                    );
+                  },
+                  optionsViewBuilder: (context, onSelected, options) {
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(8),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 200),
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            itemBuilder: (context, index) {
+                              final option = options.elementAt(index);
+                              return InkWell(
+                                onTap: () => onSelected(option),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  child: Text(option, style: const TextStyle(fontSize: 12)),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildFieldLabel('City'),
+              Container(
+                decoration: BoxDecoration(
+                  color: _selectedState == null ? Colors.grey.shade100 : Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                child: Autocomplete<String>(
+                  key: ValueKey(_selectedState),
+                  initialValue: TextEditingValue(text: _selectedCity ?? ''),
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (_selectedState == null) return const Iterable<String>.empty();
+                    if (textEditingValue.text.isEmpty) return cities;
+                    return cities.where((c) =>
+                        c.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                  },
+                  onSelected: (String selection) {
+                    setState(() { _selectedCity = selection; });
+                  },
+                  fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                    return TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      enabled: _selectedState != null,
+                      style: const TextStyle(fontSize: 12, color: Colors.black87),
+                      decoration: InputDecoration(
+                        hintText: _selectedState == null ? 'Select state' : 'Search city...',
+                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 11),
+                        border: InputBorder.none,
+                        icon: Icon(Icons.location_city_outlined, color: Colors.grey[500], size: 16),
+                        suffixIcon: controller.text.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  controller.clear();
+                                  setState(() { _selectedCity = null; });
+                                },
+                                child: Icon(Icons.close, size: 14, color: Colors.grey[400]))
+                            : null,
+                      ),
+                      onChanged: (val) {
+                        if (!cities.contains(val)) setState(() { _selectedCity = null; });
+                      },
+                    );
+                  },
+                  optionsViewBuilder: (context, onSelected, options) {
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(8),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 200),
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            itemBuilder: (context, index) {
+                              final option = options.elementAt(index);
+                              return InkWell(
+                                onTap: () => onSelected(option),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  child: Text(option, style: const TextStyle(fontSize: 12)),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -340,32 +340,84 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                             children: [
                               const Text('State', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
                               const SizedBox(height: 4),
-                              GestureDetector(
-                                onTap: () async {
-                                  final picked = await showDialog<String>(
-                                    context: context,
-                                    builder: (_) => _BloodStatePickerDialog(selectedState: _selectedState),
-                                  );
-                                  if (picked != null) {
-                                    setState(() { _selectedState = picked; _selectedCity = null; });
+                              Autocomplete<String>(
+                                initialValue: TextEditingValue(text: _selectedState ?? ''),
+                                optionsBuilder: (TextEditingValue textEditingValue) {
+                                  if (textEditingValue.text == '') {
+                                    return IndianStatesData.states;
                                   }
+                                  return IndianStatesData.states.where((String option) {
+                                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                                  });
                                 },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: Colors.grey[300]!),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.map_outlined, color: Colors.grey[500], size: 18),
-                                      const SizedBox(width: 6),
-                                      Expanded(child: Text(_selectedState ?? 'Select State', style: TextStyle(fontSize: 12, color: _selectedState != null ? Colors.black87 : Colors.grey[400]), overflow: TextOverflow.ellipsis)),
-                                      Icon(Icons.keyboard_arrow_down, color: Colors.grey[500], size: 16),
-                                    ],
-                                  ),
-                                ),
+                                onSelected: (String selection) {
+                                  setState(() {
+                                    _selectedState = selection;
+                                    _selectedCity = null;
+                                  });
+                                },
+                                fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                                  // Keep controller in sync with prefill/state updates
+                                  if (_selectedState != null && controller.text != _selectedState && !focusNode.hasFocus) {
+                                    controller.text = _selectedState!;
+                                  }
+                                  return TextFormField(
+                                    controller: controller,
+                                    focusNode: focusNode,
+                                    style: const TextStyle(fontSize: 12),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      hintText: 'Select State',
+                                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12),
+                                      prefixIcon: Icon(Icons.map_outlined, color: Colors.grey[500], size: 18),
+                                      suffixIcon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[500], size: 16),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.grey[300]!),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.grey[300]!),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.red[700]!, width: 1.5),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                    ),
+                                    onChanged: (val) {
+                                      _selectedState = val;
+                                      _selectedCity = null;
+                                    },
+                                  );
+                                },
+                                optionsViewBuilder: (context, onSelected, options) {
+                                  return Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Material(
+                                      elevation: 4.0,
+                                      child: SizedBox(
+                                        height: 200.0,
+                                        width: MediaQuery.of(context).size.width / 2 - 20,
+                                        child: ListView.builder(
+                                          padding: const EdgeInsets.all(0),
+                                          itemCount: options.length,
+                                          itemBuilder: (BuildContext context, int index) {
+                                            final String option = options.elementAt(index);
+                                            return GestureDetector(
+                                              onTap: () => onSelected(option),
+                                              child: ListTile(
+                                                title: Text(option, style: const TextStyle(fontSize: 12)),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -377,31 +429,84 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                             children: [
                               const Text('City *', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
                               const SizedBox(height: 4),
-                              GestureDetector(
-                                onTap: () async {
-                                  if (_selectedState == null) { ToastUtils.showError('Please select state first'); return; }
-                                  final picked = await showDialog<String>(
-                                    context: context,
-                                    builder: (_) => _BloodCityPickerDialog(state: _selectedState!, selectedCity: _selectedCity),
-                                  );
-                                  if (picked != null) setState(() => _selectedCity = picked);
+                              Autocomplete<String>(
+                                initialValue: TextEditingValue(text: _selectedCity ?? ''),
+                                optionsBuilder: (TextEditingValue textEditingValue) {
+                                  if (_selectedState == null || _selectedState!.isEmpty) return const Iterable<String>.empty();
+                                  final cities = IndianStatesData.getCitiesForState(_selectedState!);
+                                  if (textEditingValue.text == '') {
+                                    return cities;
+                                  }
+                                  return cities.where((String option) {
+                                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                                  });
                                 },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(color: _selectedCity == null ? Colors.grey[300]! : Colors.red[300]!),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.location_city, color: Colors.grey[500], size: 18),
-                                      const SizedBox(width: 6),
-                                      Expanded(child: Text(_selectedCity ?? 'Select City', style: TextStyle(fontSize: 12, color: _selectedCity != null ? Colors.black87 : Colors.grey[400]), overflow: TextOverflow.ellipsis)),
-                                      Icon(Icons.keyboard_arrow_down, color: Colors.grey[500], size: 16),
-                                    ],
-                                  ),
-                                ),
+                                onSelected: (String selection) {
+                                  setState(() {
+                                    _selectedCity = selection;
+                                  });
+                                },
+                                fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                                  // Keep controller in sync
+                                  if (_selectedCity != null && controller.text != _selectedCity && !focusNode.hasFocus) {
+                                    controller.text = _selectedCity!;
+                                  }
+                                  return TextFormField(
+                                    controller: controller,
+                                    focusNode: focusNode,
+                                    style: const TextStyle(fontSize: 12),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      hintText: 'Select City',
+                                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12),
+                                      prefixIcon: Icon(Icons.location_city, color: Colors.grey[500], size: 18),
+                                      suffixIcon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[500], size: 16),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: _selectedCity == null || _selectedCity!.isEmpty ? Colors.grey[300]! : Colors.red[300]!),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: _selectedCity == null || _selectedCity!.isEmpty ? Colors.grey[300]! : Colors.red[300]!),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Colors.red[700]!, width: 1.5),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                    ),
+                                    onChanged: (val) {
+                                      _selectedCity = val;
+                                    },
+                                  );
+                                },
+                                optionsViewBuilder: (context, onSelected, options) {
+                                  return Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Material(
+                                      elevation: 4.0,
+                                      child: SizedBox(
+                                        height: 200.0,
+                                        width: MediaQuery.of(context).size.width / 2 - 20,
+                                        child: ListView.builder(
+                                          padding: const EdgeInsets.all(0),
+                                          itemCount: options.length,
+                                          itemBuilder: (BuildContext context, int index) {
+                                            final String option = options.elementAt(index);
+                                            return GestureDetector(
+                                              onTap: () => onSelected(option),
+                                              child: ListTile(
+                                                title: Text(option, style: const TextStyle(fontSize: 12)),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -592,73 +697,3 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
     );
   }
 }
-
-class _BloodStatePickerDialog extends StatefulWidget {
-  final String? selectedState;
-  const _BloodStatePickerDialog({this.selectedState});
-  @override
-  State<_BloodStatePickerDialog> createState() => _BloodStatePickerDialogState();
-}
-class _BloodStatePickerDialogState extends State<_BloodStatePickerDialog> {
-  final _sc = TextEditingController();
-  List<String> _filtered = IndianStatesData.states;
-  @override
-  void dispose() { _sc.dispose(); super.dispose(); }
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select State', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-      contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      content: SizedBox(width: double.maxFinite, height: 400,
-        child: Column(children: [
-          TextField(controller: _sc, decoration: InputDecoration(hintText: 'Search state...', hintStyle: const TextStyle(fontSize: 12), prefixIcon: const Icon(Icons.search, size: 18), isDense: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
-            onChanged: (q) => setState(() { _filtered = IndianStatesData.states.where((s) => s.toLowerCase().contains(q.toLowerCase())).toList(); })),
-          const SizedBox(height: 8),
-          Expanded(child: ListView.builder(itemCount: _filtered.length, itemBuilder: (_, i) {
-            final s = _filtered[i];
-            return ListTile(dense: true, title: Text(s, style: const TextStyle(fontSize: 13)), selected: s == widget.selectedState, selectedTileColor: Colors.red[50], onTap: () => Navigator.pop(context, s));
-          })),
-        ]),
-      ),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel'))],
-    );
-  }
-}
-
-class _BloodCityPickerDialog extends StatefulWidget {
-  final String state;
-  final String? selectedCity;
-  const _BloodCityPickerDialog({required this.state, this.selectedCity});
-  @override
-  State<_BloodCityPickerDialog> createState() => _BloodCityPickerDialogState();
-}
-class _BloodCityPickerDialogState extends State<_BloodCityPickerDialog> {
-  final _sc = TextEditingController();
-  late List<String> _cities, _filtered;
-  @override
-  void initState() { super.initState(); _cities = IndianStatesData.getCitiesForState(widget.state); _filtered = _cities; }
-  @override
-  void dispose() { _sc.dispose(); super.dispose(); }
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Select City — ${widget.state}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-      contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      content: SizedBox(width: double.maxFinite, height: 400,
-        child: Column(children: [
-          TextField(controller: _sc, decoration: InputDecoration(hintText: 'Search city...', hintStyle: const TextStyle(fontSize: 12), prefixIcon: const Icon(Icons.search, size: 18), isDense: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
-            onChanged: (q) => setState(() { _filtered = _cities.where((c) => c.toLowerCase().contains(q.toLowerCase())).toList(); })),
-          const SizedBox(height: 8),
-          Expanded(child: _filtered.isEmpty
-            ? const Center(child: Text('No cities found', style: TextStyle(color: Colors.grey)))
-            : ListView.builder(itemCount: _filtered.length, itemBuilder: (_, i) {
-                final c = _filtered[i];
-                return ListTile(dense: true, title: Text(c, style: const TextStyle(fontSize: 13)), selected: c == widget.selectedCity, selectedTileColor: Colors.red[50], onTap: () => Navigator.pop(context, c));
-              })),
-        ]),
-      ),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel'))],
-    );
-  }
-}
-

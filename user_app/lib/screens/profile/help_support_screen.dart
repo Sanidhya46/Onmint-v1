@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../widgets/terms_privacy_dialog.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
+
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url)) {
+      debugPrint('Could not launch $urlString');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,22 +44,28 @@ class HelpSupportScreen extends StatelessWidget {
             _buildContactCard(
               icon: Icons.phone_outlined,
               title: 'Call Us',
-              subtitle: '+91 98765 43210',
-              onTap: () {},
+              subtitle: '+91 95654 43382',
+              onTap: () {
+                _launchUrl('tel:+919565443382');
+              },
             ),
             const SizedBox(height: 12),
             _buildContactCard(
               icon: Icons.email_outlined,
               title: 'Email Us',
-              subtitle: 'support@ourdeals.in',
-              onTap: () {},
+              subtitle: 'onmintofficial@gmail.com',
+              onTap: () {
+                _launchUrl('mailto:onmintofficial@gmail.com');
+              },
             ),
             const SizedBox(height: 12),
             _buildContactCard(
-              icon: Icons.chat_bubble_outline,
-              title: 'Live Chat',
-              subtitle: 'Start a conversation now',
-              onTap: () {},
+              icon: Icons.privacy_tip_outlined,
+              title: 'Privacy Policy',
+              subtitle: 'View our privacy policy',
+              onTap: () {
+                showTermsPrivacyDialog(context, isPrivacyPolicy: true);
+              },
             ),
           ],
         ),

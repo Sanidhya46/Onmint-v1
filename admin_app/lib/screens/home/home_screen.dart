@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:api_client/api_client.dart';
 import 'package:auth_service/auth_service.dart';
 import '../../config/app_colors.dart';
 import 'dashboard_screen.dart';
@@ -22,6 +24,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final _apiClient = OnMintApiClient();
+  int _pendingApprovalsCount = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPendingApprovalsCount();
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) => _fetchPendingApprovalsCount());
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchPendingApprovalsCount() async {
+    try {
+      final approvals = await _apiClient.admin.getPendingApprovals();
+      if (mounted) {
+        setState(() {
+          _pendingApprovalsCount = approvals.length;
+        });
+      }
+    } catch (e) {
+      // Ignore errors for background fetch
+    }
+  }
 
   final List<Widget> _screens = [
     const DashboardScreen(),
@@ -216,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.approval_outlined,
               title: 'Approvals',
               index: 1,
-              badge: '5',
+              badge: _pendingApprovalsCount > 0 ? '$_pendingApprovalsCount' : null,
             ),
             _buildDrawerItem(
               icon: Icons.people_outline,

@@ -19,6 +19,7 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
   int _totalRequests = 0;
   int _acceptedRequests = 0;
   int _completedRequests = 0;
+  bool _showAllRequests = false;
 
   @override
   void initState() {
@@ -108,30 +109,35 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
       backgroundColor: const Color(0xFFF5F5F5),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFFC62828)))
-          : Column(
-              children: [
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: _loadDashboard,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(user),
-                          const SizedBox(height: 10),
-                          _buildStatsRow(),
-                          const SizedBox(height: 12),
-                          _buildNewRequestsSection(),
-                          const SizedBox(height: 16),
-                        ],
+          : RefreshIndicator(
+              onRefresh: _loadDashboard,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHeader(user),
+                            const SizedBox(height: 10),
+                            _buildStatsRow(),
+                            const SizedBox(height: 12),
+                            _buildNewRequestsSection(),
+                            const Spacer(),
+                            _buildManageConsultationsCard(),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                _buildManageConsultationsCard(),
-                const SizedBox(height: 16),
-              ],
+                  );
+                }
+              ),
             ),
     );
   }
@@ -283,42 +289,50 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Text(
-                    'New Blood Requests',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 8),
-                  if (_requests.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFC62828),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${_requests.length}',
-                        style: const TextStyle(
-                            color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                ],
-              ),
-              TextButton(
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const BloodBankBookingsScreen()),
-                  );
-                  _loadDashboard();
-                },
-                child: const Text(
-                  'View All',
-                  style: TextStyle(color: Color(0xFFC62828), fontWeight: FontWeight.bold),
+              const Text(
+                'New Blood Requests',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF152238),
                 ),
               ),
+              const SizedBox(width: 8),
+              if (_requests.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_requests.length}',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Colors.red,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              const Spacer(),
+              if (_requests.length > 1)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showAllRequests = !_showAllRequests;
+                    });
+                  },
+                  child: Text(
+                    _showAllRequests ? 'View Less' : 'View All',
+                    style: const TextStyle(
+                      color: Color(0xFFC62828),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -344,7 +358,12 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
               ),
             )
           else
-            ..._requests.take(3).map((r) => _buildRequestCard(r)),
+            Column(
+              children: _requests
+                  .take(_showAllRequests ? _requests.length : 1)
+                  .map((r) => _buildRequestCard(r))
+                  .toList(),
+            ),
         ],
       ),
     );
@@ -479,7 +498,7 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
                         BloodRequestDetailsScreen(bookingId: bookingId),
                   ),
                 );
-                if (result == true) _loadDashboard();
+                _loadDashboard();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFC62828),

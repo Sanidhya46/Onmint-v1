@@ -30,7 +30,7 @@ class SocketService {
   bool get isConnected => _isConnected;
 
   /// Connect to Socket.IO server
-  void connect(String token, {String baseUrl = 'http://localhost:5000'}) {
+  void connect(String token, {String baseUrl = 'https://api.onmint.in'}) {
     if (_socket != null && _isConnected) {
       print('Socket already connected');
       return;

@@ -377,13 +377,17 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Manage Your\nConsultations Easily',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF152238),
-                            height: 1.3,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: const Text(
+                            'Manage Your\nConsultations Easily',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF152238),
+                              height: 1.3,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 6),

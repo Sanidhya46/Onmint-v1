@@ -164,375 +164,325 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    // Allocate 40% for top banner, 60% for bottom form
-    final topHeight = screenHeight * 0.40;
     final bottomHeight = screenHeight * 0.60;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final s = (bottomHeight / 480).clamp(0.8, 1.2);
 
     return Scaffold(
       backgroundColor: Colors.blue.shade50,
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          // ──── TOP: Image Banner ────
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: topHeight,
-            child: Image.asset(
-              'images/register_login/top_banner.jpeg',
-              width: double.infinity,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.blue.shade50,
-                  child: const Center(
-                    child: Text('Onmint', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF0033CC))),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // ──── BOTTOM: Form Container ────
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-            // Move up when keyboard appears
-            top: topHeight - bottomInset,
-            left: 0,
-            right: 0,
-            height: bottomHeight,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final formHeight = constraints.maxHeight;
-                // Calculate scale factor: decreased base height to 480 to slightly increase the size of all elements
-                final s = (formHeight / 480).clamp(0.0, 1.0);
-
-                return Padding(
-                  padding: EdgeInsets.only(left: 12 * s, right: 12 * s, bottom: 12 * s),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24 * s),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 20 * s,
-                          offset: Offset(0, 8 * s),
-                        )
-                      ],
+      resizeToAvoidBottomInset: true,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ──── TOP: Image Banner ────
+                    SizedBox(
+                      height: 180 * s,
+                      width: double.infinity,
+                      child: Image.asset(
+                        'assets/images/register_login/top_banner12.jpeg',
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(20 * s, 24 * s, 20 * s, 16 * s),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // ── Welcome Back Header ──
-                            Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(8 * s),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0033CC),
-                                    borderRadius: BorderRadius.circular(12 * s),
-                                  ),
-                                  child: Icon(Icons.login, color: Colors.white, size: 24 * s),
-                                ),
-                                SizedBox(width: 14 * s),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                    
+                    // ──── BOTTOM: Form Container ────
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 12 * s, right: 12 * s, bottom: 12 * s, top: 12 * s),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24 * s),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 20 * s,
+                                offset: Offset(0, 8 * s),
+                              )
+                            ],
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(20 * s, 24 * s, 20 * s, 12 * s),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // ── Welcome Back Header ──
+                                  Row(
                                     children: [
-                                      Text(
-                                        'Welcome Back!',
-                                        style: TextStyle(
-                                          fontSize: 20 * s,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
+                                      Container(
+                                        padding: EdgeInsets.all(8 * s),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF0033CC),
+                                          borderRadius: BorderRadius.circular(12 * s),
                                         ),
+                                        child: Icon(Icons.login, color: Colors.white, size: 24 * s),
                                       ),
-                                      SizedBox(height: 2 * s),
-                                      Text(
-                                        'Login to continue to Onmint',
-                                        style: TextStyle(
-                                          fontSize: 12 * s,
-                                          color: Colors.grey.shade600,
+                                      SizedBox(width: 14 * s),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Welcome Back!',
+                                              style: TextStyle(
+                                                fontSize: 20 * s,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            SizedBox(height: 2 * s),
+                                            Text(
+                                              'Login to access your vendor dashboard',
+                                              style: TextStyle(
+                                                fontSize: 12 * s,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                )
-                              ],
-                            ),
-                            SizedBox(height: 20 * s),
+                                  
+                                  SizedBox(height: 20 * s),
 
-                            // ── Mobile Number Field ──
-                            _buildTextField(
-                              controller: _phoneController,
-                              icon: Icons.call_outlined,
-                              label: 'Mobile Number',
-                              hint: 'Enter mobile number',
-                              keyboardType: TextInputType.phone,
-                              s: s,
-                              onChanged: (_) {
-                                if (_apiErrorMessage != null) {
-                                  setState(() => _apiErrorMessage = null);
-                                }
-                              },
-                              prefixWidget: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(width: 4 * s),
-                                  DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value: _selectedCountryCode,
-                                      items: _countryCodes.map((c) => DropdownMenuItem(
-                                        value: c,
-                                        child: Text(
-                                          c,
+                                  // ── Mobile Number Field ──
+                                  _buildTextField(
+                                    controller: _phoneController,
+                                    icon: Icons.phone_outlined,
+                                    label: 'Mobile Number',
+                                    hint: 'Enter your 10-digit number',
+                                    keyboardType: TextInputType.phone,
+                                    s: s,
+                                    prefixWidget: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.phone, color: Color(0xFF0033CC), size: 18),
+                                        SizedBox(width: 8 * s),
+                                        Text(
+                                          '+91',
                                           style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFF0033CC),
-                                            fontSize: 13 * s,
+                                            fontSize: 15 * s,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black87,
                                           ),
                                         ),
-                                      )).toList(),
-                                      onChanged: (v) => setState(() => _selectedCountryCode = v!),
-                                      icon: Icon(Icons.keyboard_arrow_down, size: 18 * s, color: Colors.grey),
+                                        const SizedBox(width: 4),
+                                        Container(
+                                          height: 16,
+                                          width: 1.5,
+                                          color: Colors.grey.shade300,
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ],
+                                    ),
+                                    validator: (val) {
+                                      if (val == null || val.isEmpty) return 'Phone number required';
+                                      if (val.length != 10) return 'Enter a valid 10-digit number';
+                                      return null;
+                                    },
+                                  ),
+                                  SizedBox(height: 16 * s),
+
+                                  // ── Password Field ──
+                                  _buildTextField(
+                                    controller: _passwordController,
+                                    icon: Icons.lock_outline,
+                                    label: 'Password',
+                                    hint: 'Enter your password',
+                                    obscureText: _obscurePassword,
+                                    s: s,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                        color: Colors.grey.shade600,
+                                        size: 20 * s,
+                                      ),
+                                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                    ),
+                                    validator: (val) {
+                                      if (val == null || val.isEmpty) return 'Password required';
+                                      return null;
+                                    },
+                                  ),
+                                  SizedBox(height: 12 * s),
+
+                                  // ── Remember Me & Forgot Password ──
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: Checkbox(
+                                              value: _rememberMe,
+                                              activeColor: const Color(0xFF0033CC),
+                                              onChanged: (val) => setState(() => _rememberMe = val ?? false),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'Remember me',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontSize: 12 * s,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          // TODO: Implement forgot password
+                                        },
+                                        child: Text(
+                                          'Forgot Password?',
+                                          style: TextStyle(
+                                            color: const Color(0xFF0033CC),
+                                            fontSize: 13 * s,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  
+                                  const Spacer(),
+                                  SizedBox(height: 16 * s),
+
+                                  // ── Login Button ──
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 46 * s,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF0033CC),
+                                        padding: EdgeInsets.zero,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12 * s),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                      onPressed: _isLoading ? null : _login,
+                                      child: _isLoading
+                                          ? SizedBox(
+                                              height: 20 * s,
+                                              width: 20 * s,
+                                              child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                            )
+                                          : Text(
+                                              'LOGIN',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15 * s,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 1.2,
+                                              ),
+                                            ),
                                     ),
                                   ),
-                                  SizedBox(width: 4 * s),
+                                  SizedBox(height: 16 * s),
+
+                                  // ── OR Divider ──
+                                  Row(
+                                    children: [
+                                      Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 16 * s),
+                                        child: Text(
+                                          'OR',
+                                          style: TextStyle(
+                                            color: Colors.grey.shade500,
+                                            fontSize: 13 * s,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
+                                    ],
+                                  ),
+                                  SizedBox(height: 14 * s),
+
+                                  // ── Sign Up Link ──
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Don\'t have an account? ',
+                                        style: TextStyle(color: Colors.grey.shade700, fontSize: 13 * s),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () => Navigator.pushReplacementNamed(context, '/register'),
+                                        child: Text(
+                                          'Sign Up',
+                                          style: TextStyle(
+                                            color: const Color(0xFF0033CC),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14 * s,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  // ── Decreased Gap Before Terms & Conditions ──
+                                  SizedBox(height: 8 * s),
+
+                                  // ── Terms & Privacy ──
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => showTermsPrivacyDialog(context, showAgreeButton: false),
+                                        child: Text(
+                                          'Terms & Conditions',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF0033CC),
+                                            fontSize: 12 * s,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        '  |  ',
+                                        style: TextStyle(color: Colors.grey.shade400, fontSize: 12 * s),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () => showTermsPrivacyDialog(context, isPrivacyPolicy: true, showAgreeButton: false),
+                                        child: Text(
+                                          'Privacy Policy',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF0033CC),
+                                            fontSize: 12 * s,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
-                              validator: (v) => v!.length != 10 ? 'Enter valid 10 digit number' : null,
                             ),
-                            SizedBox(height: 14 * s),
-
-                            // ── Password Field ──
-                            _buildTextField(
-                              controller: _passwordController,
-                              icon: Icons.lock_outline,
-                              label: 'Password',
-                              hint: 'Enter your password',
-                              obscureText: _obscurePassword,
-                              s: s,
-                              suffixWidget: GestureDetector(
-                                onTap: () => setState(() => _obscurePassword = !_obscurePassword),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12 * s),
-                                  child: Icon(
-                                    _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                    color: Colors.grey,
-                                    size: 20 * s,
-                                  ),
-                                ),
-                              ),
-                              validator: (v) => v!.isEmpty ? 'Required' : null,
-                            ),
-
-                            // ── Error Message ──
-                            if (_apiErrorMessage != null) ...[
-                              SizedBox(height: 12 * s),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 8 * s),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFEE2E2),
-                                  borderRadius: BorderRadius.circular(10 * s),
-                                  border: Border.all(color: const Color(0xFFFCA5A5), width: 0.8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.error_outline, color: const Color(0xFFDC2626), size: 18 * s),
-                                    SizedBox(width: 8 * s),
-                                    Expanded(
-                                      child: Text(
-                                        _apiErrorMessage!,
-                                        style: TextStyle(
-                                          fontSize: 12 * s,
-                                          color: const Color(0xFFDC2626),
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () => setState(() => _apiErrorMessage = null),
-                                      child: Icon(Icons.close, color: const Color(0xFFDC2626), size: 16 * s),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-
-                            SizedBox(height: 10 * s),
-
-                            // ── Remember Me & Forgot Password ──
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 16 * s,
-                                      height: 16 * s,
-                                      child: Checkbox(
-                                        value: _rememberMe,
-                                        onChanged: (v) => setState(() => _rememberMe = v!),
-                                        activeColor: const Color(0xFF0033CC),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4 * s)),
-                                        side: BorderSide(color: Colors.grey.shade400, width: 1.5),
-                                      ),
-                                    ),
-                                    SizedBox(width: 8 * s),
-                                    Text(
-                                      'Remember me',
-                                      style: TextStyle(
-                                        fontSize: 13 * s,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Text(
-                                    'Forgot Password?',
-                                    style: TextStyle(
-                                      color: const Color(0xFF0033CC),
-                                      fontSize: 13 * s,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 16 * s),
-
-                            // ── Login Button ──
-                            SizedBox(
-                              width: double.infinity,
-                              height: 46 * s,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0033CC),
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12 * s),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                onPressed: _isLoading ? null : _login,
-                                child: _isLoading
-                                    ? SizedBox(
-                                        height: 20 * s,
-                                        width: 20 * s,
-                                        child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                      )
-                                    : Text(
-                                        'LOGIN',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15 * s,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.2,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            SizedBox(height: 16 * s),
-
-                            // ── OR Divider ──
-                            Row(
-                              children: [
-                                Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 16 * s),
-                                  child: Text(
-                                    'OR',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade500,
-                                      fontSize: 13 * s,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
-                              ],
-                            ),
-                            SizedBox(height: 14 * s),
-
-                            // ── Sign Up Link ──
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Don\'t have an account? ',
-                                  style: TextStyle(color: Colors.grey.shade700, fontSize: 13 * s),
-                                ),
-                                GestureDetector(
-                                  onTap: () => Navigator.pushReplacementNamed(context, '/register'),
-                                  child: Text(
-                                    'Sign Up',
-                                    style: TextStyle(
-                                      color: const Color(0xFF0033CC),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14 * s,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            // ── Fixed Gap Before Terms & Conditions ──
-                            SizedBox(height: 16 * s),
-
-                            // ── Terms & Privacy ──
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => showTermsPrivacyDialog(context, showAgreeButton: false),
-                                  child: Text(
-                                    'Terms & Conditions',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF0033CC),
-                                      fontSize: 12 * s,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  '  |  ',
-                                  style: TextStyle(color: Colors.grey.shade400, fontSize: 12 * s),
-                                ),
-                                GestureDetector(
-                                  onTap: () => showTermsPrivacyDialog(context, isPrivacyPolicy: true, showAgreeButton: false),
-                                  child: Text(
-                                    'Privacy Policy',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF0033CC),
-                                      fontSize: 12 * s,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
