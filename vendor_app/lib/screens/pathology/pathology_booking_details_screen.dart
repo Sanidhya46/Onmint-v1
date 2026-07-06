@@ -54,11 +54,41 @@ class _PathologyBookingDetailsScreenState extends State<PathologyBookingDetailsS
 
   @override
   Widget build(BuildContext context) {
+    final patient = _booking?['patient'] ?? {};
+    final patientName = patient['fullName'] ?? patient['firstName'] != null
+        ? '${patient['firstName'] ?? ''} ${patient['lastName'] ?? ''}'.trim()
+        : 'Patient';
+    final isRequested = _currentStage == 'requested';
+
     return Scaffold(
+      backgroundColor: isRequested ? Colors.white : const Color(0xFFF7F9FD),
       appBar: AppBar(
-        title: const Text('Lab Test Details'),
-        backgroundColor: AppColors.pathology,
-        foregroundColor: Colors.white,
+        backgroundColor: isRequested ? AppColors.pathology : Colors.white,
+        foregroundColor: isRequested ? Colors.white : const Color(0xFF152238),
+        elevation: isRequested ? 0 : 0.5,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: isRequested ? Colors.white : const Color(0xFF152238)),
+          onPressed: () => Navigator.pop(context, true),
+        ),
+        title: isRequested 
+            ? const Text('Lab Test Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.handshake, color: Color(0xFF2E7D32), size: 18),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Connected with $patientName',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFF152238),
+                    ),
+                  ),
+                ],
+              ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

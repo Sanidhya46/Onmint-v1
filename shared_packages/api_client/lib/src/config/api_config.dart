@@ -1,10 +1,19 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class ApiConfig {
   // ════════════════════════════════════════════════════════════════════════════
   // 🔧 SIMPLE SETUP - CHANGE ONLY LINE 7 WHEN YOU HOST YOUR API
   // ════════════════════════════════════════════════════════════════════════════
   
   // Change this to your hosted API URL
-  static const String _baseUrlDev = 'https://api.onmint.in/api/v1';
+  static String get _baseUrlDev {
+    if (kIsWeb) return 'http://localhost:5000/api/v1';
+    try {
+      if (Platform.isAndroid) return 'http://10.0.2.2:5000/api/v1';
+    } catch (_) {}
+    return 'http://localhost:5000/api/v1';
+  }
   // Example: 'https://api.yourdomain.com/api/v1'
   
   // Change to true ONLY if you have separate dev & production environments
@@ -55,7 +64,7 @@ class ApiConfig {
   
   // Connection timeouts
   static const Duration connectTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 120);
+  static const Duration receiveTimeout = Duration(minutes: 5);
   
   // API endpoints
   static const String authEndpoint = '/auth';

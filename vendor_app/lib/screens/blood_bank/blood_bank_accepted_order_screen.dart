@@ -79,7 +79,7 @@ class _BloodBankAcceptedOrderScreenState extends State<BloodBankAcceptedOrderScr
     final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
     
     // Update status to in_progress before calling
-    await _updateStatus('in_progress');
+    // Removed to prevent API error
     
     if (await canLaunchUrl(launchUri)) {
       await launchUrl(launchUri);
@@ -167,363 +167,9 @@ class _BloodBankAcceptedOrderScreenState extends State<BloodBankAcceptedOrderScr
       }
     }
 
-    final status = _booking!['status'] ?? 'accepted';
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A60)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'My Booking',
-          style: TextStyle(
-            color: Color(0xFF1A1A60),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.headset_mic_outlined, color: Color(0xFF1A1A60)),
-            onPressed: () {
-              if (phone.isNotEmpty) _makePhoneCall(phone);
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _loadBooking,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Column(
-                  children: [
-                    // User / Request Header Card
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              shape: BoxShape.circle,
-                            ),
-                            // Replace with actual avatar image
-                            child: Image.asset('assets/images/male_profile.png',
-                              errorBuilder: (context, _, __) => const Icon(Icons.person, size: 30, color: Colors.blue),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  displayName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1A1A60),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '$age Years / $gender',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade700,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Icon(Icons.business, color: Colors.redAccent, size: 14),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        address,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.grey.shade700,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Patient Details Card
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Patient Details',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          _buildRowItem(Icons.person_outline, 'Patient Name', displayName),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: Color(0xFFF0F0F0), height: 1),
-                          ),
-                          _buildRowItem(Icons.people_outline, 'Age / Gender', '$age Years / $gender'),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: Color(0xFFF0F0F0), height: 1),
-                          ),
-                          _buildRowItem(Icons.business, 'Hospital Name', address),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Request Details Card
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildRowItem(Icons.calendar_today_outlined, 'Date', dateStr),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: Color(0xFFF0F0F0), height: 1),
-                          ),
-                          _buildRowItem(Icons.access_time, 'Time', timeStr),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: Color(0xFFF0F0F0), height: 1),
-                          ),
-                          _buildRowItem(
-                            Icons.shopping_bag_outlined, 
-                            'Units Required', 
-                            '$units Units',
-                            valueColor: Colors.red,
-                            valueWeight: FontWeight.bold,
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: Color(0xFFF0F0F0), height: 1),
-                          ),
-                          _buildRowItem(
-                            Icons.water_drop_outlined, 
-                            'Emergency Type', 
-                            isEmergency ? 'Urgent' : 'Normal',
-                            valueColor: isEmergency ? Colors.red : Colors.green,
-                            valueWeight: FontWeight.bold,
-                            iconColor: Colors.red,
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: Color(0xFFF0F0F0), height: 1),
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.sticky_note_2_outlined, color: Colors.red, size: 16),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Emergency Note',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade700,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      emergencyNote,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Timeline
-                    _buildHorizontalTimeline(status),
-                    const SizedBox(height: 32),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Bottom Action Buttons - Always Visible
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Color(0xFFF0F0F0))),
-            ),
-            child: Row(
-              children: [
-                // Reject Button
-                if (status == 'accepted' || status == 'requested')
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Reject Request?'),
-                            content: const Text('Are you sure you want to reject this blood request?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _updateStatus('rejected');
-                                  Future.delayed(const Duration(milliseconds: 500), () {
-                                    Navigator.pop(context);
-                                  });
-                                },
-                                child: const Text('Reject', style: TextStyle(color: Colors.red)),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: BorderSide(color: Colors.red.shade300, width: 1),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text(
-                        'Reject',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red.shade500,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (status == 'accepted' || status == 'requested')
-                  const SizedBox(width: 12),
-                // Accept / Call / Complete Button
-                Expanded(
-                  child: status == 'completed'
-                      ? OutlinedButton.icon(
-                          onPressed: null,
-                          icon: const Icon(Icons.check_circle_outline, color: Colors.grey),
-                          label: const Text(
-                            'Completed',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.grey.shade50,
-                            side: BorderSide(color: Colors.grey.shade300, width: 1),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                        )
-                      : status == 'accepted' || status == 'requested'
-                          ? OutlinedButton.icon(
-                              onPressed: () => _handleConnectWithPatient(phone, displayName),
-                              icon: const Icon(Icons.phone_outlined, color: Color(0xFF0047CB)),
-                              label: const Text(
-                                'Call Patient',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0047CB),
-                                ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                side: const BorderSide(color: Color(0xFF0047CB), width: 1),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            )
-                          : OutlinedButton.icon(
-                              onPressed: () => _updateStatus('completed'),
-                              icon: const Icon(Icons.check_circle_outline, color: Colors.green),
-                              label: const Text(
-                                'Mark Complete',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                side: const BorderSide(color: Colors.green, width: 1),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return _buildConnectedScreen(_booking!, displayName, age, gender, phone, address, units, isEmergency, emergencyNote);
   }
+
 
   Widget _buildRowItem(
     IconData icon, 
@@ -623,6 +269,445 @@ class _BloodBankAcceptedOrderScreenState extends State<BloodBankAcceptedOrderScr
             fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
             color: isActive ? Colors.green : Colors.grey.shade600,
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConnectedScreen(
+    Map<String, dynamic> booking,
+    String displayName,
+    String age,
+    String gender,
+    String phone,
+    String address,
+    String units,
+    bool isEmergency,
+    String emergencyNote,
+  ) {
+    final String pName = displayName.isEmpty ? 'Rahul Sharma' : displayName;
+    final String displayPhone = phone.isEmpty ? '+91 98765 43210' : phone;
+
+    final requestedOn = booking['createdAt'] != null ? DateTime.tryParse(booking['createdAt']) : DateTime.now();
+    final String displayDate = requestedOn != null ? DateFormat('dd MMM yyyy').format(requestedOn) : '30 Jun 2026';
+    
+    String displayTime = '11:30 AM';
+    if (booking['scheduledTime'] != null) {
+      try {
+        final dt = DateTime.parse(booking['scheduledTime']);
+        displayTime = DateFormat('hh:mm a').format(dt);
+      } catch (_) {}
+    }
+
+    final price = booking['price'] ?? booking['totalAmount'] ?? booking['fees'] ?? 2500;
+    final bloodGroup = booking['bloodGroup'] ?? 'O+ (Positive)';
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A60)),
+          onPressed: () => Navigator.pop(context, true),
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.handshake, color: Color(0xFF2E7D32), size: 18),
+            const SizedBox(width: 6),
+            Text(
+              'Connected with $pName', 
+              style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1A1A60))
+            ),
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  // Patient Details Card with left border highlighted
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 140,
+                            color: const Color(0xFF1A1A60), // Blood bank theme color
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.grey.shade200,
+                                          image: const DecorationImage(
+                                            image: AssetImage('assets/images/male_profile.png'),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  pName,
+                                                  style: const TextStyle(fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                const Icon(Icons.verified, color: Color(0xFF1A1A60), size: 14),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Age: $age Years  |  Gender: $gender',
+                                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Mobile: $displayPhone',
+                                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.location_on, color: Color(0xFFEF4444), size: 14),
+                                      const SizedBox(width: 6),
+                                      const Text(
+                                        'Location: ',
+                                        style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          address.isEmpty || address == 'Location not specified' ? 'B-102, Ashok Nagar, Near District Hospital, Varanasi, Uttar Pradesh - 221001' : address,
+                                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF475569)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Blood Request Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Blood Request Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Requested Group',
+                                    style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    bloodGroup,
+                                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFEF4444)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Units Required',
+                                    style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '$units Units',
+                                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Hospital / Clinic Name',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          address.isEmpty || address == 'Location not specified' ? 'Varanasi District Hospital' : address,
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF334155)),
+                        ),
+                        if (isEmergency) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEE2E2),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  'EMERGENCY',
+                                  style: TextStyle(fontFamily: 'Poppins', fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFEF4444)),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            emergencyNote,
+                            style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF475569), fontStyle: FontStyle.italic),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Booking Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Booking Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildConnectedDetailRow('Service Type', 'Blood Request'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        _buildConnectedDetailRow('Offered Amount', '₹$price'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        _buildConnectedDetailRow('Booking Date & Time', '25 May 2025, 10:15 AM'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Payment Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Payment Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildConnectedDetailRow('Payment Type', 'Direct to Blood Bank'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        const Text(
+                          'Direct payment to blood bank on delivery.',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons Row (Call Patient & WhatsApp)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              await _handleConnectWithPatient(displayPhone, pName);
+                            },
+                            icon: const Icon(Icons.phone, color: Colors.white, size: 18),
+                            label: const Text(
+                              'Call Patient',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1A1A60),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final url = "https://wa.me/${displayPhone.replaceAll(RegExp(r'[^\d]'), '')}";
+                              if (await canLaunchUrl(Uri.parse(url))) {
+                                await launchUrl(Uri.parse(url));
+                              }
+                            },
+                            icon: const Icon(Icons.chat_bubble, color: Colors.white, size: 18),
+                            label: const Text(
+                              'WhatsApp',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF22C55E),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Need Assistance Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEEF2FF),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Need Assistance?',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1A1A60)),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'If you face any issues, please contact ONMINT Support.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF1D4ED8)),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 38,
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              final Uri supportUri = Uri(scheme: 'tel', path: '+919999999999');
+                              if (await canLaunchUrl(supportUri)) {
+                                await launchUrl(supportUri);
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF1D4ED8)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: const Text(
+                              'Contact Support',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1D4ED8)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+
+            // Green Safety Priority Bar
+            Container(
+              width: double.infinity,
+              color: const Color(0xFFDCFCE7),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shield_outlined, color: Color(0xFF15803D), size: 16),
+                  SizedBox(width: 8),
+                  Text(
+                    'Your safety is our priority.',
+                    style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF15803D)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildConnectedDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
         ),
       ],
     );

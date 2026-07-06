@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
-import 'requests_screen.dart';
+import 'blood_bank_bookings_screen.dart';
 import 'stock_management_screen.dart';
 
 /// Blood Bank home screen - Main dashboard
@@ -134,7 +134,7 @@ class _BloodBankHomeScreenState extends State<BloodBankHomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const RequestsScreen(),
+                            builder: (context) => const BloodBankBookingsScreen(),
                           ),
                         );
                       },

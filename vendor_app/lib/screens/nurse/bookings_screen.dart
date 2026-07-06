@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:ui_components/ui_components.dart';
+import 'package:provider/provider.dart';
+import 'package:auth_service/auth_service.dart';
+import 'package:vendor_app/config/app_config.dart';
 import 'booking_details_screen_enhanced.dart';
 import 'active_booking_screen.dart';
+import 'fill_price_nurse_screen.dart';
+import '../booking/waiting_for_patient_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -92,7 +97,7 @@ class _BookingsScreenState extends State<BookingsScreen>
             final status = b['status']?.toString().toLowerCase() ?? '';
             if (status == 'requested' || status == 'pending') {
               _pendingBookings.add(b);
-            } else if (status == 'completed' || status == 'cancelled' || status == 'rejected') {
+            } else if (status == 'completed' || status == 'cancelled' || status == 'rejected' || status == 'accepted') {
               _completedBookings.add(b);
             } else {
               _inProgressBookings.add(b);
@@ -298,7 +303,40 @@ class _BookingsScreenState extends State<BookingsScreen>
         onTap: () async {
           Widget screen;
           if (statusRaw == 'requested' || statusRaw == 'pending') {
-            screen = BookingDetailsScreenEnhanced(bookingId: bookingId, bookingData: request);
+            final user = context.read<AuthProvider>().currentUser;
+            final userCity = user?.city?.trim().toLowerCase() ?? '';
+            final userState = user?.state?.trim().toLowerCase() ?? '';
+            
+            final bookingCity = request['city']?.toString().trim().toLowerCase() ?? '';
+            final bookingState = request['state']?.toString().trim().toLowerCase() ?? '';
+            
+            final cleanUserCity = userCity.replaceAll(RegExp(r'\s+'), '');
+            final cleanUserState = userState.replaceAll(RegExp(r'\s+'), '');
+            final cleanBookingCity = bookingCity.replaceAll(RegExp(r'\s+'), '');
+            final cleanBookingState = bookingState.replaceAll(RegExp(r'\s+'), '');
+
+            final isMatchingLocation = (cleanBookingCity.isEmpty && cleanBookingState.isEmpty) ||
+                (cleanUserCity.isNotEmpty && cleanUserState.isNotEmpty &&
+                 cleanBookingCity == cleanUserCity &&
+                 cleanBookingState == cleanUserState);
+
+            final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+            final offers = request['offers'] as List?;
+            bool hasOffered = request['hasOffered'] == true;
+            if (offers != null && currentUserId != null) {
+              hasOffered = hasOffered || offers.any((o) {
+                final vId = o['vendorId'];
+                return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+              });
+            }
+
+            if (AppConfig.useNewFlow && hasOffered) {
+              screen = WaitingForPatientScreen(bookingId: bookingId, bookingData: request);
+            } else if (AppConfig.useNewFlow && isMatchingLocation) {
+              screen = FillPriceNurseScreen(bookingId: bookingId, bookingData: request);
+            } else {
+              screen = BookingDetailsScreenEnhanced(bookingId: bookingId, bookingData: request);
+            }
           } else {
             screen = ActiveBookingScreen(bookingId: bookingId, bookingData: request);
           }

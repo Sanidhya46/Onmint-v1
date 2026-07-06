@@ -5,6 +5,8 @@ import 'package:auth_service/auth_service.dart';
 import 'package:user_app/data/indian_states_cities.dart';
 import 'package:user_app/screens/booking/lab_test_selection_screen.dart';
 import 'package:user_app/screens/booking/confirm_lab_test_booking_screen.dart';
+import 'package:user_app/screens/booking/confirm_lab_test_booking_screen_new.dart';
+import 'package:user_app/config/app_config.dart';
 
 class LabTestBookingScreen extends StatefulWidget {
   final Map<String, dynamic>? lab;
@@ -113,16 +115,27 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ConfirmLabTestBookingScreen(
-            address: _addressController.text,
-            contactName: _nameController.text,
-            phoneNumber: _phoneController.text,
-            preferredDate: _selectedDate!,
-            notes: _notesController.text,
-            selectedTests: _selectedTests,
-            city: _selectedCity ?? '',
-            state: _selectedState ?? '',
-          ),
+          builder: (context) => AppConfig.useNewFlow
+              ? ConfirmLabTestBookingScreenNew(
+                  address: _addressController.text,
+                  contactName: _nameController.text,
+                  phoneNumber: _phoneController.text,
+                  preferredDate: _selectedDate!,
+                  notes: _notesController.text,
+                  selectedTests: _selectedTests,
+                  city: _selectedCity ?? '',
+                  state: _selectedState ?? '',
+                )
+              : ConfirmLabTestBookingScreen(
+                  address: _addressController.text,
+                  contactName: _nameController.text,
+                  phoneNumber: _phoneController.text,
+                  preferredDate: _selectedDate!,
+                  notes: _notesController.text,
+                  selectedTests: _selectedTests,
+                  city: _selectedCity ?? '',
+                  state: _selectedState ?? '',
+                ),
         ),
       );
     }
@@ -278,6 +291,9 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
                                       });
                                     },
                                     fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                                      if (_selectedState != null && controller.text != _selectedState && !focusNode.hasFocus) {
+                                        controller.text = _selectedState!;
+                                      }
                                       return TextField(
                                         controller: controller,
                                         focusNode: focusNode,
@@ -364,6 +380,9 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
                                       setState(() { _selectedCity = selection; });
                                     },
                                     fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                                      if (_selectedCity != null && controller.text != _selectedCity && !focusNode.hasFocus) {
+                                        controller.text = _selectedCity!;
+                                      }
                                       return TextField(
                                         controller: controller,
                                         focusNode: focusNode,

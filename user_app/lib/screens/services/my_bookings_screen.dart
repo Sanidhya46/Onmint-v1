@@ -6,8 +6,10 @@ import '../bookings/booking_details_screen.dart';
 import '../booking/order_request_screen.dart';
 import '../booking/order_detail_file.dart';
 import '../booking/user_unified_tracking_screen.dart';
+import '../booking/connected_vendor_details_screen.dart';
 import '../booking/coming_soon_screen.dart';
 import '../bookings/pharmacist_order_tracking_screen.dart';
+import 'package:user_app/screens/booking/service_offers_screen.dart';
 
 class MyBookingsScreen extends StatefulWidget {
   const MyBookingsScreen({super.key});
@@ -703,16 +705,30 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> with SingleTickerPr
     return GestureDetector(
       onTap: () {
         if (status == 'requested' || status == 'pending') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => OrderRequestScreen(
-                bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? '',
-                bookingData: booking,
-                serviceType: serviceType,
+          final hasOffers = booking['offers'] is List && (booking['offers'] as List).isNotEmpty;
+          if (hasOffers) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ServiceOffersScreen(
+                  bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? '',
+                  serviceType: serviceType,
+                  bookingData: booking,
+                ),
               ),
-            ),
-          );
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OrderRequestScreen(
+                  bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? '',
+                  bookingData: booking,
+                  serviceType: serviceType,
+                ),
+              ),
+            );
+          }
           return;
         }
 

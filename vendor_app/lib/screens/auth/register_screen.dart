@@ -39,6 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // Step 1 Fields
   final _formKey1 = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _ageController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
@@ -228,6 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _lastNameController.dispose();
     _ageController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
@@ -421,10 +423,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'email': _emailController.text.trim(),
         'password': _passwordController.text,
         'role': backendRole,
-        'firstName': _nameController.text.trim().split(' ').first,
-        'lastName': _nameController.text.trim().split(' ').length > 1
-            ? _nameController.text.trim().split(' ').last
-            : '',
+        'firstName': _nameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
         'phone': '$_selectedCountryCode${_phoneController.text.trim()}',
         'city': _cityController.text.trim(),
         'state': _selectedState ?? '',
@@ -787,13 +787,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    _buildTextField(
-                                    controller: _nameController,
-                                    icon: Icons.person_outline,
-                                    label: 'Full Name',
-                                    hint: 'Enter your full name',
-                                    validator: (v) => v!.isEmpty ? 'Required' : null,
-                                  ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildTextField(
+                                            controller: _nameController,
+                                            icon: Icons.person_outline,
+                                            label: 'First Name',
+                                            hint: 'First name',
+                                            validator: (v) => v!.isEmpty ? 'Required' : null,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: _buildTextField(
+                                            controller: _lastNameController,
+                                            icon: Icons.person_outline,
+                                            label: 'Last Name',
+                                            hint: 'Last name',
+                                            validator: (v) => v!.isEmpty ? 'Required' : null,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   const SizedBox(height: 10),
 
                                   Row(

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import '../services/doctor_detail_screen.dart';
 import '../booking/confirm_doctor_booking_screen.dart';
+import '../booking/confirm_doctor_booking_screen_new.dart';
+import 'package:user_app/config/app_config.dart';
 
 class DoctorSummaryScreen extends StatefulWidget {
   final String categoryTitle;
@@ -60,10 +62,15 @@ class _DoctorSummaryScreenState extends State<DoctorSummaryScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ConfirmDoctorBookingScreen(
-          categoryTitle: widget.categoryTitle,
-          symptomName: widget.symptomName,
-        ),
+        builder: (context) => AppConfig.useNewFlow
+            ? ConfirmDoctorBookingScreenNew(
+                categoryTitle: widget.categoryTitle,
+                symptomName: widget.symptomName,
+              )
+            : ConfirmDoctorBookingScreen(
+                categoryTitle: widget.categoryTitle,
+                symptomName: widget.symptomName,
+              ),
       ),
     );
   }

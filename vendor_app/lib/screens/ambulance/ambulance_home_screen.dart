@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
 import 'ride_requests_screen.dart';
 import 'ride_details_screen.dart';
+import 'fill_price_ambulance_screen.dart';
+import '../booking/waiting_for_patient_screen.dart';
 
 /// Ambulance home screen - Main dashboard for ambulance drivers
 class AmbulanceHomeScreen extends StatefulWidget {
@@ -420,9 +422,20 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () async {
+          Widget targetScreen;
+          if (statusRaw == 'requested' || statusRaw == 'pending') {
+            final hasOffered = request['offers'] != null && (request['offers'] as List).any((offer) => offer['vendor'] == ApiClient.userId);
+            if (hasOffered) {
+              targetScreen = WaitingForPatientScreen(bookingId: bookingId, bookingData: request);
+            } else {
+              targetScreen = FillPriceAmbulanceScreen(bookingId: bookingId, bookingData: request);
+            }
+          } else {
+            targetScreen = RideDetailsScreen(rideId: bookingId);
+          }
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => RideDetailsScreen(rideId: bookingId)),
+            MaterialPageRoute(builder: (_) => targetScreen),
           );
           if (result == true) _loadDashboard();
         },

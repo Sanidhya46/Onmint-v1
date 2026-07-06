@@ -70,6 +70,19 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
     }
   }
 
+  String _getProfilePictureUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    final base = AppConfig.apiBaseUrl;
+    final uri = Uri.tryParse(base);
+    if (uri != null) {
+      final hostUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+      final cleanPath = path.startsWith('/') ? path : '/$path';
+      return '$hostUrl$cleanPath';
+    }
+    return path;
+  }
+
   void _viewReport() async {
     if (_booking!['report'] != null &&
         _booking!['report'].toString().isNotEmpty) {
@@ -369,16 +382,17 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
                   shape: BoxShape.circle,
-                  image: provider['profilePicture'] != null
-                      ? DecorationImage(
-                          image: NetworkImage(provider['profilePicture']),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
                 ),
-                child: provider['profilePicture'] == null
-                    ? const Icon(Icons.person, color: Colors.grey, size: 24)
-                    : null,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: (provider['profilePicture'] != null && provider['profilePicture'].toString().isNotEmpty)
+                      ? Image.network(
+                          _getProfilePictureUrl(provider['profilePicture'].toString()),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.grey, size: 24),
+                        )
+                      : const Icon(Icons.person, color: Colors.grey, size: 24),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -463,9 +477,9 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
                             child: Text(
                               locationText,
                               style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade600,
-                              ),
+                                  fontSize: 11,
+                                  color: Colors.grey.shade600,
+                                ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -479,17 +493,29 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildCircleAction(Icons.call, 'Call', () {
-                    if (providerPhone != null) {
-                      _makePhoneCall(providerPhone.toString());
-                    }
-                  }),
+                  _buildCircleAction(
+                    Icons.call,
+                    'Call',
+                    () {
+                      if (providerPhone != null) {
+                        _makePhoneCall(providerPhone.toString());
+                      }
+                    },
+                    iconColor: const Color(0xFF0047CB),
+                    bgColor: Colors.white,
+                  ),
                   const SizedBox(width: 8),
-                  _buildCircleAction(Icons.chat, 'Chat', () {
-                    if (providerPhone != null) {
-                      _openChat(providerPhone.toString());
-                    }
-                  }),
+                  _buildCircleAction(
+                    Icons.chat,
+                    'WhatsApp',
+                    () {
+                      if (providerPhone != null) {
+                        _openChat(providerPhone.toString());
+                      }
+                    },
+                    iconColor: const Color(0xFF22C55E),
+                    bgColor: const Color(0xFFF0FDF4),
+                  ),
                 ],
               )
             ],
@@ -499,7 +525,8 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
     );
   }
 
-  Widget _buildCircleAction(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildCircleAction(IconData icon, String label, VoidCallback onTap,
+      {Color? iconColor, Color? bgColor}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -508,9 +535,9 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-                color: Colors.white,
+                color: bgColor ?? Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: bgColor != null ? bgColor.withOpacity(0.5) : Colors.grey.shade200),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.03),
@@ -518,7 +545,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
                     offset: const Offset(0, 2),
                   )
                 ]),
-            child: Icon(icon, color: const Color(0xFF0047CB), size: 20),
+            child: Icon(icon, color: iconColor ?? const Color(0xFF0047CB), size: 20),
           ),
           const SizedBox(height: 4),
           Text(

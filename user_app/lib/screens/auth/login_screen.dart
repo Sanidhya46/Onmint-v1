@@ -399,7 +399,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderSide: const BorderSide(color: Color(0xFF0D6EFD), width: 1.5),
               ),
               isDense: true,
-              contentPadding: EdgeInsets.symmetric(vertical: 12 * s, horizontal: 12 * s),
+              contentPadding: EdgeInsets.symmetric(vertical: 16 * s, horizontal: 12 * s),
               prefixIcon: Padding(
                 padding: EdgeInsets.only(left: 14 * s, right: 8 * s),
                 child: Icon(icon, color: const Color(0xFF0D6EFD), size: 18 * s),

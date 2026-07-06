@@ -310,142 +310,62 @@ class _ConfirmAmbulanceBookingScreenState
 
                 const SizedBox(height: 12),
 
-                // Payment Details Card
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.credit_card,
-                                color: Colors.red[700], size: 20),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Payment Details',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
+                // Get Help Instantly Card
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to Help & Support
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
-                        const SizedBox(height: 12),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.red[200]!),
-                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Icon(Icons.headset_mic_outlined, color: Colors.blue[900], size: 24),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Total Amount',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 11),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Service Fee (Non-Refundable)',
-                                    style: TextStyle(
-                                        color: Colors.grey[600], fontSize: 9),
-                                  ),
-                                ],
+                              Text(
+                                'Get Help Instantly',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.blue[900],
+                                ),
                               ),
                               const Text(
-                                'Rs. 799',
+                                "Contact Support: We're here to help you.",
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
+                                  fontFamily: 'Poppins',
+                                  fontSize: 11,
+                                  color: Colors.grey,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Select Payment Method',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildPaymentOption(
-                          id: 'upi',
-                          title: 'UPI',
-                          icon: Icons.account_balance_wallet,
-                        ),
-                        _buildPaymentOption(
-                          id: 'card',
-                          title: 'Debit / Credit Card',
-                          icon: Icons.credit_card,
-                          trailingIcon: true,
-                        ),
-                        _buildPaymentOption(
-                          id: 'bank',
-                          title: 'Bank Transfer',
-                          icon: Icons.account_balance,
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.green[50],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.verified_user,
-                                  color: Colors.green[600], size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '100% Secure Payment',
-                                      style: TextStyle(
-                                          color: Colors.green[800],
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 11),
-                                    ),
-                                    Text(
-                                      'Your payment information is safe and encrypted',
-                                      style: TextStyle(
-                                          color: Colors.green[700],
-                                          fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Icon(Icons.lock_outline,
-                                  color: Colors.green[600], size: 16),
-                            ],
-                          ),
-                        ),
+                        Icon(Icons.chevron_right, color: Colors.blue[900], size: 24),
                       ],
                     ),
                   ),
@@ -500,77 +420,5 @@ class _ConfirmAmbulanceBookingScreenState
     );
   }
 
-  Widget _buildPaymentOption({
-    required String id,
-    required String title,
-    required IconData icon,
-    bool trailingIcon = false,
-  }) {
-    final isSelected = _selectedPayment == id;
 
-    return GestureDetector(
-      onTap: () => setState(() => _selectedPayment = id),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          border:
-              Border.all(color: isSelected ? Colors.red : Colors.grey[200]!),
-          borderRadius: BorderRadius.circular(10),
-          color: isSelected ? Colors.red[50] : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? Colors.red : Colors.grey[400]!,
-                  width: isSelected ? 5 : 1,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Icon(icon, color: Colors.grey[700], size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 11,
-                    color: Colors.black87),
-              ),
-            ),
-            if (trailingIcon)
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 16,
-                    color: Colors.blue[800],
-                    alignment: Alignment.center,
-                    child: const Text('VISA',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(width: 4),
-                  Container(
-                    width: 28,
-                    height: 16,
-                    decoration: BoxDecoration(
-                        color: Colors.orange[400],
-                        borderRadius: BorderRadius.circular(2)),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 }

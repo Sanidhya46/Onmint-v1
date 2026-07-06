@@ -103,8 +103,13 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F8FB),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF4F8FB),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
@@ -295,140 +300,62 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Payment Details Card
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                // Get Help Instantly Card
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to Help & Support
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
                       children: [
-                        Row(
-                          children: [
-                            Icon(Icons.credit_card,
-                                color: Colors.blue[900], size: 18),
-                            const SizedBox(width: 6),
-                            const Text(
-                              'Payment Details',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.blue[200]!),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Total Amount',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 11),
-                                  ),
-                                  Text(
-                                    'Service Fee (Non-Refundable)',
-                                    style: TextStyle(
-                                        color: Colors.grey[600], fontSize: 9),
-                                  ),
-                                ],
-                              ),
-                              const Text(
-                                'Rs. 499',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Select Payment Method',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildPaymentOption(
-                          id: 'upi',
-                          title: 'UPI',
-                          icon: Icons.account_balance_wallet,
-                        ),
-                        _buildPaymentOption(
-                          id: 'card',
-                          title: 'Debit / Credit Card',
-                          icon: Icons.credit_card,
-                          trailingIcon: true,
-                        ),
-                        _buildPaymentOption(
-                          id: 'bank',
-                          title: 'Bank Transfer',
-                          icon: Icons.account_balance,
-                        ),
-                        const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.green[50],
-                            borderRadius: BorderRadius.circular(6),
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Row(
+                          child: Icon(Icons.headset_mic_outlined, color: Colors.blue[900], size: 24),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.verified_user,
-                                  color: Colors.green[600], size: 16),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '100% Secure Payment',
-                                      style: TextStyle(
-                                          color: Colors.green[800],
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10),
-                                    ),
-                                    Text(
-                                      'Your payment information is safe and encrypted',
-                                      style: TextStyle(
-                                          color: Colors.green[700],
-                                          fontSize: 9),
-                                    ),
-                                  ],
+                              Text(
+                                'Get Help Instantly',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.blue[900],
                                 ),
                               ),
-                              Icon(Icons.lock_outline,
-                                  color: Colors.green[600], size: 14),
+                              const Text(
+                                "Contact Support: We're here to help you.",
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
+                              ),
                             ],
                           ),
                         ),
+                        Icon(Icons.chevron_right, color: Colors.blue[900], size: 24),
                       ],
                     ),
                   ),
@@ -439,7 +366,7 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildSummaryRow(IconData icon, String label, String value,
@@ -480,75 +407,4 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
     );
   }
 
-  Widget _buildPaymentOption({
-    required String id,
-    required String title,
-    required IconData icon,
-    bool trailingIcon = false,
-  }) {
-    final isSelected = _selectedPayment == id;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedPayment = id),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          border:
-              Border.all(color: isSelected ? Colors.blue : Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(8),
-          color: isSelected ? Colors.blue[50] : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? Colors.blue : Colors.grey[400]!,
-                  width: isSelected ? 4 : 1,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Icon(icon, color: Colors.blue[900], size: 16), // Dark Blue Icon
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
-              ),
-            ),
-            if (trailingIcon)
-              Row(
-                children: [
-                  Container(
-                    width: 24,
-                    height: 14,
-                    color: Colors.blue[800],
-                    alignment: Alignment.center,
-                    child: const Text('VISA',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 6,
-                            fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(width: 4),
-                  Container(
-                    width: 24,
-                    height: 14,
-                    decoration: BoxDecoration(
-                        color: Colors.orange[200],
-                        borderRadius: BorderRadius.circular(2)),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 }

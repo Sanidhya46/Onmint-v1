@@ -1,9 +1,22 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppConfig {
   static const String appName = 'OnMint Vendor';
-  static const String apiBaseUrl = 'https://api.onmint.in/api/v1';
+  
+  static String get apiBaseUrl {
+    if (kIsWeb) return 'http://localhost:5000/api/v1';
+    try {
+      if (Platform.isAndroid) return 'http://10.0.2.2:5000/api/v1';
+    } catch (_) {}
+    return 'http://localhost:5000/api/v1';
+  }
+
+  // Toggle for new UI changes
+  static const bool useNewFlow = true;
+
   static const bool isDevelopmentMode = true;
   
   // Vendor roles

@@ -7,6 +7,9 @@ import '../booking/user_unified_tracking_screen.dart';
 import 'pharmacist_order_tracking_screen.dart';
 import '../booking/order_request_screen.dart';
 import '../booking/order_detail_file.dart';
+import '../booking/service_offers_screen.dart';
+import '../booking/connected_vendor_details_screen.dart';
+import 'package:user_app/config/app_config.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -72,9 +75,11 @@ class _BookingsScreenState extends State<BookingsScreen>
 
           for (var b in _allBookings) {
             final status = b['status']?.toString().toLowerCase() ?? '';
-            if (status == 'requested' || status == 'pending' || status == 'accepted') {
+            if (status == 'cancelled' || status == 'rejected' || status == 'expired') {
+              continue; // Do not show cancelled bookings
+            } else if (status == 'requested' || status == 'pending') {
               _pendingBookings.add(b);
-            } else if (status == 'completed' || status == 'cancelled' || status == 'rejected' || status == 'expired') {
+            } else if (status == 'completed') {
               _completedBookings.add(b);
             } else {
               _inProgressBookings.add(b);
@@ -108,16 +113,39 @@ class _BookingsScreenState extends State<BookingsScreen>
           '/pharmacist-tracking?id=$bookingId'
         ).then((_) => _loadBookings());
       } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OrderRequestScreen(
-              bookingId: bookingId,
-              bookingData: request,
-              serviceType: serviceType,
+        final hasOffers = request['offers'] is List && (request['offers'] as List).isNotEmpty;
+        final isSupportedService = serviceType.toLowerCase() == 'nurse' || 
+                                   serviceType.toLowerCase() == 'labtest' || 
+                                   serviceType.toLowerCase() == 'pathology' ||
+                                   serviceType.toLowerCase() == 'doctor' ||
+                                   serviceType.toLowerCase() == 'consultation' ||
+                                   serviceType.toLowerCase() == 'ambulance' ||
+                                   serviceType.toLowerCase() == 'bloodbank' ||
+                                   serviceType.toLowerCase() == 'blood bank';
+
+        if (AppConfig.useNewFlow && isSupportedService && hasOffers) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ServiceOffersScreen(
+                bookingId: bookingId,
+                serviceType: serviceType,
+                bookingData: request,
+              ),
             ),
-          ),
-        ).then((_) => _loadBookings());
+          ).then((_) => _loadBookings());
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderRequestScreen(
+                bookingId: bookingId,
+                bookingData: request,
+                serviceType: serviceType,
+              ),
+            ),
+          ).then((_) => _loadBookings());
+        }
       }
     } else {
       if (isPharmacy) {
@@ -126,7 +154,24 @@ class _BookingsScreenState extends State<BookingsScreen>
           '/pharmacist-tracking?id=$bookingId'
         ).then((_) => _loadBookings());
       } else {
-        if (serviceType.toLowerCase() == 'doctor' || serviceType.toLowerCase() == 'consultation') {
+        final isVendorService = serviceType.toLowerCase() == 'nurse' || 
+                             serviceType.toLowerCase() == 'labtest' || 
+                             serviceType.toLowerCase() == 'pathology' ||
+                             serviceType.toLowerCase() == 'ambulance' ||
+                             serviceType.toLowerCase() == 'bloodbank';
+        final isConnectedState = status == 'accepted' || status == 'on_the_way' || status == 'in_progress';
+
+        if (AppConfig.useNewFlow && isVendorService && isConnectedState) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ConnectedVendorDetailsScreen(
+                bookingId: bookingId,
+                bookingData: request,
+              ),
+            ),
+          ).then((_) => _loadBookings());
+        } else if (serviceType.toLowerCase() == 'doctor' || serviceType.toLowerCase() == 'consultation') {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -307,10 +352,16 @@ class _BookingsScreenState extends State<BookingsScreen>
       statusColor = Colors.orange;
       statusLabel = 'Approve';
     } else if (statusRaw == 'requested' || statusRaw == 'pending') {
-      statusColor = Colors.orange;
-      statusLabel = 'Pending';
+      final offersList = request['offers'];
+      if (offersList is List && offersList.isNotEmpty) {
+        statusColor = Colors.orange;
+        statusLabel = 'Offer Received';
+      } else {
+        statusColor = Colors.orange;
+        statusLabel = 'Pending';
+      }
     } else if (statusRaw == 'accepted') {
-      statusColor = Colors.orange;
+      statusColor = const Color(0xFF1565C0);
       statusLabel = 'Accepted';
     } else if (statusRaw == 'completed') {
       statusColor = Colors.green;

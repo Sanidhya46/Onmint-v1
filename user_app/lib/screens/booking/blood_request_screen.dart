@@ -123,6 +123,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final canPop = Navigator.canPop(context);
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(

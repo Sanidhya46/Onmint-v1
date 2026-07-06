@@ -284,12 +284,6 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.blueGrey.shade800,
-            image: widget.doctorImage != null &&
-                    widget.doctorImage!.startsWith('http')
-                ? DecorationImage(
-                    image: NetworkImage(widget.doctorImage!),
-                    fit: BoxFit.cover)
-                : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.green.withOpacity(0.3),
@@ -298,10 +292,16 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
               ),
             ],
           ),
-          child: widget.doctorImage == null ||
-                  !widget.doctorImage!.startsWith('http')
-              ? const Icon(Icons.person, size: 80, color: Colors.white38)
-              : null,
+          child: widget.doctorImage != null && widget.doctorImage!.startsWith('http')
+              ? ClipOval(
+                  child: Image.network(
+                    widget.doctorImage!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.person, color: Colors.white38, size: 80),
+                  ),
+                )
+              : const Icon(Icons.person, color: Colors.white38, size: 80),
         ),
         const SizedBox(height: 16),
         Text(widget.doctorName,
@@ -355,17 +355,17 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.blueGrey.shade800,
-            image: widget.doctorImage != null &&
-                    widget.doctorImage!.startsWith('http')
-                ? DecorationImage(
-                    image: NetworkImage(widget.doctorImage!),
-                    fit: BoxFit.cover)
-                : null,
           ),
-          child: widget.doctorImage == null ||
-                  !widget.doctorImage!.startsWith('http')
-              ? const Icon(Icons.person, size: 80, color: Colors.white38)
-              : null,
+          child: widget.doctorImage != null && widget.doctorImage!.startsWith('http')
+              ? ClipOval(
+                  child: Image.network(
+                    widget.doctorImage!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.person, size: 80, color: Colors.white38),
+                  ),
+                )
+              : const Icon(Icons.person, size: 80, color: Colors.white38),
         ),
         const SizedBox(height: 16),
         Text(widget.doctorName,

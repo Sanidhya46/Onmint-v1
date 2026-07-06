@@ -43,6 +43,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                 .toList() ?? [];
         _pendingAppointments = allBookings.where((b) {
           final s = b.status?.toLowerCase() ?? '';
+          if (s == 'offer_send' || s == 'offer_sent') return false;
           return s == 'requested' || s == 'pending';
         }).toList();
         _isLoading = false;

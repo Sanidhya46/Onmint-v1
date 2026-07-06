@@ -70,6 +70,33 @@ class _MedicineDetailsScreenState extends State<MedicineDetailsScreen> {
     final discount = medicine['discount'] ?? 0;
     final originalPrice = discount > 0 ? price / (1 - discount / 100) : price;
 
+    String? imageUrl;
+    if (medicine['imagesSigned'] != null &&
+        medicine['imagesSigned'] is List &&
+        medicine['imagesSigned'].isNotEmpty) {
+      imageUrl = medicine['imagesSigned'][0];
+    } else if (medicine['imageUrlSigned'] != null && 
+        medicine['imageUrlSigned'].toString().isNotEmpty) {
+      imageUrl = medicine['imageUrlSigned'];
+    }
+
+    if (imageUrl == null || imageUrl.isEmpty) {
+      if (medicine['images'] != null &&
+          medicine['images'] is List &&
+          medicine['images'].isNotEmpty) {
+        imageUrl = medicine['images'][0];
+      } else if (medicine['imageUrl'] != null && 
+          medicine['imageUrl'].toString().isNotEmpty) {
+        imageUrl = medicine['imageUrl'];
+      }
+    }
+
+    if (imageUrl != null && imageUrl.startsWith('/images/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
+    } else if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Medicine Details'),
@@ -129,10 +156,9 @@ class _MedicineDetailsScreenState extends State<MedicineDetailsScreen> {
                     height: 300,
                     width: double.infinity,
                     color: AppColors.pharmacy.withOpacity(0.1),
-                    child: medicine['images'] != null &&
-                            medicine['images'].isNotEmpty
+                    child: imageUrl != null && imageUrl.isNotEmpty
                         ? Image.network(
-                            medicine['images'][0],
+                            imageUrl,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
                               return const Center(
@@ -394,7 +420,7 @@ class _MedicineDetailsScreenState extends State<MedicineDetailsScreen> {
                                 medicine['_id'] ?? medicine['id'],
                                 medicine['name'],
                                 price,
-                                medicine['images']?[0],
+                                imageUrl,
                               );
                             }
                             // Removed SnackBar notification

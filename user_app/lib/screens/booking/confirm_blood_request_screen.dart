@@ -82,8 +82,13 @@ class _ConfirmBloodRequestScreenState extends State<ConfirmBloodRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
@@ -181,14 +186,6 @@ class _ConfirmBloodRequestScreenState extends State<ConfirmBloodRequestScreen> {
                     color: Colors.red[50],
                     alignment: Alignment.center,
                     child: const Text('Banner Missing', style: TextStyle(color: Colors.red)),
-                  ),
-                ),
-                Positioned(
-                  top: MediaQuery.of(context).padding.top > 0 ? MediaQuery.of(context).padding.top - 5 : 10,
-                  left: 10,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 24),
-                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
               ],
@@ -405,7 +402,7 @@ class _ConfirmBloodRequestScreenState extends State<ConfirmBloodRequestScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildSummaryRow(IconData icon, String label, String value, {bool showDivider = true}) {

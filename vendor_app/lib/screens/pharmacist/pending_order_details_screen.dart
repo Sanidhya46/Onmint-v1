@@ -286,7 +286,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                                         children: [
                                           Center(
                                             child: InteractiveViewer(
-                                              child: Image.network(prescriptionImages[0]),
+                                              child: Image.network(prescriptionImages[0], errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey)),
                                             ),
                                           ),
                                           Positioned(
@@ -313,7 +313,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: prescriptionImages.isNotEmpty 
-                                      ? Image.network(prescriptionImages[0], fit: BoxFit.cover) 
+                                      ? Image.network(prescriptionImages[0], fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey))
                                       : const Center(child: Icon(Icons.image, color: Colors.grey)),
                                 ),
                               ),

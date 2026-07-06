@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:user_app/screens/booking/active_service_tracking_screen.dart';
 import 'package:user_app/screens/booking/user_unified_tracking_screen.dart';
+import 'package:user_app/screens/booking/connected_vendor_details_screen.dart';
+import 'package:user_app/screens/booking/service_offers_screen.dart';
 import 'package:user_app/screens/booking/user_active_consultation_screen.dart';
 import 'package:user_app/screens/bookings/booking_details_screen.dart';
 import 'package:user_app/screens/booking/order_request_screen.dart';
 import 'package:user_app/screens/booking/order_detail_file.dart';
 import 'package:user_app/screens/booking/coming_soon_screen.dart';
 import 'package:user_app/screens/medicines/order_tracking_screen.dart';
+import 'package:user_app/screens/booking/service_offers_screen.dart';
 
 /// Unified My Bookings Screen with 3 tabs:
 /// 1. Active Orders - Active service bookings
@@ -386,26 +389,62 @@ class _MyBookingsUnifiedScreenState extends State<MyBookingsUnifiedScreen>
               ),
             ).then((_) => _loadData());
           } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => OrderRequestScreen(
-                  bookingId: bookingId,
-                  bookingData: booking,
-                  serviceType: serviceType,
+            final hasOffers = booking['offers'] is List && (booking['offers'] as List).isNotEmpty;
+            if (hasOffers) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ServiceOffersScreen(
+                    bookingId: bookingId,
+                    serviceType: serviceType,
+                    bookingData: booking,
+                  ),
                 ),
-              ),
-            ).then((_) => _loadData());
+              ).then((_) => _loadData());
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OrderRequestScreen(
+                    bookingId: bookingId,
+                    bookingData: booking,
+                    serviceType: serviceType,
+                  ),
+                ),
+              ).then((_) => _loadData());
+            }
           }
           return;
         }
 
-        if (serviceType.toLowerCase() == 'nurse' ||
-            serviceType.toLowerCase() == 'ambulance' ||
-            sType == 'pathology' ||
-            sType == 'lab_test' ||
-            sType == 'lab test' ||
-            sType == 'labtest') {
+        final isVendorService = serviceType.toLowerCase() == 'nurse' || 
+                             serviceType.toLowerCase() == 'labtest' || 
+                             serviceType.toLowerCase() == 'pathology' ||
+                             serviceType.toLowerCase() == 'ambulance' ||
+                             serviceType.toLowerCase() == 'bloodbank';
+        final isConnectedState = status == 'accepted' || status == 'on_the_way' || status == 'in_progress';
+
+        if (AppConfig.useNewFlow && isVendorService && isConnectedState) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ConnectedVendorDetailsScreen(
+                bookingId: bookingId,
+                bookingData: booking,
+              ),
+            ),
+          ).then((_) => _loadActiveBookings());
+        } else if (AppConfig.useNewFlow && isVendorService && booking['offers'] != null && (booking['offers'] as List).isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ServiceOffersScreen(
+                bookingId: bookingId,
+                bookingData: booking,
+              ),
+            ),
+          ).then((_) => _loadActiveBookings());
+        } else if (isVendorService) {
           Navigator.push(
             context,
             MaterialPageRoute(

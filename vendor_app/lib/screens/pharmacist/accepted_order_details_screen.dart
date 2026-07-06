@@ -252,7 +252,7 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
                                     children: [
                                       Center(
                                         child: InteractiveViewer(
-                                          child: Image.network(order['prescriptionImages'][0]),
+                                          child: Image.network(order['prescriptionImages'][0], errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey)),
                                         ),
                                       ),
                                       Positioned(
@@ -278,7 +278,7 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(6),
                               child: (order['prescriptionImages'] != null && (order['prescriptionImages'] as List).isNotEmpty)
-                                  ? Image.network(order['prescriptionImages'][0], fit: BoxFit.cover)
+                                  ? Image.network(order['prescriptionImages'][0], fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey))
                                   : const Center(child: Icon(Icons.image, color: Colors.grey)),
                             ),
                           ),

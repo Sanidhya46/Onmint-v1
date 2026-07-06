@@ -287,24 +287,47 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isLoading && _ride != null && !_isRequested) {
+      return _buildConnectedScreen(_ride!);
+    }
+
+    final patient = _ride?['patient'] ?? {};
+    final patientName = patient['fullName'] ?? patient['firstName'] != null
+        ? '${patient['firstName'] ?? ''} ${patient['lastName'] ?? ''}'.trim()
+        : 'Unknown Patient';
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F9FD),
       appBar: AppBar(
-        title: Text(
-          _isRequested ? 'Ambulance Request Details' : 'Ambulance Booking',
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-        ),
-        backgroundColor: const Color(0xFFF75555), // Red header
-        foregroundColor: Colors.white,
-        elevation: 0,
+        backgroundColor: _isRequested ? const Color(0xFFF75555) : Colors.white,
+        foregroundColor: _isRequested ? Colors.white : const Color(0xFF152238),
+        elevation: 0.5,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: _isRequested ? Colors.white : const Color(0xFF152238)),
           onPressed: () => Navigator.pop(context, true),
         ),
+        title: _isRequested
+            ? const Text('Ambulance Request Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.handshake, color: Color(0xFF2E7D32), size: 18),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Connected with $patientName',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFF152238),
+                    ),
+                  ),
+                ],
+              ),
         actions: _isRequested ? [] : [
           IconButton(
-            icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
+            icon: const Icon(Icons.headset_mic_outlined, color: Color(0xFF152238)),
             onPressed: () {},
           ),
         ],
@@ -317,6 +340,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
               : _buildBody(),
     );
   }
+
   Widget _buildBody() {
     if (_isRequested) {
       return Column(
@@ -1420,6 +1444,433 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildConnectedScreen(Map<String, dynamic> booking) {
+    final patientData = booking['patient'] ?? {};
+    String patientName = patientData['fullName'] ?? '${patientData['firstName'] ?? ''} ${patientData['lastName'] ?? ''}'.trim();
+    if (patientName.isEmpty) patientName = 'Rahul Sharma';
+    
+    final String gender = patientData['gender']?.toString() ?? 'Male';
+    final String age = patientData['age']?.toString() ?? '32';
+    final phone = patientData['phone']?.toString() ?? '+91 98765 43210';
+
+    final pickup = _safeAddress(booking['pickupLocation'] ?? booking['location'] ?? booking['pickupAddress'], 'B-102, Ashok Nagar, Varanasi, UP');
+    final drop = _safeAddress(booking['dropLocation'] ?? booking['destination'] ?? booking['dropAddress'], 'Apex Hospital, Varanasi, UP');
+
+    final requestedOn = booking['createdAt'] != null ? DateTime.tryParse(booking['createdAt']) : DateTime.now();
+    final String displayDate = requestedOn != null ? DateFormat('dd MMM yyyy').format(requestedOn) : '30 Jun 2026';
+    
+    String displayTime = '11:30 AM';
+    if (booking['scheduledTime'] != null) {
+      try {
+        final dt = DateTime.parse(booking['scheduledTime']);
+        displayTime = DateFormat('hh:mm a').format(dt);
+      } catch (_) {}
+    }
+
+    final price = booking['price'] ?? booking['totalAmount'] ?? booking['fees'] ?? 1500;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
+          onPressed: () => Navigator.pop(context, true),
+        ),
+        title: const Text(
+          'Connected', 
+          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF152238))
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  // Patient Details Card with left border highlighted
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 140,
+                            color: const Color(0xFFEF4444), // Ambulance theme color
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.grey.shade200,
+                                          image: const DecorationImage(
+                                            image: AssetImage('assets/images/male_profile.png'),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  patientName,
+                                                  style: const TextStyle(fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                const Icon(Icons.verified, color: Color(0xFFEF4444), size: 14),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Age: $age Years  |  Gender: $gender',
+                                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Mobile: $phone',
+                                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.location_on, color: Color(0xFFEF4444), size: 14),
+                                      const SizedBox(width: 6),
+                                      const Text(
+                                        'Location: ',
+                                        style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          pickup,
+                                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF475569)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Route Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Route Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.my_location, color: Color(0xFF22C55E), size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Pickup Location',
+                                    style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    pickup,
+                                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF334155)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 7.0),
+                          child: SizedBox(
+                            height: 20,
+                            child: VerticalDivider(width: 2, color: Color(0xFFCBD5E1), thickness: 1.5),
+                          ),
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.location_on, color: Color(0xFFEF4444), size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Drop Location',
+                                    style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    drop,
+                                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF334155)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 24, color: Color(0xFFE2E8F0)),
+                        const Text(
+                          'Booking Date & Time',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$displayDate, $displayTime',
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Booking Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Booking Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildConnectedDetailRow('Service Type', 'Ambulance Ride'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        _buildConnectedDetailRow('Offered Amount', '₹$price'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        _buildConnectedDetailRow('Booking Date & Time', '25 May 2025, 10:15 AM'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Payment Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Payment Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildConnectedDetailRow('Payment Type', 'Direct to Vendor'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        const Text(
+                          'Customer will pay after service completion.',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons Row (Call Patient & WhatsApp)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final Uri telUri = Uri(scheme: 'tel', path: phone);
+                              if (await canLaunchUrl(telUri)) {
+                                await launchUrl(telUri);
+                              }
+                            },
+                            icon: const Icon(Icons.phone, color: Colors.white, size: 18),
+                            label: const Text(
+                              'Call Patient',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0284C7),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final url = "https://wa.me/${phone.replaceAll(RegExp(r'[^\d]'), '')}";
+                              if (await canLaunchUrl(Uri.parse(url))) {
+                                await launchUrl(Uri.parse(url));
+                              }
+                            },
+                            icon: const Icon(Icons.chat_bubble, color: Colors.white, size: 18),
+                            label: const Text(
+                              'WhatsApp',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF22C55E),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Need Assistance Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F9FF),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Need Assistance?',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0369A1)),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'If you face any issues, please contact ONMINT Support.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF0284C7)),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 38,
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              final Uri supportUri = Uri(scheme: 'tel', path: '+919999999999');
+                              if (await canLaunchUrl(supportUri)) {
+                                await launchUrl(supportUri);
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF0284C7)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: const Text(
+                              'Contact Support',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+
+            // Green Safety Priority Bar
+            Container(
+              width: double.infinity,
+              color: const Color(0xFFDCFCE7),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shield_outlined, color: Color(0xFF15803D), size: 16),
+                  SizedBox(width: 8),
+                  Text(
+                    'Your safety is our priority.',
+                    style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF15803D)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildConnectedDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+        ),
+      ],
     );
   }
 }

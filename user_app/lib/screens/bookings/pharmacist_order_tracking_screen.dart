@@ -210,7 +210,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
           fit: StackFit.expand,
           children: [
             InteractiveViewer(
-              child: Image.network(imageUrl, fit: BoxFit.contain),
+              child: Image.network(imageUrl, fit: BoxFit.contain, errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey)),
             ),
             Positioned(
               top: 40,
@@ -320,9 +320,14 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade200),
                         borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                          image: NetworkImage(vendor['profilePicSigned'] ?? vendor['profilePic'] ?? 'https://ui-avatars.com/api/?name=${vendor['pharmacyName'] ?? vendor['firstName'] ?? 'P'}'),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          vendor['profilePicSigned'] ?? vendor['profilePic'] ?? 'https://ui-avatars.com/api/?name=${vendor['pharmacyName'] ?? vendor['firstName'] ?? 'P'}',
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.person, color: Colors.grey),
                         ),
                       ),
                     ),
@@ -618,7 +623,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: prescriptionImages.isNotEmpty 
-                                ? Image.network(prescriptionImages[0], fit: BoxFit.cover) 
+                                ? Image.network(prescriptionImages[0], fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey))
                                 : const Center(child: Icon(Icons.image, color: Colors.grey)),
                           ),
                         ),
@@ -938,6 +943,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                 radius: 16,
                 backgroundColor: Colors.blue[50],
                 backgroundImage: provider['profilePic'] != null ? NetworkImage(provider['profilePic']) : null,
+                onBackgroundImageError: (e, s) {},
                 child: provider['profilePic'] == null ? const Icon(Icons.local_pharmacy, size: 16, color: Color(0xFF0033CC)) : null,
               ),
               const SizedBox(width: 8),
@@ -1112,7 +1118,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                                   children: [
                                     Center(
                                       child: InteractiveViewer(
-                                        child: Image.network(_booking!['prescriptionImages'][0]),
+                                        child: Image.network(_booking!['prescriptionImages'][0], errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey)),
                                       ),
                                     ),
                                     Positioned(
@@ -1138,7 +1144,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(6),
                             child: (_booking!['prescriptionImages'] != null && _booking!['prescriptionImages'].isNotEmpty)
-                                ? Image.network(_booking!['prescriptionImages'][0], fit: BoxFit.cover)
+                                ? Image.network(_booking!['prescriptionImages'][0], fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey))
                                 : const Center(child: Icon(Icons.image, color: Colors.grey)),
                           ),
                         ),

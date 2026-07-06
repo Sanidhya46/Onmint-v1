@@ -355,6 +355,12 @@ class _MedicinesManagementScreenState extends State<MedicinesManagementScreen> {
       imageUrl = medicine['imageUrl'];
     }
 
+    if (imageUrl != null && imageUrl.startsWith('/images/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
+    } else if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,

@@ -128,6 +128,8 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                           child: Image.network(
                             _medicine!['imagesSigned'][0],
                             fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.broken_image, size: 50, color: Colors.grey),
                           ),
                         )
                       else

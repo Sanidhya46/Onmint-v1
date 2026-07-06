@@ -6,6 +6,8 @@ import 'package:ui_components/ui_components.dart';
 import '../../../config/app_colors.dart';
 import '../../ambulance/ride_details_screen.dart';
 import '../../ambulance/ride_requests_screen.dart';
+import '../../ambulance/fill_price_ambulance_screen.dart';
+import '../../booking/waiting_for_patient_screen.dart';
 
 class AmbulanceDashboard extends StatefulWidget {
   const AmbulanceDashboard({super.key});
@@ -40,7 +42,21 @@ class _AmbulanceDashboardState extends State<AmbulanceDashboard> {
       if (mounted) {
         setState(() {
           _dashboardData = data;
-          _activeRequests = (requestsData['data'] as List?)?.map((e) => Booking.fromJson(e)).toList() ?? [];
+          _activeRequests = (requestsData['data'] as List?)?.where((e) {
+            final status = e['status']?.toString().toLowerCase() ?? '';
+            if (status == 'offer_send' || status == 'offer_sent') return false;
+            
+            bool hasOffered = e['hasOffered'] == true;
+            final offers = e['offers'] as List?;
+            final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+            if (offers != null && currentUserId != null) {
+              hasOffered = hasOffered || offers.any((o) {
+                final vId = o['vendorId'];
+                return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+              });
+            }
+            return !hasOffered;
+          }).map((e) => Booking.fromJson(e)).toList() ?? [];
           _isLoading = false;
         });
       }
@@ -176,7 +192,7 @@ class _AmbulanceDashboardState extends State<AmbulanceDashboard> {
                                       children: [
                                         _buildStatItem(
                                           '${_activeRequests.length}', 
-                                          'Requests'
+                                          'Pending'
                                         ),
                                         Container(width: 1, height: 40, color: Colors.grey.shade200),
                                         _buildStatItem(
@@ -521,10 +537,19 @@ class _AmbulanceDashboardState extends State<AmbulanceDashboard> {
             height: 32,
             child: ElevatedButton(
               onPressed: () {
+                Widget targetScreen;
+                final statusRaw = request.status.toLowerCase();
+                if (statusRaw == 'requested' || statusRaw == 'pending') {
+                  // In dashboard, we already filtered out requests where we made an offer
+                  targetScreen = FillPriceAmbulanceScreen(bookingId: request.id, bookingData: request.rawData ?? request.toJson());
+                } else {
+                  targetScreen = RideDetailsScreen(rideId: request.id);
+                }
+                
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RideDetailsScreen(rideId: request.id),
+                    builder: (context) => targetScreen,
                   ),
                 ).then((_) => _loadDashboard());
               },

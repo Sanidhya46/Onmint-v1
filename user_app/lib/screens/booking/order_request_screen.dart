@@ -235,61 +235,45 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
     );
   }
 
+  Widget _buildBadge({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 20),
+        const SizedBox(height: 6),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Color(0xFF0F2147),
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          subtitle,
+          style: const TextStyle(
+            color: Color(0xFF94A3B8),
+            fontSize: 8,
+            fontFamily: 'Poppins',
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final type = widget.serviceType.toLowerCase();
     final screenWidth = MediaQuery.sizeOf(context).width;
     final scale = screenWidth < 380 ? screenWidth / 380.0 : 1.0;
-
-    Color serviceColor;
-    String serviceTitle;
-    String serviceTitleBlack;
-    String imagePath;
-
-    switch (type) {
-      case 'doctor':
-        serviceColor = const Color(0xFF1565C0);
-        serviceTitle = 'Doctor ';
-        serviceTitleBlack = 'Booking';
-        imagePath = 'assets/images/request_order/doctor.png';
-        break;
-      case 'nurse':
-        serviceColor = const Color(0xFF1565C0);
-        serviceTitle = 'Nurse ';
-        serviceTitleBlack = 'Booking';
-        imagePath = 'assets/images/request_order/nurse.png';
-        break;
-      case 'ambulance':
-        serviceColor = Colors.red;
-        serviceTitle = 'Ambulance ';
-        serviceTitleBlack = 'Booking';
-        imagePath = 'assets/images/request_order/ambulance.png';
-        break;
-      case 'bloodbank':
-      case 'blood bank':
-        serviceColor = Colors.red;
-        serviceTitle = 'Blood Bank ';
-        serviceTitleBlack = 'Booking';
-        imagePath = 'assets/images/request_order/bloodbank.png';
-        break;
-      case 'medicine':
-      case 'pharmacy':
-      case 'pharmacist':
-        serviceColor = const Color(0xFF0033CC);
-        serviceTitle = 'Medicine ';
-        serviceTitleBlack = 'Order';
-        imagePath = 'assets/images/medicine/request_sent_top_banner.png';
-        break;
-      case 'pathology':
-      case 'lab_test':
-      case 'lab test':
-      default:
-        serviceColor = Colors.green[700]!;
-        serviceTitle = 'Lab Test ';
-        serviceTitleBlack = 'Booking';
-        imagePath = 'assets/images/request_order/labtest.png';
-        break;
-    }
 
     List<Widget> detailsRows = [];
     if (type == 'ambulance') {
@@ -375,226 +359,327 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A60)),
-          onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            } else {
-              Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-            }
-          },
-        ),
-        title: const Text(
-          'My Booking',
-          style: TextStyle(
-            color: Color(0xFF1A1A60),
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF0F2147)),
+            onPressed: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+              }
+            },
           ),
-        ),
-        centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.black12,
-            height: 1.0,
+          title: const Text(
+            'Request Submitted',
+            style: TextStyle(
+              color: Color(0xFF0F2147),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+            ),
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.headset_mic_outlined,
-                color: Color(0xFF1A1A60)),
-            onPressed: () {},
+          centerTitle: true,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1.0),
+            child: Container(
+              color: Colors.black12,
+              height: 1.0,
+            ),
           ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.headset_mic_outlined, color: Color(0xFF0F2147)),
+              onPressed: _contactSupport,
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 16),
+                  
+                  // Top Graphic Illustration
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    constraints: const BoxConstraints(
+                      minHeight: 180,
+                      maxHeight: 280,
+                    ),
+                    width: double.infinity,
+                    child: Image.asset(
+                      'assets/images/request_order/new_request_sent_top.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 200,
+                          color: Colors.grey[100],
+                          alignment: Alignment.center,
+                          child: const Text('Image not found',
+                              style: TextStyle(color: Colors.red)),
+                        );
+                      },
+                    ),
                   ),
-                  child: IntrinsicHeight(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Title Header
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+
+
+                  // Card 1: We're on it!
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4F6FF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              )
+                            ]
+                          ),
+                          child: const Icon(
+                            Icons.hourglass_empty_rounded,
+                            color: Color(0xFF3B82F6),
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "We're on it!",
+                                style: TextStyle(
+                                  color: Color(0xFF0F2147),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                "You'll be notified as soon as vendors respond.",
+                                style: TextStyle(
+                                  color: Color(0xFF64748B),
+                                  fontSize: 12,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Card 2: Need Help?
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ]
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFEFF6FF),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.phone_in_talk,
+                            color: Color(0xFF2563EB),
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          "Need Help?",
+                          style: TextStyle(
+                            color: Color(0xFF0F2147),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          "Our support team is here for you.",
+                          style: TextStyle(
+                            color: Color(0xFF64748B),
+                            fontSize: 12,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 40,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ElevatedButton(
+                              onPressed: _contactSupport,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: serviceTitle,
-                                          style: TextStyle(
-                                            color: serviceColor,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: serviceTitleBlack,
-                                          style: const TextStyle(
-                                            color: Color(0xFF1A1A60),
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ],
+                                  Icon(Icons.phone, color: Colors.white, size: 16),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Contact Support",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Poppins',
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.calendar_month_outlined,
-                                          size: 12, color: const Color(0xFF5A78FF)),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Requested on ${_extractDate(widget.bookingData)}',
-                                        style: TextStyle(
-                                          color: Colors.grey[700],
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                 ],
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 8),
-
-                          // Image Graphic containing arc, images, and text (Flexible height)
-                          Expanded(
-                            child: Center(
-                              child: Container(
-                                constraints: const BoxConstraints(
-                                  minHeight: 180,
-                                  maxHeight: 320,
-                                ),
-                                width: double.infinity,
-                                child: Image.asset(
-                                  imagePath,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.grey[100],
-                                      alignment: Alignment.center,
-                                      child: const Text('Image not found',
-                                          style: TextStyle(color: Colors.red)),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Tap to call our support team",
+                          style: TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 10,
+                            fontFamily: 'Poppins',
                           ),
-
-                          const SizedBox(height: 8),
-
-                          // Booking Details Card
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade100, width: 1.5),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.03),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                )
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Booking Details',
-                                  style: TextStyle(
-                                    color: Color(0xFF1A1A60),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                ...detailsRows,
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Bottom Actions Row
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: _buildActionButton(
-                                    icon: Icons.calendar_today_outlined,
-                                    label: 'Reschedule',
-                                    iconColor: const Color(0xFF1565C0),
-                                    onTap: _rescheduleAppointment,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildActionButton(
-                                    icon: Icons.cancel,
-                                    label: type == 'doctor' ? 'Cancel\nAppointment' : 'Cancel\nBooking',
-                                    iconColor: Colors.red,
-                                    onTap: _cancelAppointment,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildActionButton(
-                                    icon: Icons.headset_mic,
-                                    label: 'Contact\nSupport',
-                                    iconColor: const Color(0xFF1565C0),
-                                    onTap: _contactSupport,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
+
+                  // Card 3: Trust Badges Row
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildBadge(
+                            icon: Icons.check_circle_outline,
+                            color: const Color(0xFF5A78FF),
+                            title: "Fast Response",
+                            subtitle: "We act quickly",
+                          ),
+                        ),
+                        Container(width: 1, height: 32, color: const Color(0xFFE2E8F0)),
+                        Expanded(
+                          child: _buildBadge(
+                            icon: Icons.support_agent_outlined,
+                            color: const Color(0xFF5A78FF),
+                            title: "24/7 Support",
+                            subtitle: "We're always here",
+                          ),
+                        ),
+                        Container(width: 1, height: 32, color: const Color(0xFFE2E8F0)),
+                        Expanded(
+                          child: _buildBadge(
+                            icon: Icons.lock_outline,
+                            color: const Color(0xFF5A78FF),
+                            title: "Secure & Safe",
+                            subtitle: "Your data is safe",
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Green Banner: Your request is safe
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F5E9),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          color: Color(0xFF2E7D32),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Your request is safe and secure with us.",
+                            style: TextStyle(
+                              color: const Color(0xFF2E7D32),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-        ],
+            if (_isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.3),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildDetailRow(IconData icon, String label, String value,

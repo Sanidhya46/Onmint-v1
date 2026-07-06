@@ -56,9 +56,13 @@ class CartFloatingBar extends StatelessWidget {
                               shape: BoxShape.circle,
                               color: Colors.white,
                               border: Border.all(color: Colors.black87, width: 1.5),
-                              image: DecorationImage(
-                                image: NetworkImage(images[index]),
+                            ),
+                            child: ClipOval(
+                              child: Image.network(
+                                images[index],
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.medication, size: 16, color: Colors.grey),
                               ),
                             ),
                           ),

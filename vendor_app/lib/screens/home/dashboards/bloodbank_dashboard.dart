@@ -4,6 +4,7 @@ import 'package:auth_service/auth_service.dart';
 import 'package:api_client/api_client.dart';
 import '../../blood_bank/blood_request_details_screen.dart';
 import '../../blood_bank/blood_bank_bookings_screen.dart';
+import '../../bloodbank/fill_price_bloodbank_screen.dart';
 
 class BloodBankDashboard extends StatefulWidget {
   const BloodBankDashboard({super.key});
@@ -70,7 +71,20 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
 
         final pending = all.where((b) {
           final s = b['status']?.toString().toLowerCase() ?? '';
-          return s == 'requested' || s == 'pending';
+          if (s == 'offer_send' || s == 'offer_sent') return false;
+          if (s != 'requested' && s != 'pending') return false;
+          
+          bool hasOffered = b['hasOffered'] == true;
+          final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+          final offers = b['offers'] as List?;
+          if (offers != null && currentUserId != null) {
+            hasOffered = hasOffered || offers.any((o) {
+              final vId = o['vendorId'];
+              return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+            });
+          }
+          if (hasOffered) return false;
+          return true;
         }).toList();
 
         final accepted = all.where((b) {
@@ -248,9 +262,9 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildStatItem('$_totalRequests', "Total\nRequests"),
+            _buildStatItem('${_requests.length}', "Pending"),
             Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.2)),
-            _buildStatItem('${_requests.length}', 'Pending'),
+            _buildStatItem('$_acceptedRequests', 'Active'),
             Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.2)),
             _buildStatItem('$_completedRequests', 'Completed'),
           ],
@@ -495,7 +509,7 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        BloodRequestDetailsScreen(bookingId: bookingId),
+                        FillPriceBloodBankScreen(bookingId: bookingId, bookingData: request),
                   ),
                 );
                 _loadDashboard();

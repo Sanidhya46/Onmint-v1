@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:auth_service/auth_service.dart';
 import 'package:api_client/api_client.dart';
 import 'package:ui_components/ui_components.dart';
-import 'blood_request_details_screen.dart';
-import 'blood_bank_accepted_order_screen.dart';
+import 'package:vendor_app/screens/blood_bank/blood_bank_accepted_order_screen.dart';
+import 'package:vendor_app/config/app_config.dart';
+import '../booking/waiting_for_patient_screen.dart';
+import '../bloodbank/fill_price_bloodbank_screen.dart';
 
 class BloodBankBookingsScreen extends StatefulWidget {
   const BloodBankBookingsScreen({super.key});
@@ -68,7 +72,7 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
               final status = b['status']?.toString().toLowerCase() ?? '';
               if (status == 'requested' || status == 'pending') {
                 _pendingBookings.add(b);
-              } else if (status == 'completed' || status == 'cancelled' || status == 'rejected') {
+              } else if (status == 'completed' || status == 'cancelled' || status == 'rejected' || status == 'accepted') {
                 _completedBookings.add(b);
               } else {
                 _inProgressBookings.add(b);
@@ -241,6 +245,15 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
     final units = request['unitsRequired'] ?? '1';
     final address = _safeAddress(request['location']);
     final bloodGroup = request['bloodGroup'] ?? 'O+';
+    final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+    final offers = request['offers'] as List?;
+    bool hasOffered = request['hasOffered'] == true;
+    if (offers != null && currentUserId != null) {
+      hasOffered = hasOffered || offers.any((o) {
+        final vId = o['vendorId'];
+        return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+      });
+    }
     final statusRaw = request['status']?.toString().toLowerCase() ?? '';
     final bookingId = request['_id']?.toString() ?? '';
 
@@ -293,7 +306,11 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
         onTap: () async {
           Widget screen;
           if (statusRaw == 'requested' || statusRaw == 'pending') {
-            screen = BloodRequestDetailsScreen(bookingId: bookingId);
+            if (hasOffered) {
+              screen = WaitingForPatientScreen(bookingId: bookingId, bookingData: request);
+            } else {
+              screen = FillPriceBloodBankScreen(bookingId: bookingId, bookingData: request);
+            }
           } else {
             screen = BloodBankAcceptedOrderScreen(
               bookingId: bookingId,

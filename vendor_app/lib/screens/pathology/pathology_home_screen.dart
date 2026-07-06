@@ -7,6 +7,9 @@ import 'lab_test_request_details_screen.dart';
 import 'lab_test_booking_screen.dart';
 import 'pathology_bookings_screen.dart';
 import '../../config/app_colors.dart';
+import '../../config/app_config.dart';
+import 'fill_price_labtest_screen.dart';
+import '../booking/waiting_for_patient_screen.dart';
 import '../home/widgets/active_booking_floating_widget.dart';
 
 class PathologyHomeScreen extends StatefulWidget {
@@ -63,6 +66,7 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
             final s = status.toLowerCase();
             if (s == 'requested' || s == 'pending') return 0;
             if (s == 'completed' || s == 'cancelled' || s == 'rejected') return 2;
+            if (s == 'offer_send' || s == 'offer_sent') return 3; // ignored
             return 1; // active (accepted, on_the_way, sample_collected)
           }
 
@@ -76,8 +80,22 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
             return timeB.compareTo(timeA); // newest first
           });
 
-          _pendingBookings = allBookings.where((b) => getPriority(b['status']?.toString() ?? '') == 0).toList(); // Only show requested
-          _activeBookings = allBookings.where((b) => getPriority(b['status']?.toString() ?? '') == 1).toList();
+          final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+          _pendingBookings = allBookings.where((b) {
+            final status = b['status']?.toString().toLowerCase() ?? '';
+            if (status == 'offer_send' || status == 'offer_sent') return false;
+            final isPending = getPriority(status) == 0;
+            if (!isPending) return false;
+            
+            if (b['hasOffered'] == true) return false;
+            
+            return true;
+          }).toList();
+          _activeBookings = allBookings.where((b) {
+            final status = b['status']?.toString().toLowerCase() ?? '';
+            if (status == 'offer_send' || status == 'offer_sent') return false;
+            return getPriority(status) == 1;
+          }).toList();
           _isLoading = false;
         });
       }
@@ -92,9 +110,15 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
         };
         _pendingBookings = [];
         _activeBookings = [];
+        int _completedCount = 0;
         _isLoading = false;
       }
     }
+  }
+
+  int get _completedCount {
+    if (_dashboardData == null) return 0;
+    return _dashboardData?['totalTests'] ?? _dashboardData?['completed'] ?? 0;
   }
 
   @override
@@ -225,17 +249,17 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                         child: Row(
                           children: [
                             _buildStatItem(
-                              '${_dashboardData?['testsOffered'] ?? _dashboardData?['todayRequests'] ?? 0}',
-                              "Today's Requests",
+                              '${_pendingBookings.length}',
+                              "Pending",
                             ),
                             _buildDivider(),
                             _buildStatItem(
-                              '${_dashboardData?['activeTests'] ?? _dashboardData?['accepted'] ?? 0}',
+                              '${_activeBookings.length}',
                               "Accepted",
                             ),
                             _buildDivider(),
                             _buildStatItem(
-                              '${_dashboardData?['totalTests'] ?? _dashboardData?['completed'] ?? 0}',
+                              '${_completedCount}',
                               "Completed",
                             ),
                           ],
@@ -707,12 +731,44 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                 final status = booking['status']?.toString().toLowerCase() ?? '';
                 final isPending = status == 'requested' || status == 'pending';
                 
+                Widget targetScreen;
+                if (isPending) {
+                  final user = context.read<AuthProvider>().currentUser;
+                  final userCity = user?.city?.trim().toLowerCase() ?? '';
+                  final userState = user?.state?.trim().toLowerCase() ?? '';
+                  
+                  final bookingCity = booking['city']?.toString().trim().toLowerCase() ?? '';
+                  final bookingState = booking['state']?.toString().trim().toLowerCase() ?? '';
+                  
+                  final cleanUserCity = userCity.replaceAll(RegExp(r'\s+'), '');
+                  final cleanUserState = userState.replaceAll(RegExp(r'\s+'), '');
+                  final cleanBookingCity = bookingCity.replaceAll(RegExp(r'\s+'), '');
+                  final cleanBookingState = bookingState.replaceAll(RegExp(r'\s+'), '');
+
+                  final isMatchingLocation = (cleanBookingCity.isEmpty && cleanBookingState.isEmpty) ||
+                      (cleanUserCity.isNotEmpty && cleanUserState.isNotEmpty &&
+                       cleanBookingCity == cleanUserCity &&
+                       cleanBookingState == cleanUserState);
+
+                  final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+                  final offers = booking['offers'] as List?;
+                  bool hasOffered = booking['hasOffered'] == true;
+
+                  if (AppConfig.useNewFlow && hasOffered) {
+                    targetScreen = WaitingForPatientScreen(bookingId: bookingId, bookingData: booking);
+                  } else if (AppConfig.useNewFlow && isMatchingLocation) {
+                    targetScreen = FillPriceLabtestScreen(bookingId: bookingId, bookingData: booking);
+                  } else {
+                    targetScreen = LabTestRequestDetailsScreen(bookingId: bookingId, bookingData: booking);
+                  }
+                } else {
+                  targetScreen = LabTestBookingScreen(bookingId: bookingId, bookingData: booking);
+                }
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => isPending 
-                        ? LabTestRequestDetailsScreen(bookingId: bookingId, bookingData: booking)
-                        : LabTestBookingScreen(bookingId: bookingId, bookingData: booking),
+                    builder: (context) => targetScreen,
                   ),
                 ).then((result) {
                   if (result == true && bookingId == '649b5c3e7b1a2c3f1d4e5f6a') {

@@ -321,15 +321,31 @@ class _MedicinesListScreenState extends State<MedicinesListScreen> {
     final discount = medicine['discount'] ?? 0;
     final originalPrice = discount > 0 ? price / (1 - discount / 100) : price;
 
-    // Get image URL - support both 'images' array and 'imageUrl' single field
     String? imageUrl;
-    if (medicine['images'] != null &&
-        medicine['images'] is List &&
-        (medicine['images'] as List).isNotEmpty) {
-      imageUrl = medicine['images'][0];
-    } else if (medicine['imageUrl'] != null &&
-        medicine['imageUrl'].toString().isNotEmpty) {
-      imageUrl = medicine['imageUrl'];
+    if (medicine['imagesSigned'] != null &&
+        medicine['imagesSigned'] is List &&
+        medicine['imagesSigned'].isNotEmpty) {
+      imageUrl = medicine['imagesSigned'][0];
+    } else if (medicine['imageUrlSigned'] != null &&
+        medicine['imageUrlSigned'].toString().isNotEmpty) {
+      imageUrl = medicine['imageUrlSigned'];
+    }
+    
+    if (imageUrl == null || imageUrl.isEmpty) {
+      if (medicine['images'] != null &&
+          medicine['images'] is List &&
+          medicine['images'].isNotEmpty) {
+        imageUrl = medicine['images'][0];
+      } else if (medicine['imageUrl'] != null &&
+          medicine['imageUrl'].toString().isNotEmpty) {
+        imageUrl = medicine['imageUrl'];
+      }
+    }
+
+    if (imageUrl != null && imageUrl.startsWith('/images/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
+    } else if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
     }
 
     return Card(

@@ -62,6 +62,7 @@ class Booking {
   final bool patientOnCall;
   final bool consultationEnded;
   final DateTime? consultationEndedAt;
+  final Map<String, dynamic>? rawData; // Preserve original JSON
 
   Booking({
     required this.id,
@@ -97,6 +98,7 @@ class Booking {
     this.patientOnCall = false,
     this.consultationEnded = false,
     this.consultationEndedAt,
+    this.rawData,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
@@ -253,12 +255,13 @@ class Booking {
         report: json['report']?.toString(),
         reportUploadedAt: json['reportUploadedAt'] != null ? DateTime.parse(json['reportUploadedAt'].toString()) : null,
         collectionScheduled: json['collectionScheduled'] == true || json['collectionScheduled'] == 'true',
-        doctorOnCall: json['doctor_on_call'] == true || json['doctor_on_call'] == 'true',
-        patientOnCall: json['patient_on_call'] == true || json['patient_on_call'] == 'true',
-        consultationEnded: json['consultation_ended'] == true || json['consultation_ended'] == 'true',
+        doctorOnCall: json['doctor_on_call'] == true,
+        patientOnCall: json['patient_on_call'] == true,
+        consultationEnded: json['consultation_ended'] == true,
         consultationEndedAt: json['consultation_ended_at'] != null ? DateTime.parse(json['consultation_ended_at'].toString()) : null,
+        rawData: Map<String, dynamic>.from(json),
       );
-    } catch (e) {
+    } catch (e, stack) {
       print('Error parsing booking: $e');
       print('Booking JSON: $json');
       rethrow;

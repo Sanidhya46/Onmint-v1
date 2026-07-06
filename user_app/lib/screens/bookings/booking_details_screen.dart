@@ -1717,6 +1717,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                 CircleAvatar(
                   radius: 24,
                   backgroundImage: doctor?.profilePicture != null ? NetworkImage(doctor!.profilePicture!) : null,
+                  onBackgroundImageError: (e, s) {},
                   child: doctor?.profilePicture == null ? const Icon(Icons.person, size: 28) : null,
                 ),
                 const SizedBox(width: 12),

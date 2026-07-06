@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:ui_components/ui_components.dart';
+import 'package:provider/provider.dart';
+import 'package:auth_service/auth_service.dart';
+import 'package:vendor_app/config/app_config.dart';
 import 'lab_test_booking_screen.dart';
 import 'lab_test_request_details_screen.dart';
+import 'fill_price_labtest_screen.dart';
+import '../booking/waiting_for_patient_screen.dart';
 
 class PathologyBookingsScreen extends StatefulWidget {
   const PathologyBookingsScreen({super.key});
@@ -64,7 +69,7 @@ class _PathologyBookingsScreenState extends State<PathologyBookingsScreen>
               final status = b['status']?.toString().toLowerCase() ?? '';
               if (status == 'requested' || status == 'pending') {
                 _pendingBookings.add(b);
-              } else if (status == 'completed' || status == 'cancelled' || status == 'rejected') {
+              } else if (status == 'completed' || status == 'cancelled' || status == 'rejected' || status == 'accepted') {
                 _completedBookings.add(b);
               } else {
                 _inProgressBookings.add(b);
@@ -264,13 +269,46 @@ class _PathologyBookingsScreenState extends State<PathologyBookingsScreen>
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           if (isPending) {
+            final user = context.read<AuthProvider>().currentUser;
+            final userCity = user?.city?.trim().toLowerCase() ?? '';
+            final userState = user?.state?.trim().toLowerCase() ?? '';
+            
+            final bookingCity = booking['city']?.toString().trim().toLowerCase() ?? '';
+            final bookingState = booking['state']?.toString().trim().toLowerCase() ?? '';
+            
+            final cleanUserCity = userCity.replaceAll(RegExp(r'\s+'), '');
+            final cleanUserState = userState.replaceAll(RegExp(r'\s+'), '');
+            final cleanBookingCity = bookingCity.replaceAll(RegExp(r'\s+'), '');
+            final cleanBookingState = bookingState.replaceAll(RegExp(r'\s+'), '');
+
+            final isMatchingLocation = (cleanBookingCity.isEmpty && cleanBookingState.isEmpty) ||
+                (cleanUserCity.isNotEmpty && cleanUserState.isNotEmpty &&
+                 cleanBookingCity == cleanUserCity &&
+                 cleanBookingState == cleanUserState);
+
+            final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+            final offers = booking['offers'] as List?;
+            bool hasOffered = booking['hasOffered'] == true;
+            if (offers != null && currentUserId != null) {
+              hasOffered = hasOffered || offers.any((o) {
+                final vId = o['vendorId'];
+                return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+              });
+            }
+
+            Widget targetScreen;
+            if (AppConfig.useNewFlow && hasOffered) {
+              targetScreen = WaitingForPatientScreen(bookingId: bookingId, bookingData: booking);
+            } else if (AppConfig.useNewFlow && isMatchingLocation) {
+              targetScreen = FillPriceLabtestScreen(bookingId: bookingId, bookingData: booking);
+            } else {
+              targetScreen = LabTestRequestDetailsScreen(bookingId: bookingId, bookingData: booking);
+            }
+
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => LabTestRequestDetailsScreen(
-                  bookingId: bookingId,
-                  bookingData: booking,
-                ),
+                builder: (_) => targetScreen,
               ),
             ).then((_) => _loadBookings());
           } else {

@@ -162,19 +162,25 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F8FB),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
-      extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          children: [
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF4F8FB),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          iconTheme: const IconThemeData(color: Colors.black87),
+        ),
+        extendBodyBehindAppBar: true,
+        body: SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
             Stack(
               children: [
                 Image.asset(
@@ -502,7 +508,7 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildFieldLabel(String label) {
@@ -634,6 +640,9 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
                     });
                   },
                   fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                    if (_selectedState != null && controller.text != _selectedState && !focusNode.hasFocus) {
+                      controller.text = _selectedState!;
+                    }
                     return TextField(
                       controller: controller,
                       focusNode: focusNode,
@@ -717,6 +726,9 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
                     setState(() { _selectedCity = selection; });
                   },
                   fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                    if (_selectedCity != null && controller.text != _selectedCity && !focusNode.hasFocus) {
+                      controller.text = _selectedCity!;
+                    }
                     return TextField(
                       controller: controller,
                       focusNode: focusNode,

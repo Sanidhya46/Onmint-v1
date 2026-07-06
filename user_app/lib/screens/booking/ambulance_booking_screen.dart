@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
 import 'package:user_app/data/indian_states_cities.dart';
 import 'package:user_app/screens/booking/confirm_ambulance_booking_screen.dart';
+import 'package:user_app/screens/booking/confirm_ambulance_booking_screen_new.dart';
+import 'package:user_app/config/app_config.dart';
 
 class AmbulanceBookingScreen extends StatefulWidget {
   const AmbulanceBookingScreen({Key? key}) : super(key: key);
@@ -146,22 +148,39 @@ class _AmbulanceBookingScreenState extends State<AmbulanceBookingScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ConfirmAmbulanceBookingScreen(
-            pickupLocation: _pickupController.text,
-            dropoffLocation: _dropoffController.text,
-            name: _nameController.text,
-            phone: _phoneController.text,
-            age: _ageController.text.isNotEmpty
-                ? int.tryParse(_ageController.text) ?? 0
-                : 0,
-            gender: _selectedGender ?? 'Other',
-            notes: _notesController.text,
-            coordinates: _currentPosition != null
-                ? [_currentPosition!.longitude, _currentPosition!.latitude]
-                : [0.0, 0.0],
-            city: _selectedCity ?? '',
-            state: _selectedState ?? '',
-          ),
+          builder: (context) => AppConfig.useNewFlow
+              ? ConfirmAmbulanceBookingScreenNew(
+                  pickupLocation: _pickupController.text,
+                  dropoffLocation: _dropoffController.text,
+                  name: _nameController.text,
+                  phone: _phoneController.text,
+                  age: _ageController.text.isNotEmpty
+                      ? int.tryParse(_ageController.text) ?? 0
+                      : 0,
+                  gender: _selectedGender ?? 'Other',
+                  notes: _notesController.text,
+                  coordinates: _currentPosition != null
+                      ? [_currentPosition!.longitude, _currentPosition!.latitude]
+                      : [0.0, 0.0],
+                  city: _selectedCity ?? '',
+                  state: _selectedState ?? '',
+                )
+              : ConfirmAmbulanceBookingScreen(
+                  pickupLocation: _pickupController.text,
+                  dropoffLocation: _dropoffController.text,
+                  name: _nameController.text,
+                  phone: _phoneController.text,
+                  age: _ageController.text.isNotEmpty
+                      ? int.tryParse(_ageController.text) ?? 0
+                      : 0,
+                  gender: _selectedGender ?? 'Other',
+                  notes: _notesController.text,
+                  coordinates: _currentPosition != null
+                      ? [_currentPosition!.longitude, _currentPosition!.latitude]
+                      : [0.0, 0.0],
+                  city: _selectedCity ?? '',
+                  state: _selectedState ?? '',
+                ),
         ),
       ).then((_) {
         if (_scrollController.hasClients) {
@@ -288,6 +307,9 @@ class _AmbulanceBookingScreenState extends State<AmbulanceBookingScreen> {
                                       });
                                     },
                                     fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                                      if (_selectedState != null && controller.text != _selectedState && !focusNode.hasFocus) {
+                                        controller.text = _selectedState!;
+                                      }
                                       return TextField(
                                         controller: controller,
                                         focusNode: focusNode,
@@ -374,6 +396,9 @@ class _AmbulanceBookingScreenState extends State<AmbulanceBookingScreen> {
                                       setState(() { _selectedCity = selection; });
                                     },
                                     fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                                      if (_selectedCity != null && controller.text != _selectedCity && !focusNode.hasFocus) {
+                                        controller.text = _selectedCity!;
+                                      }
                                       return TextField(
                                         controller: controller,
                                         focusNode: focusNode,

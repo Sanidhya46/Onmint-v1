@@ -250,18 +250,17 @@ class _UserActiveNurseTrackingScreenState
                         decoration: BoxDecoration(
                           color: Colors.blue.shade50,
                           shape: BoxShape.circle,
-                          image: provider['profilePicture'] != null
-                              ? DecorationImage(
-                                  image:
-                                      NetworkImage(provider['profilePicture']),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
                         ),
-                        child: provider['profilePicture'] == null
-                            ? const Icon(Icons.medical_services,
-                                color: Color(0xFF0D47A1), size: 32)
-                            : null,
+                        child: provider['profilePicture'] != null
+                            ? ClipOval(
+                                child: Image.network(
+                                  provider['profilePicture'],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.medical_services, color: Color(0xFF0D47A1), size: 32),
+                                ),
+                              )
+                            : const Icon(Icons.medical_services, color: Color(0xFF0D47A1), size: 32),
                       ),
                       const SizedBox(width: 16),
                       Expanded(

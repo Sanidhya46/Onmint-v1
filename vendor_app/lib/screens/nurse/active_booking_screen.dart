@@ -149,297 +149,9 @@ class _ActiveBookingScreenState extends State<ActiveBookingScreen> {
     final notes = booking['notes'] ?? booking['requirements']?['description'] ?? 'Requires experienced nurse';
     final serviceType = booking['title'] ?? booking['serviceType'] ?? 'Baby & Mother Care';
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
-          onPressed: () => Navigator.pop(context, true),
-        ),
-        title: const Text(
-          'Nurse Booking',
-          style: TextStyle(
-            color: Color(0xFF152238),
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.headset_mic_outlined, color: Color(0xFF152238)),
-            onPressed: () {
-              if (phone.isNotEmpty) _makePhoneCall(phone);
-            },
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          RefreshIndicator(
-            onRefresh: _fetchDetails,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Column(
-                children: [
-                  // User / Request Header Card
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.blue.shade50,
-                          backgroundImage: profilePicture.isNotEmpty 
-                              ? NetworkImage(profilePicture)
-                              : AssetImage(gender.toString().toLowerCase() == 'female' ? 'assets/images/female_profile.png' : 'assets/images/male_profile.png') as ImageProvider,
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                displayName,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF152238),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(gender.toString().toLowerCase() == 'female' ? Icons.female : Icons.male, size: 14, color: Colors.grey.shade600),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    gender,
-                                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(width: 4, height: 4, decoration: BoxDecoration(color: Colors.grey.shade400, shape: BoxShape.circle)),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '$age Years',
-                                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Icon(Icons.location_on_outlined, color: Colors.grey, size: 14),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      address,
-                                      style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Text(dateStr, style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(Icons.access_time_outlined, size: 12, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Text(timeStr, style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              '₹$fees',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.green),
-                            ),
-                            const Text(
-                              'Service Fee',
-                              style: TextStyle(fontSize: 10, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-  
-                  // Booking Details Card
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(6)),
-                              child: const Icon(Icons.assignment, color: Color(0xFF1565C0), size: 16),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Booking Details',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF152238)),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildRowItem('Service Type', serviceType),
-                        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(color: Color(0xFFF0F0F0), height: 1)),
-                        _buildRowItem('Shift', booking['requirements']?['shift'] ?? 'Day Shift'),
-                        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(color: Color(0xFFF0F0F0), height: 1)),
-                        _buildRowItem('Patient Age', '$age Years'),
-                        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(color: Color(0xFFF0F0F0), height: 1)),
-                        _buildRowItem('Preferred Date', dateStr),
-                        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(color: Color(0xFFF0F0F0), height: 1)),
-                        _buildRowItem('Preferred Time', timeStr),
-                        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(color: Color(0xFFF0F0F0), height: 1)),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: Text('Additional Note', style: TextStyle(fontSize: 12, color: Colors.grey.shade600))),
-                            Expanded(child: Text(notes, textAlign: TextAlign.right, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF152238)))),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-  
-                  // Timeline and Action Buttons
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6)),
-                              child: const Icon(Icons.timeline, color: Colors.green, size: 16),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Status Tracking',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF152238)),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildHorizontalTimeline(status),
-                        const SizedBox(height: 20),
-                        const Divider(height: 1, color: Color(0xFFE0E0E0)),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Expanded(child: _buildActionBtn(Icons.phone, 'Call Patient', () {
-                              if (phone.isNotEmpty) _makePhoneCall(phone);
-                            })),
-                            Container(width: 1, height: 40, color: Colors.grey.shade300),
-                            Expanded(child: _buildActionBtn(Icons.chat_bubble, 'Chat', () {})),
-                            Container(width: 1, height: 40, color: Colors.grey.shade300),
-                            Expanded(child: _buildActionBtn(Icons.map, 'Open Map', () {})),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 20), // Space for bottom button
-                ],
-              ),
-            ),
-          ),
-          if (_isActing)
-            Container(
-              color: Colors.white.withOpacity(0.5),
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFF0F0F0))),
-        ),
-        child: SizedBox(
-          height: 48,
-          child: status == 'completed'
-              ? ElevatedButton.icon(
-                  onPressed: null,
-                  icon: const Icon(Icons.check, color: Colors.white),
-                  label: const Text('Completed', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey,
-                    disabledBackgroundColor: Colors.grey,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                )
-              : ElevatedButton.icon(
-                  onPressed: () {
-                    if (status == 'accepted') {
-                      _updateStatus('on_the_way');
-                    } else if (status == 'on_the_way') {
-                      _updateStatus('reached');
-                    } else if (status == 'reached' || status == 'in_progress') {
-                      _updateStatus('completed');
-                    }
-                  },
-                  icon: Icon(
-                    status == 'accepted' ? Icons.directions_bike : (status == 'on_the_way' ? Icons.location_on : Icons.check),
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                  label: Text(
-                    status == 'accepted' ? 'I Am On The Way' : (status == 'on_the_way' ? 'Reached' : 'Mark as Completed'),
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0047CB),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                ),
-        ),
-      ),
-    );
+    return _buildConnectedScreen(booking, displayName, age, gender, phone, address, fees, notes, serviceType);
   }
-  
+
   Widget _buildRowItem(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -564,6 +276,407 @@ class _ActiveBookingScreenState extends State<ActiveBookingScreen> {
             fontSize: 9,
             color: Colors.grey.shade500,
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConnectedScreen(
+    Map<String, dynamic> booking,
+    String displayName,
+    String age,
+    String gender,
+    String phone,
+    String address,
+    dynamic fees,
+    String notes,
+    String serviceType,
+  ) {
+    final String pName = displayName.isEmpty ? 'Rahul Sharma' : displayName;
+    final String displayPhone = phone.isEmpty ? '+91 98765 43210' : phone;
+
+    final requestedOn = booking['createdAt'] != null ? DateTime.tryParse(booking['createdAt']) : DateTime.now();
+    final String displayDate = requestedOn != null ? DateFormat('dd MMM yyyy').format(requestedOn) : '01 Jul 2026';
+    
+    String displayTime = '10:00 AM';
+    if (booking['scheduledTime'] != null) {
+      try {
+        final dt = DateTime.parse(booking['scheduledTime']);
+        displayTime = DateFormat('hh:mm a').format(dt);
+      } catch (_) {}
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
+          onPressed: () => Navigator.pop(context, true),
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.handshake, color: Color(0xFF2E7D32), size: 18),
+            const SizedBox(width: 6),
+            Text(
+              'Connected with $pName', 
+              style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF152238))
+            ),
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  // Patient Details Card with left border highlighted
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 140,
+                            color: const Color(0xFF7C3AED), // Nurse theme color
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.grey.shade200,
+                                          image: const DecorationImage(
+                                            image: AssetImage('assets/images/male_profile.png'),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  pName,
+                                                  style: const TextStyle(fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                const Icon(Icons.verified, color: Color(0xFF7C3AED), size: 14),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Age: $age Years  |  Gender: $gender',
+                                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Mobile: $displayPhone',
+                                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.location_on, color: Color(0xFFEF4444), size: 14),
+                                      const SizedBox(width: 6),
+                                      const Text(
+                                        'Location: ',
+                                        style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          address.isEmpty || address == 'Not specified' ? 'B-102, Ashok Nagar, Near District Hospital, Varanasi, Uttar Pradesh - 221001' : address,
+                                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF475569)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Nurse Visit Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Nurse Visit Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Visit Date & Time',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$displayDate (Wednesday), $displayTime',
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Patient Problem / Description',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          notes.isEmpty || notes == 'Requires experienced nurse' 
+                              ? 'Patient needs general nursing care and daily dressing/vital checks.' 
+                              : notes,
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Color(0xFF334155)),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Nursing Services Request',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF64748B)),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          serviceType,
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Booking Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Booking Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildConnectedDetailRow('Service Type', 'Nurse Visit'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        _buildConnectedDetailRow('Offered Amount', '₹$fees'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        _buildConnectedDetailRow('Booking Date & Time', '25 May 2025, 10:15 AM'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Payment Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Payment Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildConnectedDetailRow('Payment Type', 'Direct to Vendor'),
+                        const Divider(height: 16, color: Color(0xFFF1F5F9)),
+                        const Text(
+                          'Customer will pay after service completion.',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons Row (Call Patient & WhatsApp)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final Uri telUri = Uri(scheme: 'tel', path: displayPhone);
+                              if (await canLaunchUrl(telUri)) {
+                                await launchUrl(telUri);
+                              }
+                            },
+                            icon: const Icon(Icons.phone, color: Colors.white, size: 18),
+                            label: const Text(
+                              'Call Patient',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF7C3AED),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final url = "https://wa.me/${displayPhone.replaceAll(RegExp(r'[^\d]'), '')}";
+                              if (await canLaunchUrl(Uri.parse(url))) {
+                                await launchUrl(Uri.parse(url));
+                              }
+                            },
+                            icon: const Icon(Icons.chat_bubble, color: Colors.white, size: 18),
+                            label: const Text(
+                              'WhatsApp',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF22C55E),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Need Assistance Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9F5FF), // Purple-tinted bg
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Need Assistance?',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF6D28D9)),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'If you face any issues, please contact ONMINT Support.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF7C3AED)),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 38,
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              final Uri supportUri = Uri(scheme: 'tel', path: '+919999999999');
+                              if (await canLaunchUrl(supportUri)) {
+                                await launchUrl(supportUri);
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF7C3AED)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: const Text(
+                              'Contact Support',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF7C3AED)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+
+            // Green Safety Priority Bar
+            Container(
+              width: double.infinity,
+              color: const Color(0xFFDCFCE7),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shield_outlined, color: Color(0xFF15803D), size: 16),
+                  SizedBox(width: 8),
+                  Text(
+                    'Your safety is our priority.',
+                    style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF15803D)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildConnectedDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
         ),
       ],
     );

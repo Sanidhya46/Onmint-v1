@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:ui_components/ui_components.dart';
 import 'ride_details_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:auth_service/auth_service.dart';
+import 'package:vendor_app/config/app_config.dart';
+import 'fill_price_ambulance_screen.dart';
+import '../booking/waiting_for_patient_screen.dart';
 
 /// Ride requests list screen for ambulance drivers (matching Nurse UI)
 class RideRequestsScreen extends StatefulWidget {
@@ -79,7 +84,7 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
             final status = b['status']?.toString().toLowerCase() ?? '';
             if (status == 'requested' || status == 'pending') {
               _pendingBookings.add(b);
-            } else if (status == 'completed' || status == 'cancelled' || status == 'rejected') {
+            } else if (status == 'completed' || status == 'cancelled' || status == 'rejected' || status == 'accepted') {
               _completedBookings.add(b);
             } else {
               _inProgressBookings.add(b);
@@ -244,6 +249,16 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
         : (rawAddress?.toString() ?? 'Not specified');
     final statusRaw = request['status']?.toString().toLowerCase() ?? '';
     final bookingId = request['_id']?.toString() ?? request['id']?.toString() ?? '';
+    
+    final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+    final offers = request['offers'] as List?;
+    bool hasOffered = request['hasOffered'] == true;
+    if (offers != null && currentUserId != null) {
+      hasOffered = hasOffered || offers.any((o) {
+        final vId = o['vendorId'];
+        return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+      });
+    }
 
     Color statusColor;
     String statusLabel;
@@ -292,10 +307,19 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () async {
-          // For ambulance, we use RideDetailsScreen for both pending and active
+          Widget targetScreen;
+          if (statusRaw == 'requested' || statusRaw == 'pending') {
+            if (hasOffered) {
+              targetScreen = WaitingForPatientScreen(bookingId: bookingId, bookingData: request);
+            } else {
+              targetScreen = FillPriceAmbulanceScreen(bookingId: bookingId, bookingData: request);
+            }
+          } else {
+            targetScreen = RideDetailsScreen(rideId: bookingId);
+          }
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => RideDetailsScreen(rideId: bookingId)),
+            MaterialPageRoute(builder: (context) => targetScreen),
           );
           if (result == true) {
             _loadBookings();

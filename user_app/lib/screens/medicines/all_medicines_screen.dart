@@ -649,13 +649,24 @@ class _AllMedicinesScreenState extends State<AllMedicinesScreen>
   }
 
   Widget _buildMedicineImage(Map<String, dynamic> medicine) {
+    // Get image URL - prioritize signed URLs
     String? imageUrl;
-
-    // Try to get image from various fields
-    if (medicine['images'] != null && (medicine['images'] as List).isNotEmpty) {
-      imageUrl = medicine['images'][0];
-    } else if (medicine['imageUrl'] != null) {
-      imageUrl = medicine['imageUrl'];
+    if (medicine['imagesSigned'] != null &&
+        medicine['imagesSigned'] is List &&
+        medicine['imagesSigned'].isNotEmpty) {
+      imageUrl = medicine['imagesSigned'][0];
+    } else if (medicine['imageUrlSigned'] != null) {
+      imageUrl = medicine['imageUrlSigned'];
+    }
+    
+    if (imageUrl == null || imageUrl.isEmpty) {
+      if (medicine['images'] != null &&
+          medicine['images'] is List &&
+          medicine['images'].isNotEmpty) {
+        imageUrl = medicine['images'][0];
+      } else if (medicine['imageUrl'] != null) {
+        imageUrl = medicine['imageUrl'];
+      }
     }
 
     // Fix relative URLs

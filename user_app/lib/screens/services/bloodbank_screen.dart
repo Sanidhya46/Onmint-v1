@@ -88,19 +88,25 @@ class _BloodbankScreenState extends State<BloodbankScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Blood Bank'),
-        backgroundColor: const Color(0xFFFF416C),
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          _buildEmergencySection(),
-          _buildBloodGroupsSection(),
-          Expanded(child: _buildBloodBanksList()),
-        ],
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text('Blood Bank'),
+          backgroundColor: const Color(0xFFFF416C),
+          foregroundColor: Colors.white,
+        ),
+        body: Column(
+          children: [
+            _buildEmergencySection(),
+            _buildBloodGroupsSection(),
+            Expanded(child: _buildBloodBanksList()),
+          ],
+        ),
       ),
     );
   }

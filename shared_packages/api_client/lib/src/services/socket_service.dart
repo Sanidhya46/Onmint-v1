@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:async';
 
@@ -30,13 +32,30 @@ class SocketService {
   bool get isConnected => _isConnected;
 
   /// Connect to Socket.IO server
-  void connect(String token, {String baseUrl = 'https://api.onmint.in'}) {
+  void connect(String token, {String? baseUrl}) {
     if (_socket != null && _isConnected) {
       print('Socket already connected');
       return;
     }
 
-    _socket = IO.io(baseUrl, <String, dynamic>{
+    String socketUrl = baseUrl ?? 'https://api.onmint.in';
+    if (baseUrl == null) {
+      if (kIsWeb) {
+        socketUrl = 'http://localhost:5000';
+      } else {
+        try {
+          if (Platform.isAndroid) {
+            socketUrl = 'http://10.0.2.2:5000';
+          } else {
+            socketUrl = 'http://localhost:5000';
+          }
+        } catch (_) {
+          socketUrl = 'http://localhost:5000';
+        }
+      }
+    }
+
+    _socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
       'auth': {

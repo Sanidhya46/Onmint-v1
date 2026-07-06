@@ -226,9 +226,19 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Stack(
+    return WillPopScope(
+      onWillPop: () async {
+        if (_selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+          return false;
+        }
+        return false; // Prevent popping back to splash screen
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Stack(
         children: [
           _screens[_selectedIndex],
           if (_hasActiveBooking && _selectedIndex == 0 && MediaQuery.of(context).viewInsets.bottom == 0)
@@ -392,7 +402,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ) : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
+    ));
   }
 
   Widget _buildNavItem({

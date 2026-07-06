@@ -234,7 +234,7 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: kIsWeb
-                ? Image.network(file.path, fit: BoxFit.cover)
+                ? Image.network(file.path, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey))
                 : Image.file(File(file.path), fit: BoxFit.cover),
           ),
         ),
@@ -400,7 +400,7 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: kIsWeb
-                          ? Image.network(_capturedImages[0].path, fit: BoxFit.contain)
+                          ? Image.network(_capturedImages[0].path, fit: BoxFit.contain, errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.grey))
                           : Image.file(File(_capturedImages[0].path), fit: BoxFit.contain),
                     ),
                   ),

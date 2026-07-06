@@ -177,8 +177,47 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
 
     final booking = _bookingDetails ?? {};
     
+    return _buildConnectedScreen(booking);
+  }
+
+  Widget _buildConnectedScreen(Map<String, dynamic> booking) {
+    final patientData = booking['patient'] ?? {};
+    String patientName = patientData['fullName'] ?? '${patientData['firstName'] ?? ''} ${patientData['lastName'] ?? ''}'.trim();
+    if (patientName.isEmpty) patientName = 'Rahul Sharma';
+    
+    final String gender = patientData['gender']?.toString().capitalize() ?? 'Male';
+    final String age = patientData['age']?.toString() ?? '32';
+    
+    final rawAddr = booking['location']?['address'];
+    String address;
+    if (rawAddr is Map) {
+      address = rawAddr['address']?.toString() ?? 
+          [rawAddr['street'], rawAddr['city'], rawAddr['state']].where((p) => p != null && p.toString().isNotEmpty).join(', ');
+    } else {
+      address = rawAddr?.toString() ?? 'B-102, Ashok Nagar, Near District Hospital, Varanasi, Uttar Pradesh - 221001';
+    }
+
+    final requestedOn = booking['createdAt'] != null ? DateTime.tryParse(booking['createdAt']) : DateTime.now();
+    final String displayDate = requestedOn != null ? DateFormat('dd MMM yyyy').format(requestedOn) : '30 Jun 2026';
+    
+    String displayTime = '10:00 AM';
+    if (booking['scheduledTime'] != null) {
+      try {
+        final dt = DateTime.parse(booking['scheduledTime']);
+        displayTime = DateFormat('hh:mm a').format(dt);
+      } catch (_) {}
+    }
+
+    final price = booking['price'] ?? booking['totalAmount'] ?? booking['fees'] ?? 499;
+    final phone = patientData['phone']?.toString() ?? '+91 98765 43210';
+
+    List<String> tests = ['Complete Blood Count (CBC)', 'Vitamin D (25-Hydroxy)'];
+    if (booking['tests'] != null && booking['tests'] is List && booking['tests'].isNotEmpty) {
+      tests = (booking['tests'] as List).map((t) => (t['name'] ?? 'Test').toString()).toList();
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -187,27 +226,556 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
           icon: Icon(Icons.arrow_back, color: textDark),
           onPressed: () => Navigator.pop(context, true),
         ),
-        title: const Text(
-          'Lab Test Booking', 
-          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF152238))
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            _buildPatientCard(booking),
-            const SizedBox(height: 12),
-            _buildTestDetailsCard(booking),
-            const SizedBox(height: 12),
-            _buildHorizontalTimeline(_statusStep),
-            const SizedBox(height: 6), // Decreased spacing
-            _buildActionButtonsRow(),
-            const SizedBox(height: 0), // Decreased spacing
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(
+                color: Color(0xFF1D4ED8),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check, color: Colors.white, size: 16),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Connected', 
+              style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF1D4ED8))
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomAction(_statusStep),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  // Patient Details Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 70,
+                                height: 70,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    image: AssetImage('assets/images/male_profile.png'),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          patientName,
+                                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFEFF6FF),
+                                            borderRadius: BorderRadius.circular(4),
+                                            border: Border.all(color: const Color(0xFFBFDBFE)),
+                                          ),
+                                          child: Row(
+                                            children: const [
+                                              Icon(Icons.verified, color: Color(0xFF1D4ED8), size: 12),
+                                              SizedBox(width: 4),
+                                              Text('Verified', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF1D4ED8), fontWeight: FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF64748B)),
+                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 60, child: Text('Age', style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)))),
+                                        Text('$age Years', style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF0F172A), fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.person_outline, size: 14, color: Color(0xFF64748B)),
+                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 60, child: Text('Gender', style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)))),
+                                        Text(gender, style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF0F172A), fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.phone_outlined, size: 14, color: Color(0xFF64748B)),
+                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 60, child: Text('Mobile', style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)))),
+                                        Text(phone, style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF0F172A), fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Location', style: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                              const SizedBox(height: 6),
+                              Text(address, style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF475569))),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Sample Collection Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Sample Collection',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1D4ED8)),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                                      ),
+                                      child: const Icon(Icons.calendar_today_outlined, color: Color(0xFF1D4ED8), size: 18),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Sample Collection Date',
+                                            style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Color(0xFF1D4ED8)),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '$displayDate\n(Monday)',
+                                            style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(width: 1, height: 40, color: const Color(0xFFE2E8F0)),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                                      ),
+                                      child: const Icon(Icons.home_outlined, color: Color(0xFF1D4ED8), size: 18),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: const [
+                                          Text(
+                                            'Collection Type',
+                                            style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Color(0xFF1D4ED8)),
+                                          ),
+                                          SizedBox(height: 2),
+                                          Text(
+                                            'Home Sample Collection\n(At Your Doorstep)',
+                                            style: TextStyle(fontFamily: 'Poppins', fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Lab Tests Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Lab Tests',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1D4ED8)),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: tests.asMap().entries.map((entry) {
+                              int idx = entry.key;
+                              String test = entry.value;
+                              return Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Row(
+                                      children: [
+                                        Text('${idx + 1}. ', style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF334155))),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: Text(test, style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF334155), fontWeight: FontWeight.w600))),
+                                      ],
+                                    ),
+                                  ),
+                                  if (idx < tests.length - 1)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 12),
+                                      child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+                                    ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Booking Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Booking Details',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1D4ED8)),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildConnectedDetailRow('Service Type', 'Pathology Test'),
+                        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: Color(0xFFF1F5F9))),
+                        _buildConnectedDetailRow('Offered Amount', '₹$price'),
+                        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(height: 1, color: Color(0xFFF1F5F9))),
+                        _buildConnectedDetailRow('Booking Date & Time', '25 May 2025, 10:15 AM'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Payment Details Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Payment Details',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1D4ED8)),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: const [
+                                  Text(
+                                    'Payment Mode:   ',
+                                    style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+                                  ),
+                                  Text(
+                                    'Direct to Vendor',
+                                    style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Customer will pay after service completion.',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Color(0xFF0F172A)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFF16A34A), width: 2),
+                          ),
+                          child: const Icon(Icons.check, color: Color(0xFF16A34A), size: 24),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Action Buttons Row (Call Patient & WhatsApp)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final Uri telUri = Uri(scheme: 'tel', path: phone);
+                              if (await canLaunchUrl(telUri)) {
+                                await launchUrl(telUri);
+                              }
+                            },
+                            icon: const Icon(Icons.phone, color: Colors.white, size: 18),
+                            label: const Text(
+                              'Call Patient',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1D4ED8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final url = "https://wa.me/${phone.replaceAll(RegExp(r'[^\d]'), '')}";
+                              if (await canLaunchUrl(Uri.parse(url))) {
+                                await launchUrl(Uri.parse(url));
+                              }
+                            },
+                            icon: const Icon(Icons.chat_bubble, color: Colors.white, size: 18),
+                            label: const Text(
+                              'WhatsApp',
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF16A34A),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Need Assistance Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Need Assistance?',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF1D4ED8)),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'If you have any issue with your booking\nor patient, contact ONMINT Support.',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Color(0xFF475569)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed: () async {
+                            final Uri supportUri = Uri(scheme: 'tel', path: '+919999999999');
+                            if (await canLaunchUrl(supportUri)) {
+                              await launchUrl(supportUri);
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF1D4ED8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                          ),
+                          child: const Text('Contact Support', style: TextStyle(fontFamily: 'Poppins', fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF1D4ED8))),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Green Safety Priority Bar
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FDF4),
+                      border: Border.all(color: const Color(0xFFDCFCE7)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF16A34A),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.check, color: Colors.white, size: 12),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Your safety is our priority',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Do not share your personal details with the patient.\nContact support if you face any issue.',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Color(0xFF475569)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPatientInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: const Color(0xFF64748B)),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 60,
+          child: Text(
+            label,
+            style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF0F172A), fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConnectedDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Color(0xFF64748B)),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+        ),
+      ],
     );
   }
 

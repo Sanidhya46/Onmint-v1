@@ -1141,7 +1141,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Image.asset(
-          'images/Advertisement_banner.png',
+          'assets/images/Advertisement_banner.png',
           fit: BoxFit.cover,
           height: 140,
           width: double.infinity,
@@ -1583,14 +1583,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ? ((originalPrice - price) / originalPrice * 100).round()
         : 21;
 
-    // Extract image URL from either imageUrl or images array
-    String? imageUrl = medicine['imageUrl']?.toString();
+    // Extract image URL from either imageUrl or images array, prioritizing signed URLs
+    String? imageUrl = medicine['imageUrlSigned']?.toString();
     if (imageUrl == null || imageUrl.isEmpty) {
-      if (medicine['images'] != null &&
-          medicine['images'] is List &&
-          medicine['images'].isNotEmpty) {
-        imageUrl = medicine['images'][0]?.toString();
+      if (medicine['imagesSigned'] != null &&
+          medicine['imagesSigned'] is List &&
+          medicine['imagesSigned'].isNotEmpty) {
+        imageUrl = medicine['imagesSigned'][0]?.toString();
       }
+    }
+    
+    // Fallback to unsigned if signed are not present
+    if (imageUrl == null || imageUrl.isEmpty) {
+      imageUrl = medicine['imageUrl']?.toString();
+      if (imageUrl == null || imageUrl.isEmpty) {
+        if (medicine['images'] != null &&
+            medicine['images'] is List &&
+            medicine['images'].isNotEmpty) {
+          imageUrl = medicine['images'][0]?.toString();
+        }
+      }
+    }
+
+    if (imageUrl != null && imageUrl.startsWith('/images/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
+    } else if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = 'https://api.onmint.in$imageUrl';
     }
 
     return Container(

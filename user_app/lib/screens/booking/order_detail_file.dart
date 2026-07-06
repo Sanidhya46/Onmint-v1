@@ -9,6 +9,7 @@ import 'package:user_app/screens/booking/user_video_call_screen.dart';
 import 'package:user_app/screens/booking/user_active_consultation_screen.dart';
 import 'package:user_app/screens/booking/active_service_tracking_screen.dart';
 import 'package:user_app/screens/booking/order_request_screen.dart';
+import 'package:user_app/screens/booking/service_offers_screen.dart';
 
 class OrderDetailFile extends StatefulWidget {
   final String bookingId;
@@ -135,9 +136,9 @@ class _OrderDetailFileState extends State<OrderDetailFile>
   @override
   Widget build(BuildContext context) {
     if (_isLoading && _booking == null) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFF8F9FA),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -155,6 +156,14 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     }
 
     if (isRequested) {
+      final hasOffers = booking['offers'] is List && (booking['offers'] as List).isNotEmpty;
+      if (hasOffers) {
+        return ServiceOffersScreen(
+          bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? '',
+          serviceType: serviceType.isEmpty ? 'doctor' : serviceType,
+          bookingData: booking,
+        );
+      }
       return OrderRequestScreen(
         bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? '',
         bookingData: booking,
@@ -162,8 +171,10 @@ class _OrderDetailFileState extends State<OrderDetailFile>
       );
     }
 
+    final isLabTest = serviceType == 'pathology' || serviceType == 'labtest' || serviceType == 'lab_test' || serviceType == 'lab test';
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: isLabTest ? Colors.white : const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -301,7 +312,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
       case 'doctor':
         topTitle = 'Doctor Consultation';
         waitText = 'We are waiting for a doctor to accept\nyour request.';
-        imagePath = 'assets/images/request/order/doctor.png';
+        imagePath = 'assets/images/request_order/doctor.png';
         waitCardTitle = 'Waiting for doctor to accept';
         waitCardSub = 'We will notify you once a doctor accepts your request.';
         break;
@@ -309,7 +320,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         topTitle = 'Nursing Care';
         waitText =
             'We are waiting for a nurse provider to accept\nyour request.';
-        imagePath = 'assets/images/request/order/nurse.png';
+        imagePath = 'assets/images/request_order/nurse.png';
         waitCardTitle = 'Waiting for nurse to accept';
         waitCardSub = 'We will notify you once a nurse accepts your request.';
         break;
@@ -317,7 +328,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         topTitle = 'Ambulance Booking';
         waitText =
             'We are waiting for an ambulance provider to accept\nyour request.';
-        imagePath = 'assets/images/request/order/ambulance.png';
+        imagePath = 'assets/images/request_order/ambulance.png';
         waitCardTitle = 'Waiting for ambulance to accept';
         waitCardSub =
             'We will notify you once an ambulance accepts your request.';
@@ -326,7 +337,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
       case 'blood bank':
         topTitle = 'Blood Request';
         waitText = 'We are waiting for a blood unit to accept\nyour request.';
-        imagePath = 'assets/images/request/order/bloodbank.png';
+        imagePath = 'assets/images/request_order/bloodbank.png';
         waitCardTitle = 'Waiting for blood bank to accept';
         waitCardSub =
             'We will notify you once a blood bank accepts your request.';
@@ -337,7 +348,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
       default:
         topTitle = 'Lab Test Booking';
         waitText = 'We are waiting for a lab partner to accept\nyour request.';
-        imagePath = 'assets/images/request/order/labtest.png';
+        imagePath = 'assets/images/request_order/labtest.png';
         waitCardTitle = 'Waiting for lab partner to accept';
         waitCardSub =
             'We will notify you once a technician accepts your request.';
@@ -1313,6 +1324,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                           radius: 38,
                           backgroundColor: Colors.blue.shade50,
                           backgroundImage: drImage.startsWith('http') ? NetworkImage(drImage) : null,
+                          onBackgroundImageError: (e, s) {},
                           child: !drImage.startsWith('http')
                               ? const Icon(Icons.person, size: 38, color: Colors.blue)
                               : null,

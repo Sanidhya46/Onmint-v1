@@ -7,6 +7,8 @@ import '../widgets/active_booking_floating_widget.dart';
 import '../../nurse/booking_details_screen_enhanced.dart';
 import '../../nurse/active_booking_screen.dart';
 import '../../nurse/bookings_screen.dart';
+import '../../../config/app_config.dart';
+import '../../nurse/fill_price_nurse_screen.dart';
 
 class NurseDashboard extends StatefulWidget {
   const NurseDashboard({super.key});
@@ -74,11 +76,25 @@ class _NurseDashboardState extends State<NurseDashboard> {
                 }));
           }
 
+          final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
           _pendingBookings = allBookings
-              .where((booking) {
+              .where((b) {
                 final status =
-                    booking['status']?.toString().toLowerCase() ?? '';
-                return status == 'requested' || status == 'pending';
+                    b['status']?.toString().toLowerCase() ?? '';
+                if (status == 'offer_send' || status == 'offer_sent') return false;
+                final isPending = status == 'requested' || status == 'pending';
+                if (!isPending) return false;
+
+                bool hasOffered = b['hasOffered'] == true;
+                final offers = b['offers'] as List?;
+                if (offers != null && currentUserId != null) {
+                  hasOffered = hasOffered || offers.any((o) {
+                    final vId = o['vendorId'];
+                    return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+                  });
+                }
+                if (hasOffered) return false;
+                return true;
               })
               .toList();
 
@@ -219,7 +235,7 @@ class _NurseDashboardState extends State<NurseDashboard> {
                                 child: Row(
                                   children: [
                                     _buildStatItem(
-                                        '${_dashboardData?['pendingRequests'] ?? 0}',
+                                        '${_pendingBookings.length}',
                                         'Pending'),
                                     Container(
                                         width: 1,
@@ -643,14 +659,49 @@ class _NurseDashboardState extends State<NurseDashboard> {
               onPressed: () {
                 final bookingId =
                     booking['_id'] ?? booking['id'] ?? '';
+                final statusRaw = booking['status']?.toString().toLowerCase() ?? '';
+                
+                Widget targetScreen;
+                if (statusRaw == 'requested' || statusRaw == 'pending') {
+                  final user = context.read<AuthProvider>().currentUser;
+                  final userCity = user?.city?.trim().toLowerCase() ?? '';
+                  final userState = user?.state?.trim().toLowerCase() ?? '';
+                  
+                  final bookingCity = booking['city']?.toString().trim().toLowerCase() ?? '';
+                  final bookingState = booking['state']?.toString().trim().toLowerCase() ?? '';
+                  
+                  final cleanUserCity = userCity.replaceAll(RegExp(r'\s+'), '');
+                  final cleanUserState = userState.replaceAll(RegExp(r'\s+'), '');
+                  final cleanBookingCity = bookingCity.replaceAll(RegExp(r'\s+'), '');
+                  final cleanBookingState = bookingState.replaceAll(RegExp(r'\s+'), '');
+
+                  final isMatchingLocation = (cleanBookingCity.isEmpty && cleanBookingState.isEmpty) ||
+                      (cleanUserCity.isNotEmpty && cleanUserState.isNotEmpty &&
+                       cleanBookingCity == cleanUserCity &&
+                       cleanBookingState == cleanUserState);
+
+                  if (AppConfig.useNewFlow && isMatchingLocation) {
+                    targetScreen = FillPriceNurseScreen(
+                      bookingId: bookingId,
+                      bookingData: booking,
+                    );
+                  } else {
+                    targetScreen = BookingDetailsScreenEnhanced(
+                      bookingId: bookingId,
+                      bookingData: booking,
+                    );
+                  }
+                } else {
+                  targetScreen = BookingDetailsScreenEnhanced(
+                    bookingId: bookingId,
+                    bookingData: booking,
+                  );
+                }
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        BookingDetailsScreenEnhanced(
-                          bookingId: bookingId,
-                          bookingData: booking,
-                        ),
+                    builder: (context) => targetScreen,
                   ),
                 ).then((_) => _loadDashboard());
               },

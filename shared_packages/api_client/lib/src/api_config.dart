@@ -1,8 +1,17 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 /// API Configuration for OnMint Healthcare Platform
 class ApiConfig {
   /// Base URL for the backend API
   /// Update this to your actual backend URL
-  static const String baseUrl = 'https://api.onmint.in/api/v1';
+  static String get baseUrl {
+    if (kIsWeb) return 'http://localhost:5000/api/v1';
+    try {
+      if (Platform.isAndroid) return 'http://10.0.2.2:5000/api/v1';
+    } catch (_) {}
+    return 'http://localhost:5000/api/v1';
+  }
   
   /// Mock mode for development (set to false to use real backend)
   static const bool mockMode = false;

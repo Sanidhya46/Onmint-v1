@@ -242,8 +242,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     prefixWidget: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.phone, color: Color(0xFF0033CC), size: 18),
-                                        SizedBox(width: 8 * s),
                                         Text(
                                           '+91',
                                           style: TextStyle(
