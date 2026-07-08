@@ -236,173 +236,185 @@ class _HomeScreenState extends State<HomeScreen>
         }
         return false; // Prevent popping back to splash screen
       },
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Stack(
+      child: Stack(
         children: [
-          _screens[_selectedIndex],
-          if (_hasActiveBooking && _selectedIndex == 0 && MediaQuery.of(context).viewInsets.bottom == 0)
-            Positioned(
-              right: 20,
-              bottom: 20, // Floating above the bottom nav bar
-              child: GestureDetector(
-                onTap: _openTrackingScreen,
-                child: AnimatedBuilder(
-                  animation: _rotationController,
-                  builder: (context, child) {
-                    return Container(
-                      width: 65,
-                      height: 65,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Rotating Border
-                          Transform.rotate(
-                            angle: _rotationController.value *
-                                2 *
-                                3.141592653589793,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.transparent,
-                                  width: 3,
-                                ),
-                                gradient: SweepGradient(
-                                  colors: [
-                                    _activeThemeColor.withOpacity(0.1),
-                                    _activeThemeColor,
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Inner white circle to hide the middle of gradient
-                          Container(
-                            width: 59,
-                            height: 59,
-                            decoration: const BoxDecoration(
+          Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Stack(
+              children: [
+                _screens[_selectedIndex],
+                if (_hasActiveBooking && _selectedIndex == 0 && MediaQuery.of(context).viewInsets.bottom == 0)
+                  Positioned(
+                    right: 20,
+                    bottom: 20, // Floating above the bottom nav bar
+                    child: GestureDetector(
+                      onTap: _openTrackingScreen,
+                      child: AnimatedBuilder(
+                        animation: _rotationController,
+                        builder: (context, child) {
+                          return Container(
+                            width: 65,
+                            height: 65,
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                )
+                              ],
                             ),
-                          ),
-                          // Icon
-                          _activeImage,
-                          // Green dot if in progress
-                          if (_activeBookingDetails?['status']?.toString().toLowerCase() == 'in_progress')
-                            Positioned(
-                              top: 2,
-                              right: 2,
-                              child: Container(
-                                width: 14,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 2),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Rotating Border
+                                Transform.rotate(
+                                  angle: _rotationController.value *
+                                      2 *
+                                      3.141592653589793,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.transparent,
+                                        width: 3,
+                                      ),
+                                      gradient: SweepGradient(
+                                        colors: [
+                                          _activeThemeColor.withOpacity(0.1),
+                                          _activeThemeColor,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                // Inner white circle to hide the middle of gradient
+                                Container(
+                                  width: 59,
+                                  height: 59,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                // Icon
+                                _activeImage,
+                                // Green dot if in progress
+                                if (_activeBookingDetails?['status']?.toString().toLowerCase() == 'in_progress')
+                                  Positioned(
+                                    top: 2,
+                                    right: 2,
+                                    child: Container(
+                                      width: 14,
+                                      height: 14,
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white, width: 2),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            
-          // Sticky Bottom Cart Bar
-          const Positioned(
-            bottom: 12,
-            left: 0,
-            right: 0,
-            child: CartFloatingBar(),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 8, vertical: 4), // Reduced padding
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildNavItem(
-                    icon: Icons.home_rounded,
-                    label: 'Home',
-                    index: 0,
-                    isSelected: _selectedIndex == 0,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    icon: Icons.bloodtype_rounded,
-                    label: 'Blood',
-                    index: 1,
-                    isSelected: _selectedIndex == 1,
-                  ),
-                ),
-                const SizedBox(width: 56), // Exact space for FAB in center
-                Expanded(
-                  child: _buildNavItem(
-                    icon: Icons.calendar_month_rounded,
-                    label: 'Bookings',
-                    index: 2,
-                    isSelected: _selectedIndex == 2,
-                  ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    icon: Icons.person_rounded,
-                    label: 'Profile',
-                    index: 3,
-                    isSelected: _selectedIndex == 3,
-                  ),
+                  
+                // Sticky Bottom Cart Bar
+                const Positioned(
+                  bottom: 12,
+                  left: 0,
+                  right: 0,
+                  child: CartFloatingBar(),
                 ),
               ],
             ),
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4), // Reduced padding
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildNavItem(
+                          icon: Icons.home_rounded,
+                          label: 'Home',
+                          index: 0,
+                          isSelected: _selectedIndex == 0,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildNavItem(
+                          icon: Icons.bloodtype_rounded,
+                          label: 'Blood',
+                          index: 1,
+                          isSelected: _selectedIndex == 1,
+                        ),
+                      ),
+                      const SizedBox(width: 56), // Exact space for FAB in center
+                      Expanded(
+                        child: _buildNavItem(
+                          icon: Icons.calendar_month_rounded,
+                          label: 'Bookings',
+                          index: 2,
+                          isSelected: _selectedIndex == 2,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildNavItem(
+                          icon: Icons.person_rounded,
+                          label: 'Profile',
+                          index: 3,
+                          isSelected: _selectedIndex == 3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+          if (MediaQuery.of(context).viewInsets.bottom == 0)
+            Positioned(
+              bottom: 25, // Adjusted to match the centerDocked position approximately
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () {
+                    _showUploadBottomSheet(context);
+                  },
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                    ),
+                    child: Image.asset(
+                      'assets/images/circular_camera_icon.png',
+                      width: 56,
+                      height: 56,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
-      floatingActionButton: MediaQuery.of(context).viewInsets.bottom == 0 ? Transform.translate(
-        offset: const Offset(0, 10), // Pushes it down so 65% is in the navbar
-        child: FloatingActionButton(
-          onPressed: () {
-            _showUploadBottomSheet(context);
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: Image.asset(
-            'assets/images/circular_camera_icon.png',
-            width: 56,
-            height: 56,
-          ),
-        ),
-      ) : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    ));
+    );
   }
 
   Widget _buildNavItem({

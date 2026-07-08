@@ -104,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = MediaQuery.of(context).size.height + MediaQuery.of(context).viewInsets.bottom;
     final bottomHeight = screenHeight * (2 / 3);
     final s = (bottomHeight / 500).clamp(0.8, 1.2);
 
@@ -115,7 +115,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ──── TOP: Image Banner ────
                     Image.asset(
                       'assets/images/register_login/register_top_banner.png',
                       width: double.infinity,
@@ -134,8 +133,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               topRight: Radius.circular(24 * s),
                             ),
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 20 * s, left: 20 * s, right: 20 * s),
+                          child: SingleChildScrollView(
+                            padding: EdgeInsets.only(top: 20 * s, left: 20 * s, right: 20 * s, bottom: 20 * s),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
@@ -178,12 +177,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                                 SizedBox(height: 16 * s),
                                 
-                                Expanded(
-                                  child: SingleChildScrollView(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(bottom: 20 * s),
-                                      child: Form(
-                                        key: _formKey,
+                                
+                                Form(
+                                  key: _formKey,
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
@@ -381,18 +377,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       ],
                                     ),
                                   ),
-                                ),
-                                      ), // closes SingleChildScrollView(182)
-                                    ), // closes Expanded(181)
-                                  ], // closes children: [(141)
-                                ), // closes Column(139)
-                              ), // closes Padding(137)
-                            ), // closes Container(129)
-                          ), // closes Padding(127)
-                        ), // closes Expanded(126)
-                      ], // closes children: [(117)
-                    ), // closes Column(115)
-                  ), // closes SafeArea(114)
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -473,7 +466,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             borderRadius: BorderRadius.circular(8 * s),
             border: Border.all(color: Colors.grey.shade200),
           ),
-          padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 8 * s),
+          padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 0),
           child: Autocomplete<String>(
             initialValue: TextEditingValue(text: _selectedState ?? ''),
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -497,7 +490,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   hintStyle: TextStyle(fontSize: 10 * s, color: Colors.grey.shade400),
                   border: InputBorder.none,
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 10 * s),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12 * s),
                   icon: Icon(Icons.map_outlined, color: const Color(0xFF0D6EFD), size: 14 * s),
                   suffixIcon: controller.text.isNotEmpty
                       ? GestureDetector(
@@ -580,7 +573,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             borderRadius: BorderRadius.circular(8 * s),
             border: Border.all(color: Colors.grey.shade200),
           ),
-          padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 12 * s),
+          padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 0),
           child: Autocomplete<String>(
             key: ValueKey(_selectedState),
             initialValue: TextEditingValue(text: _selectedCity ?? ''),
@@ -604,7 +597,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   hintStyle: TextStyle(fontSize: 10 * s, color: Colors.grey.shade400),
                   border: InputBorder.none,
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8 * s),
+                  contentPadding: EdgeInsets.symmetric(vertical: 12 * s),
                   icon: Icon(Icons.location_city, color: const Color(0xFF0D6EFD), size: 14 * s),
                   suffixIcon: controller.text.isNotEmpty
                       ? GestureDetector(
@@ -681,7 +674,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             borderRadius: BorderRadius.circular(8 * s),
             border: Border.all(color: Colors.grey.shade200),
           ),
-          padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 12 * s),
+          padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 9 * s),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _selectedGender,

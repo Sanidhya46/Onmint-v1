@@ -366,9 +366,21 @@ class _MyBookingsUnifiedScreenState extends State<MyBookingsUnifiedScreen>
           statusText = 'Request Sent';
         }
         break;
+      case 'accepted':
+        statusColor = Colors.green;
+        statusText = 'Connected';
+        break;
+      case 'in_progress':
+      case 'on_the_way':
+        statusColor = Colors.blue;
+        statusText = 'In Progress';
+        break;
       default:
+        // Capitalize first letter for default
         statusColor = Colors.grey;
-        statusText = status;
+        statusText = status.length > 0 
+            ? status[0].toUpperCase() + status.substring(1).replaceAll('_', ' ')
+            : status;
     }
 
     final bookingId = booking['_id'] ?? booking['id'] ?? '';

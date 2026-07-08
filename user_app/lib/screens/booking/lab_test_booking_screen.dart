@@ -158,7 +158,7 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
           const Color(0xFFF8F9FA), // Very light grey/white background
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -676,7 +676,7 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
                       // Proceed Button
                       SizedBox(
                         width: double.infinity,
-                        height: 38,
+                        height: 44, // Match standard field height
                         child: ElevatedButton(
                           onPressed: _proceedToConfirmation,
                           style: ElevatedButton.styleFrom(
@@ -687,9 +687,8 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
                             ),
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const SizedBox(width: 24), // Balance spacing
                               const Text(
                                 'Proceed',
                                 style: TextStyle(
@@ -698,6 +697,7 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
                                   color: Colors.white,
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               Container(
                                 padding: EdgeInsets.all(4),
                                 decoration: BoxDecoration(

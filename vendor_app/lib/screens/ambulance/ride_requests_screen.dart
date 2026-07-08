@@ -63,6 +63,21 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
             for (var e in regularBookings) {
               final b = Map<String, dynamic>.from(e);
               final id = b['_id']?.toString() ?? b['id']?.toString() ?? '';
+              bool isRejectedByMe = false;
+              final offers = b['offers'] as List?;
+              if (offers != null) {
+                final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+                for (var o in offers) {
+                  final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+                  bool isMyOffer = currentUserId != null && (vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId)));
+                  if (isMyOffer && o is Map && o['status'] == 'rejected') {
+                    isRejectedByMe = true;
+                    break;
+                  }
+                }
+              }
+              if (isRejectedByMe) continue;
+              
               if (id.isNotEmpty) uniqueBookings[id] = b;
             }
           }
@@ -253,10 +268,11 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
     final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
     final offers = request['offers'] as List?;
     bool hasOffered = request['hasOffered'] == true;
-    if (offers != null && currentUserId != null) {
+    if (offers != null) {
       hasOffered = hasOffered || offers.any((o) {
-        final vId = o['vendorId'];
-        return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+        if (currentUserId == null) return false;
+        final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+        return vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
       });
     }
 
@@ -265,8 +281,13 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
     bool isCompleted = false;
 
     if (statusRaw == 'requested' || statusRaw == 'pending') {
-      statusColor = Colors.orange;
-      statusLabel = 'Pending';
+      if (hasOffered) {
+        statusColor = const Color(0xFF1565C0);
+        statusLabel = 'Offer Sent';
+      } else {
+        statusColor = Colors.orange;
+        statusLabel = 'Requested';
+      }
     } else if (statusRaw == 'completed') {
       statusColor = Colors.green;
       statusLabel = 'Completed';
@@ -275,6 +296,9 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
       statusColor = Colors.red;
       statusLabel = 'Cancelled';
       isCompleted = true;
+    } else if (statusRaw == 'accepted') {
+      statusColor = Colors.green;
+      statusLabel = 'Connected';
     } else {
       statusColor = const Color(0xFF1565C0);
       statusLabel = 'In Progress';
@@ -321,8 +345,18 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
             context,
             MaterialPageRoute(builder: (context) => targetScreen),
           );
-          if (result == true) {
+          if (result == true || result == 'accepted') {
             _loadBookings();
+          }
+          if (result == 'accepted') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RideDetailsScreen(
+                  rideId: bookingId,
+                ),
+              ),
+            );
           }
         },
         child: Padding(

@@ -235,7 +235,7 @@ class _UserActiveConsultationScreenState
         break;
       case 'accepted':
       default:
-        headerTitle = 'Request Accepted';
+        headerTitle = 'Connected';
         subTitle =
             '${fullName.isEmpty ? "The doctor" : fullName} has accepted your request.';
         headerIcon = Icons.check_circle;
@@ -484,7 +484,7 @@ class _UserActiveConsultationScreenState
           const SizedBox(height: 24),
           Row(
             children: [
-              _buildProgressStep('Accepted', Icons.check, true, 'Done'),
+              _buildProgressStep('Connected', Icons.check, true, 'Done'),
               _buildProgressLine(isLive || isCompleted),
               _buildProgressStep(
                   'In Consultation',

@@ -165,7 +165,9 @@ class _BookingDetailsScreenEnhancedState
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      body: RefreshIndicator(
+        onRefresh: _fetchDetails,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         child: Column(
           children: [
@@ -289,6 +291,7 @@ class _BookingDetailsScreenEnhancedState
           ],
         ),
       ),
+      ), // closes RefreshIndicator
       bottomNavigationBar: (status.toLowerCase() == 'requested' || status.toLowerCase() == 'pending')
           ? Container(
               padding: const EdgeInsets.all(16),

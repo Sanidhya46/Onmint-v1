@@ -688,7 +688,11 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> with SingleTickerPr
       statusBgColor = Colors.green.shade50;
       statusTextColor = Colors.green;
       displayStatus = 'Completed';
-    } else if (status == 'accepted' || status == 'confirmed') {
+    } else if (status == 'accepted') {
+      statusBgColor = Colors.green.shade50;
+      statusTextColor = Colors.green;
+      displayStatus = 'Connected';
+    } else if (status == 'confirmed') {
       statusBgColor = Colors.blue.shade50;
       statusTextColor = Colors.blue;
       displayStatus = 'Confirmed';

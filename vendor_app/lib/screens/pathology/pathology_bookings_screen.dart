@@ -67,6 +67,21 @@ class _PathologyBookingsScreenState extends State<PathologyBookingsScreen>
 
             for (var b in _allBookings) {
               final status = b['status']?.toString().toLowerCase() ?? '';
+              bool isRejectedByMe = false;
+              final offers = b['offers'] as List?;
+              if (offers != null) {
+                final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+                for (var o in offers) {
+                  final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+                  bool isMyOffer = currentUserId != null && (vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId)));
+                  if (isMyOffer && o is Map && o['status'] == 'rejected') {
+                    isRejectedByMe = true;
+                    break;
+                  }
+                }
+              }
+              if (isRejectedByMe) continue;
+
               if (status == 'requested' || status == 'pending') {
                 _pendingBookings.add(b);
               } else if (status == 'completed' || status == 'cancelled' || status == 'rejected' || status == 'accepted') {
@@ -224,9 +239,28 @@ class _PathologyBookingsScreenState extends State<PathologyBookingsScreen>
     bool isPending = false;
     bool isCompleted = false;
 
+    final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+    final offers = booking['offers'] as List?;
+    bool hasOffered = booking['hasOffered'] == true;
+    bool isRejectedByMe = false;
+    if (offers != null) {
+      hasOffered = hasOffered || offers.any((o) {
+        if (currentUserId == null) return false;
+        final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+        bool isMyOffer = vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
+        if (isMyOffer && o is Map && o['status'] == 'rejected') isRejectedByMe = true;
+        return isMyOffer;
+      });
+    }
+
     if (statusRaw == 'requested' || statusRaw == 'pending') {
-      statusColor = Colors.orange;
-      statusLabel = 'Pending';
+      if (hasOffered) {
+        statusColor = const Color(0xFF1565C0);
+        statusLabel = 'Offer Sent';
+      } else {
+        statusColor = Colors.orange;
+        statusLabel = 'Requested';
+      }
       isPending = true;
     } else if (statusRaw == 'completed') {
       statusColor = Colors.green;
@@ -236,6 +270,9 @@ class _PathologyBookingsScreenState extends State<PathologyBookingsScreen>
       statusColor = Colors.red;
       statusLabel = 'Cancelled';
       isCompleted = true;
+    } else if (statusRaw == 'accepted') {
+      statusColor = Colors.green;
+      statusLabel = 'Connected';
     } else {
       statusColor = const Color(0xFF1565C0);
       statusLabel = 'In Progress';
@@ -287,14 +324,7 @@ class _PathologyBookingsScreenState extends State<PathologyBookingsScreen>
                  cleanBookingState == cleanUserState);
 
             final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
-            final offers = booking['offers'] as List?;
-            bool hasOffered = booking['hasOffered'] == true;
-            if (offers != null && currentUserId != null) {
-              hasOffered = hasOffered || offers.any((o) {
-                final vId = o['vendorId'];
-                return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
-              });
-            }
+            // hasOffered is already calculated above for the UI tag
 
             Widget targetScreen;
             if (AppConfig.useNewFlow && hasOffered) {
@@ -310,7 +340,20 @@ class _PathologyBookingsScreenState extends State<PathologyBookingsScreen>
               MaterialPageRoute(
                 builder: (_) => targetScreen,
               ),
-            ).then((_) => _loadBookings());
+            ).then((result) {
+              _loadBookings();
+              if (result == 'accepted') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LabTestBookingScreen(
+                      bookingId: bookingId,
+                      bookingData: booking,
+                    ),
+                  ),
+                );
+              }
+            });
           } else {
             Navigator.push(
               context,

@@ -141,8 +141,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
               : Column(
                   children: [
                     Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: RefreshIndicator(
+                        onRefresh: _loadAppointment,
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -153,6 +156,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           ],
                         ),
                       ),
+                    ),
                     ),
                   ],
                 ),

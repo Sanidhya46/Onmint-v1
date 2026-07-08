@@ -325,63 +325,114 @@ class _ConfirmLabTestBookingScreenNewState
 
             const SizedBox(height: 16),
 
-            // Get Help Instantly Section
+            // Nearest Lab
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF90CAF9), width: 1.5),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF90CAF9).withOpacity(0.2),
-                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFBBDEFB),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.support_agent,
-                      color: Color(0xFF1E88E5),
-                      size: 24,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.purple[50],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.science, color: Colors.purple[700], size: 16),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Nearest Lab',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text('View All', style: TextStyle(color: Colors.purple[700], fontWeight: FontWeight.bold, fontSize: 11)),
+                    ],
                   ),
-                  const SizedBox(width: 14),
-                  const Expanded(
+                  const SizedBox(height: 16),
+                  
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9F2FF),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Get Help Instantly',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0D47A1),
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Need assistance with your booking? Contact support 24/7.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF1E88E5),
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                              child: Icon(Icons.biotech, color: Colors.purple[700], size: 20),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Accurate Diagnostics', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87)),
+                                  const SizedBox(height: 2),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.purple[100],
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.location_on_outlined, color: Colors.purple[700], size: 8),
+                                        const SizedBox(width: 2),
+                                        Text('3.0 km away', style: TextStyle(color: Colors.purple[700], fontSize: 8, fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Available: Blood Tests, X-Ray,\nUltrasound, MRI',
+                                    style: TextStyle(color: Colors.grey[800], fontSize: 9, height: 1.2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                  child: Icon(Icons.phone, color: Colors.purple[700], size: 20),
+                                ),
+                                const SizedBox(height: 4),
+                                Text('Call Now', style: TextStyle(color: Colors.purple[700], fontSize: 8, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: Color(0xFF1E88E5),
                   ),
                 ],
               ),

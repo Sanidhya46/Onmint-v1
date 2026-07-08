@@ -573,7 +573,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
       steps = [
         {
           'id': 'accepted',
-          'title': 'Request Accepted',
+          'title': 'Connected',
           'subtitle': 'Your request has been accepted'
         },
         {
@@ -603,7 +603,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
       steps = [
         {
           'id': 'accepted',
-          'title': 'Request Accepted',
+          'title': 'Connected',
           'subtitle': 'Your request has been accepted'
         },
         {
@@ -627,7 +627,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
       steps = [
         {
           'id': 'accepted',
-          'title': 'Request Accepted',
+          'title': 'Connected',
           'subtitle': 'Your request has been accepted'
         },
         {
@@ -679,7 +679,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
       steps = [
         {
           'id': 'accepted',
-          'title': 'Request Accepted',
+          'title': 'Connected',
           'subtitle': 'Your request has been accepted'
         },
         {

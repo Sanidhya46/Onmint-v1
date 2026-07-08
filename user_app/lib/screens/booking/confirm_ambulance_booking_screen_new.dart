@@ -307,63 +307,114 @@ class _ConfirmAmbulanceBookingScreenNewState
 
                 const SizedBox(height: 12),
 
-                // Get Help Instantly Section
+                // Nearest Ambulance
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF2F2),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.red.shade100, width: 1.5),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.red.shade100.withOpacity(0.5),
-                        blurRadius: 8,
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.support_agent,
-                          color: Colors.red.shade600,
-                          size: 24,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.red[50],
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.emergency, color: Colors.red[700], size: 16),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Nearest Ambulance',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text('View All', style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.bold, fontSize: 11)),
+                        ],
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
+                      const SizedBox(height: 16),
+                      
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF2F2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Get Help Instantly',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red.shade900,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Need assistance with your booking? Contact support 24/7.',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.red.shade700,
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                  child: Icon(Icons.airport_shuttle, color: Colors.red[700], size: 20),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Fast Response Services', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87)),
+                                      const SizedBox(height: 2),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red[100],
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.location_on_outlined, color: Colors.red[700], size: 8),
+                                            const SizedBox(width: 2),
+                                            Text('1.0 km away', style: TextStyle(color: Colors.red[700], fontSize: 8, fontWeight: FontWeight.w500)),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Available: Basic Life Support,\nAdvanced Life Support',
+                                        style: TextStyle(color: Colors.grey[800], fontSize: 9, height: 1.2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                      child: Icon(Icons.phone, color: Colors.red[700], size: 20),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text('Call Now', style: TextStyle(color: Colors.red[700], fontSize: 8, fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ),
-                      Icon(
-                        Icons.chevron_right,
-                        color: Colors.red.shade600,
                       ),
                     ],
                   ),

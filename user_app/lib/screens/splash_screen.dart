@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
       if (AppConfig.developmentMode && AppConfig.forceLogoutOnStart) {
         await authProvider.forceLogout();
-        if (mounted) Navigator.of(context).pushReplacementNamed('/login');
+        if (mounted) Navigator.of(context).pushReplacementNamed('/register');
         return;
       }
 
@@ -60,11 +60,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         if (authProvider.isAuthenticated && !authProvider.isPatient) {
           await authProvider.logout();
         }
-        if (mounted) Navigator.of(context).pushReplacementNamed('/login');
+        if (mounted) Navigator.of(context).pushReplacementNamed('/register');
       }
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacementNamed('/register');
       }
     }
   }

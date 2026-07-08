@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjimport 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
@@ -41,9 +41,27 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
       );
       
       final requests = <Map<String, dynamic>>[];
+      final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
       if (requestsData['data'] is List) {
         for (var e in requestsData['data']) {
-          requests.add(Map<String, dynamic>.from(e));
+          final b = Map<String, dynamic>.from(e);
+          final status = b['status']?.toString().toLowerCase() ?? '';
+          if (status == 'offer_send' || status == 'offer_sent') continue;
+          bool hasOffered = b['hasOffered'] == true;
+          final offers = b['offers'] as List?;
+          bool isRejectedByMe = false;
+          if (offers != null) {
+            hasOffered = hasOffered || offers.any((o) {
+              if (currentUserId == null) return false;
+              final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+              bool isMyOffer = vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
+              if (isMyOffer && o is Map && o['status'] == 'rejected') isRejectedByMe = true;
+              return isMyOffer;
+            });
+          }
+          if (isRejectedByMe) continue;
+          if (hasOffered && (status == 'requested' || status == 'pending')) continue;
+          requests.add(b);
         }
       }
       // Sort newest first
@@ -385,13 +403,16 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
     String statusLabel;
     if (statusRaw == 'requested' || statusRaw == 'pending') {
       statusColor = Colors.orange;
-      statusLabel = 'Pending';
+      statusLabel = 'Requested';
     } else if (statusRaw == 'completed') {
       statusColor = Colors.green;
       statusLabel = 'Completed';
     } else if (statusRaw == 'cancelled' || statusRaw == 'rejected') {
       statusColor = Colors.red;
       statusLabel = 'Cancelled';
+    } else if (statusRaw == 'accepted') {
+      statusColor = Colors.green;
+      statusLabel = 'Connected';
     } else {
       statusColor = const Color(0xFF1565C0);
       statusLabel = 'In Progress';
@@ -437,7 +458,17 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
             context,
             MaterialPageRoute(builder: (_) => targetScreen),
           );
-          if (result == true) _loadDashboard();
+          if (result == true || result == 'accepted') _loadDashboard();
+          if (result == 'accepted') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RideDetailsScreen(
+                  rideId: bookingId,
+                ),
+              ),
+            );
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(12),

@@ -162,20 +162,15 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        return false;
-      },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF4F8FB),
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black87),
-        ),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F8FB),
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
+      ),
         extendBodyBehindAppBar: true,
         body: SingleChildScrollView(
           controller: _scrollController,
@@ -483,9 +478,8 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
                             elevation: 0,
                           ),
                           child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              SizedBox(width: 24),
                               Text(
                                 'Proceed',
                                 style: TextStyle(
@@ -494,6 +488,7 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
                                   color: Colors.white,
                                 ),
                               ),
+                              SizedBox(width: 8),
                               Icon(Icons.arrow_forward,
                                   color: Colors.white, size: 16),
                             ],
@@ -508,7 +503,7 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
           ],
         ),
       ),
-    ));
+    );
   }
 
   Widget _buildFieldLabel(String label) {

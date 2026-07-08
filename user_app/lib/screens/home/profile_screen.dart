@@ -193,24 +193,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
 
-                  // Logout Button
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _logout(authProvider),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.error,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                  const SizedBox(height: 24),
+                  if (user != null)
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => _logout(authProvider),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.error,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text('Logout', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ),
                         ),
-                        child: const Text('Logout'),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
                 ],
               ),
             ),

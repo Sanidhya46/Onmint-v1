@@ -70,6 +70,21 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
 
             for (var b in _allBookings) {
               final status = b['status']?.toString().toLowerCase() ?? '';
+              bool isRejectedByMe = false;
+              final offers = b['offers'] as List?;
+              if (offers != null) {
+                final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+                for (var o in offers) {
+                  final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+                  bool isMyOffer = currentUserId != null && (vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId)));
+                  if (isMyOffer && o is Map && o['status'] == 'rejected') {
+                    isRejectedByMe = true;
+                    break;
+                  }
+                }
+              }
+              if (isRejectedByMe) continue;
+
               if (status == 'requested' || status == 'pending') {
                 _pendingBookings.add(b);
               } else if (status == 'completed' || status == 'cancelled' || status == 'rejected' || status == 'accepted') {
@@ -248,10 +263,14 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
     final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
     final offers = request['offers'] as List?;
     bool hasOffered = request['hasOffered'] == true;
-    if (offers != null && currentUserId != null) {
+    bool isRejectedByMe = false;
+    if (offers != null) {
       hasOffered = hasOffered || offers.any((o) {
-        final vId = o['vendorId'];
-        return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+        if (currentUserId == null) return false;
+        final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+        bool isMyOffer = vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
+        if (isMyOffer && o is Map && o['status'] == 'rejected') isRejectedByMe = true;
+        return isMyOffer;
       });
     }
     final statusRaw = request['status']?.toString().toLowerCase() ?? '';
@@ -263,7 +282,7 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
 
     if (statusRaw == 'requested' || statusRaw == 'pending') {
       statusColor = Colors.orange;
-      statusLabel = 'Pending';
+      statusLabel = 'Requested';
     } else if (statusRaw == 'completed') {
       statusColor = Colors.green;
       statusLabel = 'Completed';
@@ -272,6 +291,9 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
       statusColor = Colors.red;
       statusLabel = 'Cancelled';
       isCompleted = true;
+    } else if (statusRaw == 'accepted') {
+      statusColor = Colors.green;
+      statusLabel = 'Connected';
     } else {
       statusColor = const Color(0xFF1565C0);
       statusLabel = 'In Progress';
@@ -322,6 +344,17 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
             MaterialPageRoute(builder: (context) => screen),
           );
           _loadBookings();
+          if (result == 'accepted') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BloodBankAcceptedOrderScreen(
+                  bookingId: bookingId,
+                  initialData: request,
+                ),
+              ),
+            );
+          }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

@@ -139,21 +139,6 @@ class _LabTestSelectionScreenState extends State<LabTestSelectionScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: Checkbox(
-                            value: isSelected,
-                            onChanged: (bool? value) {
-                              _toggleSelection(test);
-                            },
-                            activeColor: Colors.purple[700],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,12 +165,18 @@ class _LabTestSelectionScreenState extends State<LabTestSelectionScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          '₹${test.price.toInt()}',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: Checkbox(
+                            value: isSelected,
+                            onChanged: (bool? value) {
+                              _toggleSelection(test);
+                            },
+                            activeColor: Colors.purple[700],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                         ),
                       ],
@@ -217,13 +208,7 @@ class _LabTestSelectionScreenState extends State<LabTestSelectionScreen> {
                     children: [
                       Text(
                         '${_selectedTests.length} Test${_selectedTests.length == 1 ? '' : 's'} Selected',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '₹${totalPrice.toInt()}',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
                     ],
                   ),

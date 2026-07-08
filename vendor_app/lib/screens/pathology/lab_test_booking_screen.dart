@@ -245,8 +245,10 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: RefreshIndicator(
+        onRefresh: _fetchDetails,
+        child: SingleChildScrollView(
+          child: Column(
           children: [
             const SizedBox(height: 16),
             Padding(
@@ -739,6 +741,7 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

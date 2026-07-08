@@ -9,6 +9,7 @@ import '../../nurse/active_booking_screen.dart';
 import '../../nurse/bookings_screen.dart';
 import '../../../config/app_config.dart';
 import '../../nurse/fill_price_nurse_screen.dart';
+import '../../booking/waiting_for_patient_screen.dart';
 
 class NurseDashboard extends StatefulWidget {
   const NurseDashboard({super.key});
@@ -87,12 +88,17 @@ class _NurseDashboardState extends State<NurseDashboard> {
 
                 bool hasOffered = b['hasOffered'] == true;
                 final offers = b['offers'] as List?;
-                if (offers != null && currentUserId != null) {
+                bool isRejectedByMe = false;
+                if (offers != null) {
                   hasOffered = hasOffered || offers.any((o) {
-                    final vId = o['vendorId'];
-                    return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+                    if (currentUserId == null) return false;
+                    final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+                    bool isMyOffer = vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
+                    if (isMyOffer && o is Map && o['status'] == 'rejected') isRejectedByMe = true;
+                    return isMyOffer;
                   });
                 }
+                if (isRejectedByMe) return false;
                 if (hasOffered) return false;
                 return true;
               })
@@ -625,24 +631,7 @@ class _NurseDashboardState extends State<NurseDashboard> {
                             ],
                           ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '₹$fees',
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.blue,
-                              ),
-                            ),
-                            const Text(
-                              'Consultation Fee',
-                              style: TextStyle(
-                                  fontSize: 9, color: Colors.grey),
-                            ),
-                          ],
-                        ),
+                        // Price hidden for vendor apps
                       ],
                     ),
                   ],
@@ -680,7 +669,25 @@ class _NurseDashboardState extends State<NurseDashboard> {
                        cleanBookingCity == cleanUserCity &&
                        cleanBookingState == cleanUserState);
 
-                  if (AppConfig.useNewFlow && isMatchingLocation) {
+                  bool hasOffered = booking['hasOffered'] == true;
+                  final offers = booking['offers'] as List?;
+                  bool isRejectedByMe = false;
+                  if (offers != null) {
+                    hasOffered = hasOffered || offers.any((o) {
+                      if (user?.id == null) return false;
+                      final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+                      bool isMyOffer = vId == user?.id || (vId is Map && (vId['_id'] == user?.id || vId['id'] == user?.id));
+                      if (isMyOffer && o is Map && o['status'] == 'rejected') isRejectedByMe = true;
+                      return isMyOffer;
+                    });
+                  }
+
+                  if (AppConfig.useNewFlow && hasOffered && !isRejectedByMe) {
+                    targetScreen = WaitingForPatientScreen(
+                      bookingId: bookingId,
+                      bookingData: booking,
+                    );
+                  } else if (AppConfig.useNewFlow && isMatchingLocation) {
                     targetScreen = FillPriceNurseScreen(
                       bookingId: bookingId,
                       bookingData: booking,
@@ -703,7 +710,20 @@ class _NurseDashboardState extends State<NurseDashboard> {
                   MaterialPageRoute(
                     builder: (context) => targetScreen,
                   ),
-                ).then((_) => _loadDashboard());
+                ).then((result) {
+                  _loadDashboard();
+                  if (result == 'accepted') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookingDetailsScreenEnhanced(
+                          bookingId: bookingId,
+                          bookingData: booking,
+                        ),
+                      ),
+                    );
+                  }
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1565C0),

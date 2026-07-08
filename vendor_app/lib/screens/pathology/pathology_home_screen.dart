@@ -87,7 +87,20 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
             final isPending = getPriority(status) == 0;
             if (!isPending) return false;
             
-            if (b['hasOffered'] == true) return false;
+            bool hasOffered = b['hasOffered'] == true;
+            final offers = b['offers'] as List?;
+            bool isRejectedByMe = false;
+            if (offers != null) {
+              hasOffered = hasOffered || offers.any((o) {
+                if (currentUserId == null) return false;
+                final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+                bool isMyOffer = vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
+                if (isMyOffer && o is Map && o['status'] == 'rejected') isRejectedByMe = true;
+                return isMyOffer;
+              });
+            }
+            if (isRejectedByMe) return false;
+            if (hasOffered) return false;
             
             return true;
           }).toList();
@@ -675,23 +688,7 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '₹$fees',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF0D47A1),
-                              ),
-                            ),
-                            const Text(
-                              'Consultation Fee',
-                              style: TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
+                        // Price hidden for vendor apps
                       ],
                     ),
                   ],
@@ -753,8 +750,18 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                   final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
                   final offers = booking['offers'] as List?;
                   bool hasOffered = booking['hasOffered'] == true;
+                  bool isRejectedByMe = false;
+                  if (offers != null) {
+                    hasOffered = hasOffered || offers.any((o) {
+                      if (currentUserId == null) return false;
+                      final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+                      bool isMyOffer = vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
+                      if (isMyOffer && o is Map && o['status'] == 'rejected') isRejectedByMe = true;
+                      return isMyOffer;
+                    });
+                  }
 
-                  if (AppConfig.useNewFlow && hasOffered) {
+                  if (AppConfig.useNewFlow && hasOffered && !isRejectedByMe) {
                     targetScreen = WaitingForPatientScreen(bookingId: bookingId, bookingData: booking);
                   } else if (AppConfig.useNewFlow && isMatchingLocation) {
                     targetScreen = FillPriceLabtestScreen(bookingId: bookingId, bookingData: booking);
@@ -775,6 +782,17 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                     _mockDataHandled = true;
                   }
                   _loadDashboard();
+                  if (result == 'accepted') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LabTestBookingScreen(
+                          bookingId: bookingId,
+                          bookingData: booking,
+                        ),
+                      ),
+                    );
+                  }
                 });
               },
               style: ElevatedButton.styleFrom(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:intl/intl.dart';
 
-class WaitingForPatientScreen extends StatelessWidget {
+class WaitingForPatientScreen extends StatefulWidget {
   final String bookingId;
   final Map<String, dynamic> bookingData;
 
@@ -13,7 +13,37 @@ class WaitingForPatientScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<WaitingForPatientScreen> createState() => _WaitingForPatientScreenState();
+}
+
+class _WaitingForPatientScreenState extends State<WaitingForPatientScreen> {
+  bool _isLoading = false;
+
+  Future<void> _refreshData() async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await ApiClient().get('/realtime-bookings/${widget.bookingId}');
+      final data = response.data['data'] ?? response.data;
+      final status = data['status']?.toString().toLowerCase() ?? '';
+      
+      if (status == 'accepted' || status == 'completed') {
+        if (mounted) {
+          Navigator.pop(context, 'accepted');
+          return;
+        }
+      }
+    } catch (e) {
+      // Ignore fallback silently, or we could also try ambulance specific endpoint etc, but realtime-bookings should exist.
+    }
+    
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bookingData = widget.bookingData;
     final patientData = bookingData['patient'] ?? bookingData['patientDetails'] ?? {};
     String pName = 'Patient';
     if (patientData is Map) {
@@ -55,29 +85,38 @@ class WaitingForPatientScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Image Graphic
-            Image.asset(
-              'assets/images/request_send_top_image.png',
-              height: 220,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback icon placeholder if image is missing
-                return Container(
-                  height: 200,
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.access_time_filled, size: 80, color: Color(0xFF0056D2)),
-                );
-              },
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              constraints: const BoxConstraints(
+                minHeight: 180,
+                maxHeight: 280,
+              ),
+              width: double.infinity,
+              child: Image.asset(
+                'assets/images/request_send_top_image.png',
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback icon placeholder if image is missing
+                  return Container(
+                    height: 200,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.access_time_filled, size: 80, color: Color(0xFF0056D2)),
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -230,6 +269,7 @@ class WaitingForPatientScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

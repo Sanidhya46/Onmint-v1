@@ -150,7 +150,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
     if (statusRaw == 'requested' || statusRaw == 'pending') {
       statusColor = Colors.orange;
-      statusLabel = 'Pending';
+      statusLabel = 'Requested';
       isPending = true;
     } else if (statusRaw == 'completed') {
       statusColor = Colors.green;
@@ -160,6 +160,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       statusColor = Colors.red;
       statusLabel = 'Cancelled';
       isCompleted = true;
+    } else if (statusRaw == 'accepted') {
+      statusColor = Colors.green;
+      statusLabel = 'Connected';
     } else {
       statusColor = const Color(0xFF1565C0);
       statusLabel = 'In Progress';

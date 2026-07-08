@@ -37,8 +37,11 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
           children: [
             // Profile Card
             Padding(
@@ -225,40 +228,41 @@ class ProfileScreen extends StatelessWidget {
               'Read our privacy policy',
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
             ),
-
             const SizedBox(height: 8),
-
-            // Logout Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    await authProvider.logout();
-                    if (context.mounted) {
-                      Navigator.pushReplacementNamed(context, '/login');
-                    }
-                  },
-                  icon: const Icon(Icons.logout, color: Colors.red, size: 20),
-                  label: const Text(
-                    'Logout',
-                    style: TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+          ],
+        ),
+      )),
+      // Logout Button
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                await authProvider.logout();
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, '/login');
+                }
+              },
+              icon: const Icon(Icons.logout, color: Colors.red, size: 20),
+              label: const Text(
+                'Logout',
+                style: TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-          ],
+          ),
         ),
       ),
+    ],
+    ),
     );
   }
 

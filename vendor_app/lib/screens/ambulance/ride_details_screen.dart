@@ -346,8 +346,11 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       return Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: RefreshIndicator(
+              onRefresh: _loadRide,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -363,6 +366,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                   const SizedBox(height: 6),
                   _buildRequestServiceDetailsCard(),
                 ],
+              ),
               ),
             ),
           ),
@@ -1457,7 +1461,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
     final phone = patientData['phone']?.toString() ?? '+91 98765 43210';
 
     final pickup = _safeAddress(booking['pickupLocation'] ?? booking['location'] ?? booking['pickupAddress'], 'B-102, Ashok Nagar, Varanasi, UP');
-    final drop = _safeAddress(booking['dropLocation'] ?? booking['destination'] ?? booking['dropAddress'], 'Apex Hospital, Varanasi, UP');
+    final drop = _safeAddress(booking['dropOffLocation'] ?? booking['dropLocation'] ?? booking['destination'] ?? booking['dropAddress'], 'Apex Hospital, Varanasi, UP');
 
     final requestedOn = booking['createdAt'] != null ? DateTime.tryParse(booking['createdAt']) : DateTime.now();
     final String displayDate = requestedOn != null ? DateFormat('dd MMM yyyy').format(requestedOn) : '30 Jun 2026';
@@ -1487,8 +1491,10 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF152238))
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: RefreshIndicator(
+        onRefresh: _loadRide,
+        child: SingleChildScrollView(
+          child: Column(
           children: [
             const SizedBox(height: 16),
 
@@ -1854,6 +1860,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

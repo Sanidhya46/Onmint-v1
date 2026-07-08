@@ -300,64 +300,116 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Get Help Instantly Card
-                GestureDetector(
-                  onTap: () {
-                    // Navigate to Help & Support
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(Icons.headset_mic_outlined, color: Colors.blue[900], size: 24),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                // Nearest Nurse
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                'Get Help Instantly',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Colors.blue[900],
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[50],
+                                  shape: BoxShape.circle,
                                 ),
+                                child: Icon(Icons.person, color: Colors.blue[700], size: 16),
                               ),
+                              const SizedBox(width: 8),
                               const Text(
-                                "Contact Support: We're here to help you.",
+                                'Nearest Nurse',
                                 style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 11,
-                                  color: Colors.grey,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
                                 ),
                               ),
                             ],
                           ),
+                          Text('View All', style: TextStyle(color: Colors.blue[700], fontWeight: FontWeight.bold, fontSize: 11)),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2F7FF),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        Icon(Icons.chevron_right, color: Colors.blue[900], size: 24),
-                      ],
-                    ),
+                        child: Column(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                  child: Icon(Icons.medical_services, color: Colors.blue[700], size: 20),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Care & Comfort Nursing', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87)),
+                                      const SizedBox(height: 2),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue[100],
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.location_on_outlined, color: Colors.blue[700], size: 8),
+                                            const SizedBox(width: 2),
+                                            Text('2.0 km away', style: TextStyle(color: Colors.blue[700], fontSize: 8, fontWeight: FontWeight.w500)),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Available: General Care,\nPost-surgery Care, Eldercare',
+                                        style: TextStyle(color: Colors.grey[800], fontSize: 9, height: 1.2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                      child: Icon(Icons.phone, color: Colors.blue[700], size: 20),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text('Call Now', style: TextStyle(color: Colors.blue[700], fontSize: 8, fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),

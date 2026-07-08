@@ -72,12 +72,23 @@ class _ConnectedVendorDetailsScreenState
     if (!cleanNumber.startsWith('91') && cleanNumber.length == 10) {
       cleanNumber = '91$cleanNumber';
     }
-    final Uri url = Uri.parse('https://wa.me/$cleanNumber');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+    
+    final Uri appUrl = Uri.parse('whatsapp://send?phone=$cleanNumber');
+    final Uri webUrl = Uri.parse('https://wa.me/$cleanNumber');
+    
+    try {
+      if (await canLaunchUrl(appUrl)) {
+        await launchUrl(appUrl, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(webUrl)) {
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch WhatsApp')),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not launch WhatsApp')),
+        SnackBar(content: Text('Error launching WhatsApp: $e')),
       );
     }
   }
@@ -416,12 +427,31 @@ class _ConnectedVendorDetailsScreenState
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: _buildQuickActionCard(
-                          icon: Icons.chat,
-                          label: 'WhatsApp',
-                          color: const Color(0xFF22C55E),
-                          bgColor: const Color(0xFFF0FDF4),
+                        child: GestureDetector(
                           onTap: () => _openWhatsApp(phone),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade50,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Image.network(
+                                  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/512px-WhatsApp.svg.png',
+                                  width: 24,
+                                  height: 24,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(
+                                    Icons.chat,
+                                    color: Colors.green,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text('WhatsApp', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -760,7 +790,8 @@ class _ConnectedVendorDetailsScreenState
   }
 
   Widget _buildQuickActionCard({
-    required IconData icon,
+    IconData? icon,
+    Widget? customIconWidget,
     required String label,
     required Color color,
     required Color bgColor,
@@ -777,9 +808,9 @@ class _ConnectedVendorDetailsScreenState
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 24),
+              customIconWidget ?? Icon(icon, color: color, size: 24),
               const SizedBox(height: 8),
               FittedBox(
                 fit: BoxFit.scaleDown,

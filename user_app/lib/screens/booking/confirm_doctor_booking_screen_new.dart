@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
-import 'package:user_app/screens/booking/order_request_screen.dart';
+import 'package:user_app/screens/booking/order_detail_file.dart';
 
 class ConfirmDoctorBookingScreenNew extends StatefulWidget {
   final String categoryTitle;
@@ -55,10 +55,9 @@ class _ConfirmDoctorBookingScreenNewState
         );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => OrderRequestScreen(
+            builder: (context) => OrderDetailFile(
               bookingId: '',
               bookingData: bookingData,
-              serviceType: 'doctor',
             ),
           ),
           (route) => route.isFirst,
@@ -242,63 +241,114 @@ class _ConfirmDoctorBookingScreenNewState
 
             const SizedBox(height: 16),
 
-            // Get Help Instantly Section
+            // Nearest Doctor
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3E5F5),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.purple.shade200, width: 1.5),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.purple.shade100.withOpacity(0.5),
-                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.shade100,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.support_agent,
-                      color: Colors.purple.shade600,
-                      size: 24,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[50],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.local_hospital, color: Colors.blue[700], size: 16),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Nearest Doctor',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text('View All', style: TextStyle(color: Colors.blue[700], fontWeight: FontWeight.bold, fontSize: 11)),
+                    ],
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
+                  const SizedBox(height: 16),
+                  
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2F7FF),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Get Help Instantly',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.purple.shade900,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Need assistance with your booking? Contact support 24/7.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.purple.shade700,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                              child: Icon(Icons.health_and_safety, color: Colors.blue[700], size: 20),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('City Care Clinic', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87)),
+                                  const SizedBox(height: 2),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue[100],
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.location_on_outlined, color: Colors.blue[700], size: 8),
+                                        const SizedBox(width: 2),
+                                        Text('1.5 km away', style: TextStyle(color: Colors.blue[700], fontSize: 8, fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Available: General Physician,\nCardiologist, Dentist',
+                                    style: TextStyle(color: Colors.grey[800], fontSize: 9, height: 1.2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                  child: Icon(Icons.phone, color: Colors.blue[700], size: 20),
+                                ),
+                                const SizedBox(height: 4),
+                                Text('Call Now', style: TextStyle(color: Colors.blue[700], fontSize: 8, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: Colors.purple.shade600,
                   ),
                 ],
               ),

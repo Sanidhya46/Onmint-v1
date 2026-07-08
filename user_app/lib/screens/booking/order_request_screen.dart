@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:api_client/api_client.dart';
 import '../doctors/doctor_categories_screen.dart';
@@ -8,6 +9,8 @@ import 'blood_request_screen.dart';
 import 'lab_test_booking_screen.dart';
 import '../profile/help_support_screen.dart';
 import '../medicines/medicines_list_screen.dart';
+import 'service_offers_screen.dart';
+import '../home/home_screen.dart';
 
 class OrderRequestScreen extends StatefulWidget {
   final String bookingId;
@@ -28,6 +31,52 @@ class OrderRequestScreen extends StatefulWidget {
 class _OrderRequestScreenState extends State<OrderRequestScreen> {
   bool _isLoading = false;
   final PatientService _patientService = PatientService();
+  Timer? _pollingTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startPolling();
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (mounted) {
+        _pollStatus();
+      }
+    });
+  }
+
+  Future<void> _pollStatus() async {
+    try {
+      final updatedBooking = await _patientService.getBookingById(widget.bookingId);
+      if (!mounted) return;
+      
+      final offers = updatedBooking['offers'] as List<dynamic>? ?? [];
+      
+      if (offers.isNotEmpty || updatedBooking['status'] == 'accepted') {
+        _pollingTimer?.cancel();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ServiceOffersScreen(
+              bookingId: widget.bookingId,
+              serviceType: widget.serviceType,
+              bookingData: updatedBooking,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Silently ignore polling errors
+    }
+  }
 
   String _extractPatientName(Map<String, dynamic>? data) {
     if (data == null) return 'N/A';
@@ -235,6 +284,38 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
     );
   }
 
+  Future<void> _refreshStatus() async {
+    try {
+      final updatedBooking = await _patientService.getBookingById(widget.bookingId);
+      if (!mounted) return;
+      
+      final offers = updatedBooking['offers'] as List<dynamic>? ?? [];
+      
+      if (offers.isNotEmpty || updatedBooking['status'] == 'accepted') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ServiceOffersScreen(
+              bookingId: widget.bookingId,
+              serviceType: widget.serviceType,
+              bookingData: updatedBooking,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Still waiting for vendor offers...')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to refresh: $e')),
+        );
+      }
+    }
+  }
+
   Widget _buildBadge({
     required IconData icon,
     required Color color,
@@ -350,11 +431,10 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        } else {
-          Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-        }
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
         return false;
       },
       child: Scaffold(
@@ -366,11 +446,10 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Color(0xFF0F2147)),
             onPressed: () {
-              if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              } else {
-                Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-              }
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+                (route) => false,
+              );
             },
           ),
           title: const Text(
@@ -399,8 +478,10 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
         ),
         body: Stack(
           children: [
-            SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
+            RefreshIndicator(
+              onRefresh: _refreshStatus,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -428,6 +509,7 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
                       },
                     ),
                   ),
+
 
 
                   // Card 1: We're on it!
@@ -668,6 +750,7 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
                   const SizedBox(height: 24),
                 ],
               ),
+            ),
             ),
             if (_isLoading)
               Container(

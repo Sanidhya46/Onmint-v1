@@ -41,10 +41,25 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
         final allBookings = (appointments['data'] as List?)
                 ?.map((e) => Booking.fromJson(e as Map<String, dynamic>))
                 .toList() ?? [];
+        final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
         _pendingAppointments = allBookings.where((b) {
           final s = b.status?.toLowerCase() ?? '';
           if (s == 'offer_send' || s == 'offer_sent') return false;
-          return s == 'requested' || s == 'pending';
+          final isPending = s == 'requested' || s == 'pending';
+          if (!isPending) return false;
+          
+          final raw = b.rawData ?? {};
+          bool hasOffered = raw['hasOffered'] == true;
+          final offers = raw['offers'] as List?;
+          if (offers != null && currentUserId != null) {
+            hasOffered = hasOffered || offers.any((o) {
+              final vId = o['vendorId'] ?? o['vendor'] ?? o['vendor_id'];
+              return vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
+            });
+          }
+          if (hasOffered) return false;
+          
+          return true;
         }).toList();
         _isLoading = false;
       });

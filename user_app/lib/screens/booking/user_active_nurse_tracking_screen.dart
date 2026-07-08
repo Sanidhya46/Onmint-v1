@@ -149,7 +149,7 @@ class _UserActiveNurseTrackingScreenState
         break;
       case 'accepted':
       default:
-        headerTitle = 'Request Accepted';
+        headerTitle = 'Connected';
         subTitle =
             '${fullName.isEmpty ? "A nurse" : fullName} has accepted your request.';
         headerIcon = Icons.check_circle;
@@ -423,7 +423,7 @@ class _UserActiveNurseTrackingScreenState
             children: [
               Expanded(
                 flex: 2,
-                child: _buildProgressStep('Accepted', Icons.check, stepIndex >= 0, isFirst: true),
+                child: _buildProgressStep('Connected', Icons.check, stepIndex >= 0, isFirst: true),
               ),
               _buildProgressLine(stepIndex >= 1),
               Expanded(

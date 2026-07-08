@@ -51,8 +51,8 @@ class _AmbulanceDashboardState extends State<AmbulanceDashboard> {
             final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
             if (offers != null && currentUserId != null) {
               hasOffered = hasOffered || offers.any((o) {
-                final vId = o['vendorId'];
-                return vId == currentUserId || (vId is Map && vId['_id'] == currentUserId);
+                final vId = o['vendorId'] ?? o['vendor'] ?? o['vendor_id'];
+                return vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
               });
             }
             return !hasOffered;
@@ -511,21 +511,7 @@ class _AmbulanceDashboardState extends State<AmbulanceDashboard> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    '₹${request.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      color: Color(0xFFE52329),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Booking Fee',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 9,
-                    ),
-                  ),
+                  // Price hidden for vendor apps
                 ],
               ),
             ],

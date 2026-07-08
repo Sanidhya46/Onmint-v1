@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
-import 'package:user_app/screens/booking/order_request_screen.dart';
+import 'package:user_app/screens/booking/order_detail_file.dart';
 
 class ConfirmDoctorBookingScreen extends StatefulWidget {
   final String categoryTitle;
@@ -56,10 +56,9 @@ class _ConfirmDoctorBookingScreenState
         );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => OrderRequestScreen(
+            builder: (context) => OrderDetailFile(
               bookingId: '',
               bookingData: bookingData,
-              serviceType: 'doctor',
             ),
           ),
           (route) => route.isFirst,

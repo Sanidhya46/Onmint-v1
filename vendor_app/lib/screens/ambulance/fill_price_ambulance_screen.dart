@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:ui_components/ui_components.dart';
 import 'package:intl/intl.dart';
+import '../booking/waiting_for_patient_screen.dart';
 
 class FillPriceAmbulanceScreen extends StatefulWidget {
   final String bookingId;
@@ -62,7 +63,15 @@ class _FillPriceAmbulanceScreenState extends State<FillPriceAmbulanceScreen> {
 
       if (mounted) {
         ToastUtils.showSuccess('Offer submitted successfully');
-        Navigator.pop(context, true);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WaitingForPatientScreen(
+              bookingId: widget.bookingId,
+              bookingData: widget.bookingData,
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

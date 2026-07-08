@@ -147,7 +147,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     final isRequested = status == 'requested' || status == 'pending';
     final serviceType = booking['serviceType']?.toString().toLowerCase() ?? '';
 
-    if (serviceType == 'doctor') {
+    if (serviceType == 'doctor' && !isRequested) {
       if (status == 'completed') {
         return _buildDoctorCompletedScreen(booking);
       } else {
@@ -164,11 +164,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
           bookingData: booking,
         );
       }
-      return OrderRequestScreen(
-        bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? '',
-        bookingData: booking,
-        serviceType: serviceType.isEmpty ? 'doctor' : serviceType,
-      );
+      // Fall through to display _buildRequestedUI in the Scaffold below
     }
 
     final isLabTest = serviceType == 'pathology' || serviceType == 'labtest' || serviceType == 'lab_test' || serviceType == 'lab test';
@@ -558,7 +554,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
 
     // Status map
     final steps = [
-      {'key': 'accepted', 'title': 'Request Accepted'},
+      {'key': 'accepted', 'title': 'Connected'},
       {'key': 'on_the_way', 'title': 'On The Way'},
       {'key': 'sample_collected', 'title': 'Sample Collected'},
       {'key': 'report_ready', 'title': 'Report Ready'},
