@@ -495,45 +495,7 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
               ),
             ],
           ),
-          // Active Service Widget
-          if (_activeBookings.isNotEmpty || _pendingBookings.isNotEmpty)
-            Positioned(
-              bottom: 24,
-              right: 24,
-              child: Builder(
-                builder: (context) {
-                  final targetBookingData = _activeBookings.isNotEmpty
-                      ? _activeBookings.first
-                      : _pendingBookings.first;
-                  return ActiveBookingFloatingWidget(
-                    serviceType: 'lab_test',
-                    bookingDetails: targetBookingData,
-                    onTap: () {
-                      if (_activeBookings.length > 1) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PathologyBookingsScreen(),
-                          ),
-                        );
-                        return;
-                      }
 
-                      final targetBookingId = targetBookingData['_id'].toString();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LabTestBookingScreen(
-                            bookingId: targetBookingId,
-                            bookingData: targetBookingData,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
         ],
       ),
     );

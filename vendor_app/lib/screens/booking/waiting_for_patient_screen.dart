@@ -111,9 +111,9 @@ class _WaitingForPatientScreenState extends State<WaitingForPatientScreen> {
       targetScreen = RideDetailsScreen(rideId: widget.bookingId);
     } else if (serviceType == 'nurse') {
       targetScreen = ActiveBookingScreen(bookingId: widget.bookingId, bookingData: data);
-    } else if (serviceType == 'pathology') {
+    } else if (serviceType == 'pathology' || serviceType == 'labtest' || serviceType == 'lab_test') {
       targetScreen = LabTestBookingScreen(bookingId: widget.bookingId, bookingData: data);
-    } else if (serviceType == 'bloodbank' || serviceType == 'blood_request') {
+    } else if (serviceType == 'bloodbank' || serviceType == 'blood_request' || serviceType == 'blood_bank') {
       targetScreen = BloodBankAcceptedOrderScreen(bookingId: widget.bookingId, initialData: data);
     } else {
       Navigator.of(context).popUntil((route) => route.isFirst);

@@ -75,7 +75,6 @@ flutter:
     - assets/images/
     - assets/images/pathology/
     - assets/images/bloodbank/
-    - assets/images/request_order/
     - assets/images/register_login/
     - assets/images/register_login/top_banner12.jpeg
     - assets/images/splash_screen.png
