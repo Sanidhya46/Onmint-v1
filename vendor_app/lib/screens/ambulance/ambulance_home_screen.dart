@@ -459,16 +459,6 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
             MaterialPageRoute(builder: (_) => targetScreen),
           );
           if (result == true || result == 'accepted') _loadDashboard();
-          if (result == 'accepted') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RideDetailsScreen(
-                  rideId: bookingId,
-                ),
-              ),
-            );
-          }
         },
         child: Padding(
           padding: const EdgeInsets.all(12),

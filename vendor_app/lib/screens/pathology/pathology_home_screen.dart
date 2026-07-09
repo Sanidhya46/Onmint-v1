@@ -793,17 +793,6 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                     _mockDataHandled = true;
                   }
                   _loadDashboard();
-                  if (result == 'accepted') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LabTestBookingScreen(
-                          bookingId: bookingId,
-                          bookingData: booking,
-                        ),
-                      ),
-                    );
-                  }
                 });
               },
               style: ElevatedButton.styleFrom(

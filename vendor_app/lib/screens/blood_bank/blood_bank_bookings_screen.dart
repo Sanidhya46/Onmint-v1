@@ -350,17 +350,6 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
             MaterialPageRoute(builder: (context) => screen),
           );
           _loadBookings();
-          if (result == 'accepted') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => BloodBankAcceptedOrderScreen(
-                  bookingId: bookingId,
-                  initialData: request,
-                ),
-              ),
-            );
-          }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

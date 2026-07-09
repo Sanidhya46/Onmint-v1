@@ -348,17 +348,6 @@ class _PathologyBookingsScreenState extends State<PathologyBookingsScreen>
               ),
             ).then((result) {
               _loadBookings();
-              if (result == 'accepted') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => LabTestBookingScreen(
-                      bookingId: bookingId,
-                      bookingData: booking,
-                    ),
-                  ),
-                );
-              }
             });
           } else {
             Navigator.push(

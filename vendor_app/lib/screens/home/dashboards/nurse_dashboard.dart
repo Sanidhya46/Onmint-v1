@@ -723,17 +723,6 @@ class _NurseDashboardState extends State<NurseDashboard> {
                   ),
                 ).then((result) {
                   _loadDashboard();
-                  if (result == 'accepted') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BookingDetailsScreenEnhanced(
-                          bookingId: bookingId,
-                          bookingData: booking,
-                        ),
-                      ),
-                    );
-                  }
                 });
               },
               style: ElevatedButton.styleFrom(

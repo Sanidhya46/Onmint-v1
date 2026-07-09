@@ -396,17 +396,6 @@ class _BookingsScreenState extends State<BookingsScreen>
           if (result == true || result == 'accepted') {
             _loadBookings();
           }
-          if (result == 'accepted') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => BookingDetailsScreenEnhanced(
-                  bookingId: bookingId,
-                  bookingData: request,
-                ),
-              ),
-            );
-          }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
