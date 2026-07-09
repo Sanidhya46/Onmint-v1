@@ -71,15 +71,15 @@ class _WaitingForPatientScreenState extends State<WaitingForPatientScreen> {
           if (offers != null && currentUserId != null) {
             for (var o in offers) {
               final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
-              bool isMyOffer = vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
-              if (isMyOffer && o is Map && o['status'] == 'accepted') {
+              bool isMyOffer = vId.toString() == currentUserId.toString() || (vId is Map && (vId['_id'].toString() == currentUserId.toString() || vId['id'].toString() == currentUserId.toString()));
+              if (isMyOffer && o is Map && (o['status'].toString().toLowerCase() == 'accepted' || o['status'].toString().toLowerCase() == 'approved')) {
                 myOfferAccepted = true;
                 break;
               }
             }
           }
           
-          final assignedTo = data['assignedTo'] ?? data['acceptedProvider'] ?? data['assignedVendor'];
+          final assignedTo = data['assignedTo'] ?? data['acceptedProvider'] ?? data['assignedVendor'] ?? data['provider'] ?? data['vendorId'] ?? data['vendor'] ?? data['providerId'] ?? data['acceptedVendor'];
           bool assignedToMe = false;
           if (assignedTo != null && currentUserId != null) {
             final aId = assignedTo is Map ? (assignedTo['_id'] ?? assignedTo['id']) : assignedTo;

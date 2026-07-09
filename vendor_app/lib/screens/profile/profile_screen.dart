@@ -62,13 +62,13 @@ class ProfileScreen extends StatelessWidget {
                     Stack(
                       children: [
                         CircleAvatar(
-                          radius: 42,
+                          radius: 46,
                           backgroundImage: user?.profilePicture != null
                               ? NetworkImage(user!.profilePicture!)
                               : null,
                           backgroundColor: Colors.grey[300],
                           child: user?.profilePicture == null
-                              ? const Icon(Icons.person, size: 42, color: Colors.grey)
+                              ? const Icon(Icons.person, size: 46, color: Colors.grey)
                               : null,
                         ),
                         // Red circle badge for unapproved/uncertified vendors
@@ -268,7 +268,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String title, String subtitle, {required VoidCallback onTap}) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -282,7 +282,7 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
