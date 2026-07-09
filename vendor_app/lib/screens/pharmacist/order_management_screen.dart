@@ -4,6 +4,7 @@ import 'package:ui_components/ui_components.dart';
 import '../../config/app_colors.dart';
 import 'pending_order_details_screen.dart';
 import 'accepted_order_details_screen.dart';
+import 'dart:async';
 
 class OrderManagementScreen extends StatefulWidget {
   final String? initialStatus;
@@ -24,16 +25,21 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
   List<Map<String, dynamic>> _inProgressOrders = [];
   List<Map<String, dynamic>> _completedOrders = [];
   bool _isLoading = true;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadOrders();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadOrders();
+    });
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _tabController.dispose();
     super.dispose();
   }

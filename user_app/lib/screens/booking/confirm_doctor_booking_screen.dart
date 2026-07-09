@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:user_app/screens/booking/order_detail_file.dart';
+import 'package:user_app/screens/booking/order_request_screen.dart';
 
 class ConfirmDoctorBookingScreen extends StatefulWidget {
   final String categoryTitle;
@@ -47,18 +48,20 @@ class _ConfirmDoctorBookingScreenState
         'totalAmount': consultationFee,
       };
 
-      await _apiClient.patient.createRealtimeBooking(bookingData);
+      final resp = await _apiClient.patient.createRealtimeBooking(bookingData);
+      final newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
 
       if (mounted) {
         setState(() => _isBooking = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Doctor consultation request sent successfully!')),
+          const SnackBar(content: Text('Booking request sent successfully!')),
         );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => OrderDetailFile(
-              bookingId: '',
-              bookingData: bookingData,
+            builder: (context) => OrderRequestScreen(
+              bookingId: newBookingId,
+              bookingData: resp,
+              serviceType: 'doctor',
             ),
           ),
           (route) => route.isFirst,

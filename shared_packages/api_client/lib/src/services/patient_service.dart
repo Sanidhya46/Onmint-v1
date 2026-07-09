@@ -478,7 +478,7 @@ class PatientService {
   /// Get realtime booking details
   Future<Map<String, dynamic>> getRealtimeBookingDetails(String bookingId) async {
     try {
-      final response = await _apiClient.get('/realtime-booking/$bookingId');
+      final response = await _apiClient.get('/realtime-bookings/$bookingId');
       
       if (response.data['success'] == true) {
         return response.data['data'];
@@ -493,7 +493,7 @@ class PatientService {
   /// Cancel realtime booking
   Future<void> cancelRealtimeBooking(String bookingId, {required String reason}) async {
     try {
-      final response = await _apiClient.post('/realtime-booking/$bookingId/cancel', data: {
+      final response = await _apiClient.post('/realtime-bookings/$bookingId/cancel', data: {
         'reason': reason,
       });
       
@@ -508,7 +508,7 @@ class PatientService {
   /// Get patient dashboard for realtime bookings
   Future<Map<String, dynamic>> getRealtimeBookingDashboard() async {
     try {
-      final response = await _apiClient.get('/realtime-booking/patient/dashboard');
+      final response = await _apiClient.get('/realtime-bookings/patient/dashboard');
       
       if (response.data['success'] == true) {
         return response.data['data'];

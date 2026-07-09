@@ -8,6 +8,7 @@ import 'booking_details_screen_enhanced.dart';
 import 'active_booking_screen.dart';
 import 'fill_price_nurse_screen.dart';
 import '../booking/waiting_for_patient_screen.dart';
+import 'dart:async';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -26,16 +27,21 @@ class _BookingsScreenState extends State<BookingsScreen>
   List<Map<String, dynamic>> _inProgressBookings = [];
   List<Map<String, dynamic>> _completedBookings = [];
   bool _isLoading = true;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadBookings();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadBookings();
+    });
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _tabController.dispose();
     super.dispose();
   }

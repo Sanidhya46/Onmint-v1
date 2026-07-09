@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
 import 'package:api_client/api_client.dart';
 import '../../doctor/appointment_details_screen.dart';
+import 'dart:async';
 
 class DoctorDashboard extends StatefulWidget {
   const DoctorDashboard({super.key});
@@ -17,11 +18,21 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
   List<Booking> _pendingAppointments = [];
   bool _isLoading = true;
   bool _showAllRequests = false;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _loadDashboard();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadDashboard();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadDashboard() async {

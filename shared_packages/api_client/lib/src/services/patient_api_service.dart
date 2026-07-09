@@ -404,7 +404,7 @@ class PatientApiService {
   /// Cancel realtime booking
   Future<void> cancelRealtimeBooking(String bookingId, {required String reason}) async {
     try {
-      await _client.post('/realtime-booking/$bookingId/cancel', data: {
+      await _client.post('/realtime-bookings/$bookingId/cancel', data: {
         'reason': reason,
       });
     } on DioException catch (e) {
@@ -415,7 +415,7 @@ class PatientApiService {
   /// Get patient dashboard for realtime bookings
   Future<Map<String, dynamic>> getRealtimeBookingDashboard() async {
     try {
-      final response = await _client.get('/realtime-booking/patient/dashboard');
+      final response = await _client.get('/realtime-bookings/patient/dashboard');
       return ResponseHandler.extractData<Map<String, dynamic>>(response);
     } on DioException catch (e) {
       throw Exception(ResponseHandler.handleDioError(e));

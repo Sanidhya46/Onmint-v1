@@ -7,6 +7,7 @@ import 'package:auth_service/auth_service.dart';
 import 'package:vendor_app/config/app_config.dart';
 import 'fill_price_ambulance_screen.dart';
 import '../booking/waiting_for_patient_screen.dart';
+import 'dart:async';
 
 /// Ride requests list screen for ambulance drivers (matching Nurse UI)
 class RideRequestsScreen extends StatefulWidget {
@@ -26,16 +27,21 @@ class _RideRequestsScreenState extends State<RideRequestsScreen>
   List<Map<String, dynamic>> _inProgressBookings = [];
   List<Map<String, dynamic>> _completedBookings = [];
   bool _isLoading = true;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadBookings();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadBookings();
+    });
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _tabController.dispose();
     super.dispose();
   }

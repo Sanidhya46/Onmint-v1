@@ -104,81 +104,59 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height + MediaQuery.of(context).viewInsets.bottom;
-    final bottomHeight = screenHeight * (2 / 3);
-    final s = (bottomHeight / 500).clamp(0.8, 1.2);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final s = (screenHeight / 800).clamp(0.8, 1.2);
 
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-                    Image.asset(
-                      'assets/images/register_login/register_top_banner.png',
-                      width: double.infinity,
-                      fit: BoxFit.fitWidth,
+        child: _ConditionalScrollWrapper(
+          isKeyboardOpen: MediaQuery.of(context).viewInsets.bottom > 0,
+          s: s,
+          banner: Image.asset(
+            'assets/images/register_login/register_top_banner.png',
+            width: double.infinity,
+            fit: BoxFit.fitWidth,
+          ),
+          header: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(6 * s),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0D6EFD),
+                  borderRadius: BorderRadius.circular(10 * s),
+                ),
+                child: Icon(Icons.person_outline, color: Colors.white, size: 18 * s),
+              ),
+              SizedBox(width: 12 * s),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Create Your Profile',
+                      style: TextStyle(
+                        fontSize: 14 * s,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF152238),
+                      ),
                     ),
-                    
-                    // ──── BOTTOM: Form Container ────
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 12 * s, right: 12 * s, bottom: 0, top: 0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(24 * s),
-                              topRight: Radius.circular(24 * s),
-                            ),
-                          ),
-                          child: SingleChildScrollView(
-                            padding: EdgeInsets.only(top: 20 * s, left: 20 * s, right: 20 * s, bottom: 20 * s),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(6 * s),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF0D6EFD),
-                                        borderRadius: BorderRadius.circular(10 * s),
-                                      ),
-                                      child: Icon(Icons.person_outline, color: Colors.white, size: 18 * s),
-                                    ),
-                                    SizedBox(width: 12 * s),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Create Your Profile',
-                                            style: TextStyle(
-                                              fontSize: 14 * s,
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color(0xFF152238),
-                                            ),
-                                          ),
-                                          SizedBox(height: 2 * s),
-                                          Text(
-                                            'Please fill in your details to continue',
-                                            style: TextStyle(
-                                              fontSize: 10 * s,
-                                              color: Colors.grey.shade600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                SizedBox(height: 16 * s),
-                                
-                                
-                                Form(
+                    SizedBox(height: 2 * s),
+                    Text(
+                      'Please fill in your details to continue',
+                      style: TextStyle(
+                        fontSize: 10 * s,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actionButtons: _buildActionButtons(s),
+          form: Form(
                                   key: _formKey,
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -368,82 +346,75 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                         }
                                                       },
                                                   ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                                                  ], // TextSpan children
+                                                ), // TextSpan
+                                              ), // RichText
+                                            ), // Expanded
+                                          ], // Row children
+                                        ), // Row
+                                      ], // Form inner Column children
+                                    ), // Form inner Column
+                                  ), // Form
+        ),
+      ),
+    ); // Scaffold
+  } // build
+
+  Widget _buildActionButtons(double s) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 40 * s,
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleRegister,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0D6EFD),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8 * s),
                 ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 40 * ((MediaQuery.of(context).size.height * (2 / 3)) / 500).clamp(0.8, 1.2),
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleRegister,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D6EFD),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8 * ((MediaQuery.of(context).size.height * (2 / 3)) / 500).clamp(0.8, 1.2)),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? SizedBox(width: 20, height: 20, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text(
-                          'CONTINUE',
-                          style: TextStyle(fontSize: 14 * ((MediaQuery.of(context).size.height * (2 / 3)) / 500).clamp(0.8, 1.2), fontWeight: FontWeight.bold),
-                        ),
-                ),
+                elevation: 0,
               ),
-              SizedBox(height: 12 * ((MediaQuery.of(context).size.height * (2 / 3)) / 500).clamp(0.8, 1.2)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Already have an account? ",
-                    style: TextStyle(color: Colors.grey.shade700, fontSize: 12 * ((MediaQuery.of(context).size.height * (2 / 3)) / 500).clamp(0.8, 1.2)),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushReplacementNamed('/login');
-                    },
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0D6EFD),
-                        fontSize: 12 * ((MediaQuery.of(context).size.height * (2 / 3)) / 500).clamp(0.8, 1.2),
-                      ),
+              child: _isLoading
+                  ? SizedBox(width: 20, height: 20, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : Text(
+                      'CONTINUE',
+                      style: TextStyle(fontSize: 14 * s, fontWeight: FontWeight.bold),
                     ),
+            ),
+          ),
+          SizedBox(height: 12 * s),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Already have an account? ",
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 12 * s),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushReplacementNamed('/login');
+                },
+                child: Text(
+                  'Login',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0D6EFD),
+                    fontSize: 12 * s,
                   ),
-                ],
+                ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: 20),
+        ],
       ),
     );
   }
-
-
   // ──────────────────────────────────────────────────────────
   // State Searchable Autocomplete
   // ──────────────────────────────────────────────────────────
@@ -769,5 +740,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ],
     );
+  }
+}
+
+class _ConditionalScrollWrapper extends StatelessWidget {
+  final bool isKeyboardOpen;
+  final Widget banner;
+  final Widget header;
+  final Widget form;
+  final Widget actionButtons;
+  final double s;
+
+  const _ConditionalScrollWrapper({
+    required this.isKeyboardOpen,
+    required this.banner,
+    required this.header,
+    required this.form,
+    required this.actionButtons,
+    required this.s,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final container = Padding(
+      padding: EdgeInsets.only(left: 12 * s, right: 12 * s, bottom: 0, top: 0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24 * s),
+            topRight: Radius.circular(24 * s),
+          ),
+        ),
+        padding: EdgeInsets.only(top: 20 * s, left: 20 * s, right: 20 * s, bottom: 20 * s),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            header,
+            SizedBox(height: 16 * s),
+            isKeyboardOpen ? form : Expanded(child: SingleChildScrollView(child: form)),
+          ],
+        ),
+      ),
+    );
+
+    if (isKeyboardOpen) {
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            banner,
+            container,
+            actionButtons,
+          ],
+        ),
+      );
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          banner,
+          Expanded(child: container),
+          actionButtons,
+        ],
+      );
+    }
   }
 }

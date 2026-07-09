@@ -66,7 +66,8 @@ class _ConfirmAmbulanceBookingScreenState
         'state': widget.state,
       };
 
-      await _apiClient.patient.createRealtimeBooking(bookingData);
+      final resp = await _apiClient.patient.createRealtimeBooking(bookingData);
+      final newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
 
       if (mounted) {
         setState(() => _isBooking = false);
@@ -76,9 +77,8 @@ class _ConfirmAmbulanceBookingScreenState
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (context) => OrderRequestScreen(
-                bookingId:
-                    '', // Cannot extract easily here, but screen handles it if empty
-                bookingData: bookingData,
+                bookingId: newBookingId,
+                bookingData: resp,
                 serviceType: 'ambulance',
               ),
           ),

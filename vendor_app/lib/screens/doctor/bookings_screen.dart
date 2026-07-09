@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'appointment_details_screen.dart';
+import 'dart:async';
 
 /// Bookings management screen for doctors - Complete consultation flow
 class BookingsScreen extends StatefulWidget {
@@ -21,26 +22,33 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
   bool _isLoadingRequested = true;
   bool _isLoadingAccepted = true;
   bool _isLoadingCompleted = true;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadAllBookings();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadAllBookings();
+    });
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _tabController.dispose();
     super.dispose();
   }
 
   Future<void> _loadAllBookings() async {
-    setState(() {
-      _isLoadingRequested = true;
-      _isLoadingAccepted = true;
-      _isLoadingCompleted = true;
-    });
+    if (_requestedBookings.isEmpty && _acceptedBookings.isEmpty && _completedBookings.isEmpty) {
+      setState(() {
+        _isLoadingRequested = true;
+        _isLoadingAccepted = true;
+        _isLoadingCompleted = true;
+      });
+    }
 
     try {
       await _apiClient.initialize();

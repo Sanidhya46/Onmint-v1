@@ -54,16 +54,20 @@ class _ConfirmBloodRequestScreenState extends State<ConfirmBloodRequestScreen> {
         'state': widget.state,
       };
 
-      final response = await _apiClient.patient.createRealtimeBooking(requestData);
+      final resp = await _apiClient.patient.createRealtimeBooking(requestData);
+      final newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
 
       if (mounted) {
-        ToastUtils.showSuccess('Booking successfully created and sent to nearby blood banks');
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Blood request sent successfully!')),
+        );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (context) => OrderRequestScreen(
-              bookingId: response['_id'] ?? '',
-              bookingData: requestData,
-              serviceType: 'bloodbank',
+              bookingId: newBookingId,
+              bookingData: resp,
+              serviceType: 'blood_request',
             ),
           ),
           (route) => route.isFirst,

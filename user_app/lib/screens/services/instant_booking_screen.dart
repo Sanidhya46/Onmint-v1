@@ -165,6 +165,9 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
     setState(() => _isBooking = true);
 
     try {
+      String newBookingId = '';
+      Map<String, dynamic> createdData = {};
+
       if (widget.serviceType == 'nurse') {
         // Create realtime nurse booking to notify all nearby nurses
         final bookingData = {
@@ -193,7 +196,9 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
           'state': _userState,
         };
 
-        await _apiClient.patient.createRealtimeBooking(bookingData);
+        final resp = await _apiClient.patient.createRealtimeBooking(bookingData);
+        newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
+        createdData = resp;
       } else if (widget.serviceType == 'bloodbank') {
         // Create blood bank booking
         final bookingData = {
@@ -218,7 +223,9 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
           'state': _userState,
         };
 
-        await _apiClient.patient.createBooking(bookingData);
+        final resp = await _apiClient.patient.createBooking(bookingData);
+        newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
+        createdData = resp;
       } else if (widget.serviceType == 'pathology') {
         // Create realtime pathology booking to notify all nearby labs
         final testsList = _selectedLabTests.map((testName) {
@@ -258,7 +265,9 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
           'state': _userState,
         };
 
-        await _apiClient.patient.createRealtimeBooking(bookingData);
+        final resp = await _apiClient.patient.createRealtimeBooking(bookingData);
+        newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
+        createdData = resp;
       } else {
         // Create realtime booking for doctor/ambulance
         final bookingData = {
@@ -294,7 +303,9 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
           bookingData['consultationType'] = 'video-call';
         }
 
-        await _apiClient.patient.createRealtimeBooking(bookingData);
+        final resp = await _apiClient.patient.createRealtimeBooking(bookingData);
+        newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
+        createdData = resp;
       }
 
       if (mounted) {
@@ -335,8 +346,8 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => OrderRequestScreen(
-              bookingId: '',
-              bookingData: {}, // we don't have the exact created response easily here, but basic fields work
+              bookingId: newBookingId,
+              bookingData: createdData.isNotEmpty ? createdData : {},
               serviceType: widget.serviceType,
             ),
           ),

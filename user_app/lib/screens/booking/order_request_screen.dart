@@ -55,7 +55,7 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
 
   Future<void> _pollStatus() async {
     try {
-      final updatedBooking = await _patientService.getBookingById(widget.bookingId);
+      final updatedBooking = await _patientService.getRealtimeBookingDetails(widget.bookingId);
       if (!mounted) return;
       
       final offers = updatedBooking['offers'] as List<dynamic>? ?? [];
@@ -286,7 +286,7 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
 
   Future<void> _refreshStatus() async {
     try {
-      final updatedBooking = await _patientService.getBookingById(widget.bookingId);
+      final updatedBooking = await _patientService.getRealtimeBookingDetails(widget.bookingId);
       if (!mounted) return;
       
       final offers = updatedBooking['offers'] as List<dynamic>? ?? [];

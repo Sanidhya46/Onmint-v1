@@ -25,7 +25,18 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
       ProfileScreen(key: ValueKey(_refreshCounters[3])),
     ];
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        if (_selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0;
+            _refreshCounters[0]++;
+          });
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
         children: screens,
@@ -63,6 +74,7 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
             label: 'Profile',
           ),
         ],
+      ),
       ),
     );
   }

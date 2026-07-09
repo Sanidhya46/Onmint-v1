@@ -71,7 +71,8 @@ class _ConfirmLabTestBookingScreenState
         'state': widget.state,
       };
 
-      await _apiClient.patient.createRealtimeBooking(bookingData);
+      final resp = await _apiClient.patient.createRealtimeBooking(bookingData);
+      final newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
 
       if (mounted) {
         setState(() => _isBooking = false);
@@ -81,8 +82,8 @@ class _ConfirmLabTestBookingScreenState
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (context) => OrderDetailFile(
-              bookingId: '',
-              bookingData: bookingData,
+              bookingId: newBookingId,
+              bookingData: resp,
             ),
           ),
           (route) => route.isFirst,

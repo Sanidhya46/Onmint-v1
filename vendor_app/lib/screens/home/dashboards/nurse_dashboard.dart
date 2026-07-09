@@ -10,6 +10,7 @@ import '../../nurse/bookings_screen.dart';
 import '../../../config/app_config.dart';
 import '../../nurse/fill_price_nurse_screen.dart';
 import '../../booking/waiting_for_patient_screen.dart';
+import 'dart:async';
 
 class NurseDashboard extends StatefulWidget {
   const NurseDashboard({super.key});
@@ -24,15 +25,25 @@ class _NurseDashboardState extends State<NurseDashboard> {
   List<Map<String, dynamic>> _pendingBookings = [];
   bool _isLoading = true;
   bool _showAllRequests = false;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _loadDashboard();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadDashboard();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadDashboard() async {
-    setState(() => _isLoading = true);
+    if (_dashboardData == null) setState(() => _isLoading = true);
     try {
       await _apiClient.initialize();
 

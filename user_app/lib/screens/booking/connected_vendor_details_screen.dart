@@ -427,31 +427,12 @@ class _ConnectedVendorDetailsScreenState
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: GestureDetector(
+                        child: _buildQuickActionCard(
+                          icon: Icons.chat_bubble_outline,
+                          label: 'WhatsApp',
+                          color: const Color(0xFF25D366),
+                          bgColor: const Color(0xFFE8F5E9),
                           onTap: () => _openWhatsApp(phone),
-                          child: Column(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade50,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Image.network(
-                                  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/512px-WhatsApp.svg.png',
-                                  width: 24,
-                                  height: 24,
-                                  errorBuilder: (context, error, stackTrace) => const Icon(
-                                    Icons.chat,
-                                    color: Colors.green,
-                                    size: 24,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text('WhatsApp', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
-                            ],
-                          ),
                         ),
                       ),
                       const SizedBox(width: 10),

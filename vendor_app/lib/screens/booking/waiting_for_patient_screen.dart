@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
+import 'package:provider/provider.dart';
+import 'package:auth_service/auth_service.dart';
+import '../ambulance/ride_details_screen.dart';
+import '../nurse/active_booking_screen.dart';
+import '../pathology/lab_test_booking_screen.dart';
+import '../blood_bank/blood_bank_accepted_order_screen.dart';
 
 class WaitingForPatientScreen extends StatefulWidget {
   final String bookingId;
@@ -18,26 +25,90 @@ class WaitingForPatientScreen extends StatefulWidget {
 
 class _WaitingForPatientScreenState extends State<WaitingForPatientScreen> {
   bool _isLoading = false;
+  Timer? _pollingTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (mounted) {
+        _refreshData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
 
   Future<void> _refreshData() async {
+    if (_isLoading) return;
     setState(() => _isLoading = true);
     try {
       final response = await ApiClient().get('/realtime-bookings/${widget.bookingId}');
       final data = response.data['data'] ?? response.data;
       final status = data['status']?.toString().toLowerCase() ?? '';
       
-      if (status == 'accepted' || status == 'completed') {
+      if (status == 'accepted' || status == 'completed' || status == 'rejected' || status == 'cancelled') {
         if (mounted) {
-          Navigator.pop(context, 'accepted');
+          _pollingTimer?.cancel();
+          final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
+          
+          bool myOfferAccepted = false;
+          final offers = data['offers'] as List?;
+          if (offers != null && currentUserId != null) {
+            for (var o in offers) {
+              final vId = o is Map ? (o['vendorId'] ?? o['vendor'] ?? o['vendor_id']) : null;
+              bool isMyOffer = vId == currentUserId || (vId is Map && (vId['_id'] == currentUserId || vId['id'] == currentUserId));
+              if (isMyOffer && o is Map && o['status'] == 'accepted') {
+                myOfferAccepted = true;
+                break;
+              }
+            }
+          }
+          
+          final assignedTo = data['assignedTo'];
+          bool assignedToMe = false;
+          if (assignedTo != null && currentUserId != null) {
+            final aId = assignedTo is Map ? (assignedTo['_id'] ?? assignedTo['id']) : assignedTo;
+            assignedToMe = (aId == currentUserId);
+          }
+          
+          if (status == 'accepted' && (myOfferAccepted || assignedToMe)) {
+            _navigateToConnectedScreen(data);
+          } else {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
           return;
         }
       }
     } catch (e) {
-      // Ignore fallback silently, or we could also try ambulance specific endpoint etc, but realtime-bookings should exist.
+      // Ignore fallback silently
     }
     
     if (mounted) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  void _navigateToConnectedScreen(Map<String, dynamic> data) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    final serviceType = (data['serviceType'] ?? widget.bookingData['serviceType'])?.toString().toLowerCase() ?? '';
+    
+    if (serviceType == 'ambulance') {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => RideDetailsScreen(rideId: widget.bookingId)));
+    } else if (serviceType == 'nurse') {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => ActiveBookingScreen(bookingId: widget.bookingId, bookingData: data)));
+    } else if (serviceType == 'pathology') {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => LabTestBookingScreen(bookingId: widget.bookingId, bookingData: data)));
+    } else if (serviceType == 'bloodbank' || serviceType == 'blood_request') {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => BloodBankAcceptedOrderScreen(bookingId: widget.bookingId, initialData: data)));
     }
   }
 

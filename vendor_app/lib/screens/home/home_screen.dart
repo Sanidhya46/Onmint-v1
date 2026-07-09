@@ -63,7 +63,18 @@ class _HomeScreenState extends State<HomeScreen> {
         (_selectedIndex == 0 && (role == 'ambulance' || role == 'nurse' || role == 'pathology' || role == 'bloodbank' || role == 'pharmacist')) || 
         (_selectedIndex == 1 && (role == 'ambulance' || role == 'nurse' || role == 'pathology' || role == 'bloodbank' || role == 'pharmacist'));
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        if (_selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0;
+            _refreshCounters[0]++;
+          });
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
       appBar: hideAppBar ? null : AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Profile',
           ),
         ],
+      ),
       ),
     );
   }

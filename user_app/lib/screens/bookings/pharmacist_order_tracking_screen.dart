@@ -158,7 +158,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
     try {
       await _apiClient.initialize();
       await _apiClient.post(
-        '/realtime-booking/${widget.bookingId}/cancel',
+        '/realtime-bookings/${widget.bookingId}/cancel',
         data: {'reason': 'Cancelled by user'},
       );
       if (mounted) {

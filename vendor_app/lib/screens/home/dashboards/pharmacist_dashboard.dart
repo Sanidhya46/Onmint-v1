@@ -6,6 +6,7 @@ import 'package:auth_service/auth_service.dart';
 import '../../../config/app_colors.dart';
 import '../../pharmacist/pending_orders_screen.dart';
 import '../../pharmacist/pending_order_details_screen.dart';
+import 'dart:async';
 
 class PharmacistDashboard extends StatefulWidget {
   const PharmacistDashboard({super.key});
@@ -20,11 +21,21 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
   List<dynamic> _pendingOrders = [];
   bool _isLoading = true;
   bool _showAllOrders = false; // Added to expand orders inline
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _loadDashboard();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadDashboard();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadDashboard() async {

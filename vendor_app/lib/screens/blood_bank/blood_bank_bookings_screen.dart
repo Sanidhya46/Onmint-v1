@@ -7,6 +7,7 @@ import 'package:vendor_app/screens/blood_bank/blood_bank_accepted_order_screen.d
 import 'package:vendor_app/config/app_config.dart';
 import '../booking/waiting_for_patient_screen.dart';
 import '../bloodbank/fill_price_bloodbank_screen.dart';
+import 'dart:async';
 
 class BloodBankBookingsScreen extends StatefulWidget {
   const BloodBankBookingsScreen({super.key});
@@ -25,16 +26,21 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
   List<Map<String, dynamic>> _inProgressBookings = [];
   List<Map<String, dynamic>> _completedBookings = [];
   bool _isLoading = true;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadBookings();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadBookings();
+    });
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _tabController.dispose();
     super.dispose();
   }

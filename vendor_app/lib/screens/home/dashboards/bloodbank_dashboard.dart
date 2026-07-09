@@ -5,6 +5,7 @@ import 'package:api_client/api_client.dart';
 import '../../blood_bank/blood_request_details_screen.dart';
 import '../../blood_bank/blood_bank_bookings_screen.dart';
 import '../../bloodbank/fill_price_bloodbank_screen.dart';
+import 'dart:async';
 
 class BloodBankDashboard extends StatefulWidget {
   const BloodBankDashboard({super.key});
@@ -21,12 +22,22 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
   int _acceptedRequests = 0;
   int _completedRequests = 0;
   bool _showAllRequests = false;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _apiClient.initialize();
     _loadDashboard();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) _loadDashboard();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   /// Safely extract address string from any type (String, Map, int, etc.)
@@ -49,7 +60,7 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
   }
 
   Future<void> _loadDashboard() async {
-    setState(() => _isLoading = true);
+    if (_requests.isEmpty) setState(() => _isLoading = true);
     try {
       // Fetch ALL bookings without status filter — filter locally
       final res = await _apiClient.get('/realtime/provider/bookings',

@@ -73,7 +73,8 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
         'totalAmount': 499, // From UI
       };
 
-      await _apiClient.patient.createRealtimeBooking(bookingData);
+      final resp = await _apiClient.patient.createRealtimeBooking(bookingData);
+      final newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
 
       if (mounted) {
         setState(() => _isBooking = false);
@@ -83,8 +84,8 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (context) => OrderRequestScreen(
-              bookingId: '',
-              bookingData: bookingData,
+              bookingId: newBookingId,
+              bookingData: resp,
               serviceType: 'nurse',
             ),
           ),
