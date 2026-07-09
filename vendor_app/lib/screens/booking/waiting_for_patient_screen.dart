@@ -58,6 +58,12 @@ class _WaitingForPatientScreenState extends State<WaitingForPatientScreen> {
       if (status == 'accepted' || status == 'completed' || status == 'rejected' || status == 'cancelled') {
         if (mounted) {
           _pollingTimer?.cancel();
+          
+          if (status == 'rejected' || status == 'cancelled') {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            return;
+          }
+
           final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
           
           bool myOfferAccepted = false;
@@ -80,7 +86,7 @@ class _WaitingForPatientScreenState extends State<WaitingForPatientScreen> {
             assignedToMe = (aId == currentUserId);
           }
           
-          if (status == 'accepted' && (myOfferAccepted || assignedToMe)) {
+          if ((status == 'accepted' || status == 'completed') && (myOfferAccepted || assignedToMe)) {
             _navigateToConnectedScreen(data);
           } else {
             Navigator.of(context).popUntil((route) => route.isFirst);
@@ -98,18 +104,26 @@ class _WaitingForPatientScreenState extends State<WaitingForPatientScreen> {
   }
 
   void _navigateToConnectedScreen(Map<String, dynamic> data) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
     final serviceType = (data['serviceType'] ?? widget.bookingData['serviceType'])?.toString().toLowerCase() ?? '';
     
+    Widget targetScreen;
     if (serviceType == 'ambulance') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => RideDetailsScreen(rideId: widget.bookingId)));
+      targetScreen = RideDetailsScreen(rideId: widget.bookingId);
     } else if (serviceType == 'nurse') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => ActiveBookingScreen(bookingId: widget.bookingId, bookingData: data)));
+      targetScreen = ActiveBookingScreen(bookingId: widget.bookingId, bookingData: data);
     } else if (serviceType == 'pathology') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => LabTestBookingScreen(bookingId: widget.bookingId, bookingData: data)));
+      targetScreen = LabTestBookingScreen(bookingId: widget.bookingId, bookingData: data);
     } else if (serviceType == 'bloodbank' || serviceType == 'blood_request') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => BloodBankAcceptedOrderScreen(bookingId: widget.bookingId, initialData: data)));
+      targetScreen = BloodBankAcceptedOrderScreen(bookingId: widget.bookingId, initialData: data);
+    } else {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      return;
     }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => targetScreen),
+    );
   }
 
   @override
