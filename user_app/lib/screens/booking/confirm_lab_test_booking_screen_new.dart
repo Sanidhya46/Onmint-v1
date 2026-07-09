@@ -3,6 +3,7 @@ import 'package:api_client/api_client.dart';
 import 'package:intl/intl.dart';
 import 'package:user_app/screens/booking/lab_test_selection_screen.dart';
 import 'package:user_app/screens/booking/order_detail_file.dart';
+import 'package:user_app/screens/booking/order_request_screen.dart';
 
 class ConfirmLabTestBookingScreenNew extends StatefulWidget {
   final String address;
@@ -80,9 +81,10 @@ class _ConfirmLabTestBookingScreenNewState
         );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => OrderDetailFile(
+            builder: (context) => OrderRequestScreen(
               bookingId: newBookingId,
               bookingData: resp,
+              serviceType: 'pathology',
             ),
           ),
           (route) => route.isFirst,

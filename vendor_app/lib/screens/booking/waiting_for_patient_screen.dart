@@ -79,11 +79,11 @@ class _WaitingForPatientScreenState extends State<WaitingForPatientScreen> {
             }
           }
           
-          final assignedTo = data['assignedTo'];
+          final assignedTo = data['assignedTo'] ?? data['acceptedProvider'] ?? data['assignedVendor'];
           bool assignedToMe = false;
           if (assignedTo != null && currentUserId != null) {
             final aId = assignedTo is Map ? (assignedTo['_id'] ?? assignedTo['id']) : assignedTo;
-            assignedToMe = (aId == currentUserId);
+            assignedToMe = (aId.toString() == currentUserId.toString());
           }
           
           if ((status == 'accepted' || status == 'completed') && (myOfferAccepted || assignedToMe)) {

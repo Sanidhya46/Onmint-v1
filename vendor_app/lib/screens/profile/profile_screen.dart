@@ -45,9 +45,9 @@ class ProfileScreen extends StatelessWidget {
           children: [
             // Profile Card
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Colors.blue.shade50, Colors.white],
@@ -62,13 +62,13 @@ class ProfileScreen extends StatelessWidget {
                     Stack(
                       children: [
                         CircleAvatar(
-                          radius: 36,
+                          radius: 42,
                           backgroundImage: user?.profilePicture != null
                               ? NetworkImage(user!.profilePicture!)
                               : null,
                           backgroundColor: Colors.grey[300],
                           child: user?.profilePicture == null
-                              ? const Icon(Icons.person, size: 36, color: Colors.grey)
+                              ? const Icon(Icons.person, size: 42, color: Colors.grey)
                               : null,
                         ),
                         // Red circle badge for unapproved/uncertified vendors
@@ -101,7 +101,7 @@ class ProfileScreen extends StatelessWidget {
                       ],
                     ),
 
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,12 +109,12 @@ class ProfileScreen extends StatelessWidget {
                           Text(
                             user?.fullName ?? 'Vendor',
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF152238),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
                             user?.role.toLowerCase() == 'nurse'
                                 ? (user?.specializations?.isNotEmpty == true
@@ -130,7 +130,7 @@ class ProfileScreen extends StatelessWidget {
                               color: Colors.grey,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           if (user?.licenseNumber != null)
                             Text(
                               'Reg. No. ${user!.licenseNumber}',
@@ -147,7 +147,7 @@ class ProfileScreen extends StatelessWidget {
                                 color: Colors.grey,
                               ),
                             ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           Wrap(
                             spacing: 8,
                             runSpacing: 4,
@@ -268,7 +268,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String title, String subtitle, {required VoidCallback onTap}) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -282,9 +282,7 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-        dense: true,
-        visualDensity: const VisualDensity(vertical: -2),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(

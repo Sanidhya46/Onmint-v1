@@ -455,39 +455,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               builder: (context) => const HelpSupportScreen()),
                         );
                       },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              const SizedBox(height: 16),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 24.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
+                    _buildDivider(),
+                    _buildListTile(
+                      icon: Icons.logout,
+                      title: 'Logout',
+                      iconColor: Colors.red,
+                      titleColor: Colors.red,
+                      hideArrow: true,
+                      onTap: () async {
                         final navigator = Navigator.of(context);
                         await authProvider.logout();
                         if (mounted) {
                           navigator.pushNamedAndRemoveUntil('/login', (route) => false);
                         }
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text('Logout', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
-                  ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 32),
             ],
           ),
         ),
