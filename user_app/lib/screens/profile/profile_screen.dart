@@ -455,6 +455,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               builder: (context) => const HelpSupportScreen()),
                         );
                       },
+                    ),
                     _buildDivider(),
                     _buildListTile(
                       icon: Icons.logout,
