@@ -123,19 +123,19 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         (_appointment!['status'] == 'requested' || _appointment!['status'] == 'pending');
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: const Text(
-          'Booking Request Details',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          'Consultation Request',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, fontFamily: 'Poppins'),
         ),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFF0052CC), // Darker blue matching the mockup
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF1565C0)))
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF0052CC)))
           : _appointment == null
               ? const Center(child: Text('Appointment not found'))
               : Column(
@@ -145,25 +145,31 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         onRefresh: _loadAppointment,
                         child: SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildCompactDetails(),
-                            const SizedBox(height: 12),
-                            if (_appointment!['status'] == 'completed')
-                              _buildCompletedActions(),
-                          ],
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildCompactDetails(),
+                              const SizedBox(height: 12),
+                              if (_appointment!['status'] == 'completed')
+                                _buildCompletedActions(),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                     ),
                   ],
                 ),
       bottomNavigationBar: showActionButtons
           ? SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -2))
+                  ],
+                ),
                 child: _buildActionButtons(),
               ),
             )
@@ -190,147 +196,116 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     return Column(
       children: [
         // 1. Request Summary
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        _buildSectionCard(
+          title: 'Request Summary',
+          child: Row(
             children: [
-              const Text('Request Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF152238))),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      shape: BoxShape.circle,
-                      image: patient['profilePicture'] != null ? DecorationImage(image: NetworkImage(patient['profilePicture']), fit: BoxFit.cover) : null,
-                    ),
-                    child: patient['profilePicture'] == null ? const Icon(Icons.person, color: Colors.blue, size: 36) : null,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(patientName.isEmpty ? 'Patient' : patientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
-                        const SizedBox(height: 4),
-                        Text('${age.replaceAll(" Years", " Years")} / $gender', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                      ],
-                    ),
-                  ),
-                ],
+              Container(
+                width: 65,
+                height: 65,
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  shape: BoxShape.circle,
+                  image: patient['profilePicture'] != null 
+                    ? DecorationImage(image: NetworkImage(patient['profilePicture']), fit: BoxFit.cover) 
+                    : null,
+                ),
+                child: patient['profilePicture'] == null 
+                  ? Image.asset('assets/images/male_profile.png', fit: BoxFit.cover) 
+                  : null,
               ),
-              const SizedBox(height: 10),
-              const Divider(color: Color(0xFFF0F0F0)),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(patientName.isEmpty ? 'Patient' : patientName, 
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF152238), fontFamily: 'Poppins')),
+                    const SizedBox(height: 4),
+                    Text('${age.replaceAll(" Years", " Years")} / $gender', 
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13, fontFamily: 'Poppins')),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Row(
                     children: [
                       Icon(Icons.calendar_today_outlined, size: 14, color: Colors.blue.shade700),
-                      const SizedBox(width: 8),
-                      Text('Request Date & Time', style: TextStyle(color: Colors.blue.shade700, fontSize: 12, fontWeight: FontWeight.w600)),
+                      const SizedBox(width: 6),
+                      Text('Request Date & Time', style: TextStyle(color: Colors.blue.shade700, fontSize: 11, fontWeight: FontWeight.w500, fontFamily: 'Poppins')),
                     ],
                   ),
-                  Text('$formattedDate, $formattedTime', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Text('$formattedDate, $formattedTime', 
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF152238), fontFamily: 'Poppins')),
                 ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 16),
         
         // 2. Patient Details
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
+        _buildSectionCard(
+          title: 'Patient Details',
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Patient Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF152238))),
-              const SizedBox(height: 10),
               _buildIconRow(Icons.person_outline, 'Name', patientName.isEmpty ? 'Patient' : patientName),
               _buildDivider(),
-              _buildIconRow(Icons.contact_page_outlined, 'Age / Gender', '${age.replaceAll(" Years", " Years")} / $gender'),
+              _buildIconRow(Icons.badge_outlined, 'Age / Gender', '${age.replaceAll(" Years", " Years")} / $gender'),
               _buildDivider(),
-              _buildIconRow(Icons.location_on_outlined, 'Address', addressText),
+              _buildIconRow(Icons.location_on_outlined, 'Address', addressText, isLast: true),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 16),
         
         // 3. Consultation Details
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
+        _buildSectionCard(
+          title: 'Consultation Details',
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Consultation Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF152238))),
-              const SizedBox(height: 10),
               _buildIconRow(Icons.medical_services_outlined, 'Consultation Type', consultationType),
               _buildDivider(),
-              _buildIconRow(Icons.description_outlined, 'Reason / Symptoms', problem),
+              _buildIconRow(Icons.description_outlined, 'Reason / Symptoms', problem, isLast: true),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 16),
 
         // 4. Request Details
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
+        _buildSectionCard(
+          title: 'Request Details',
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Request Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF152238))),
-              const SizedBox(height: 10),
               _buildIconRow(Icons.calendar_today_outlined, 'Request Date', formattedDate),
               _buildDivider(),
               _buildIconRow(Icons.access_time_outlined, 'Request Time', formattedTime),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               
               // Additional Notes Box
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFF0F5FF),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue.shade700, size: 18),
+                    const Icon(Icons.info_outline, color: Color(0xFF0052CC), size: 18),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Additional Notes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF152238))),
+                          Text('Additional Notes', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF152238), fontFamily: 'Poppins')),
                           SizedBox(height: 4),
                           Text(
-                            'Once accepted, patient details will be shared with you and consultation status can be updated from your panel.',
-                            style: TextStyle(fontSize: 11, color: Colors.black54),
+                            'Once accepted, patient details will be shared with you\nand consultation status can be updated from your panel.',
+                            style: TextStyle(fontSize: 11, color: Colors.black54, fontFamily: 'Poppins'),
                           ),
                         ],
                       ),
@@ -345,158 +320,110 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     );
   }
 
-  Widget _buildIconRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
+  Widget _buildSectionCard({required String title, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200, width: 1),
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Colors.blue.shade700),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 130,
-            child: Text(label, style: const TextStyle(color: Colors.black54, fontSize: 12)),
-          ),
-          Expanded(
-            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12, color: Colors.black87)),
-          ),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: Color(0xFF1A1A60), fontFamily: 'Poppins')),
+          const SizedBox(height: 16),
+          child,
         ],
       ),
     );
   }
 
-  Widget _buildCompactRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 100, child: Text(label, style: const TextStyle(color: Colors.grey, fontSize: 11))),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String label, String value, {bool isLast = false}) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: const Color(0xFF1565C0)),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 130,
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                color: Colors.grey[800],
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
-      ),
+  Widget _buildIconRow(IconData icon, String label, String value, {bool isLast = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: Colors.blue.shade600),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 130,
+          child: Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontFamily: 'Poppins')),
+        ),
+        Expanded(
+          child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: Color(0xFF152238), fontFamily: 'Poppins')),
+        ),
+      ],
     );
   }
 
   Widget _buildDivider() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6, top: 6),
-      child: Divider(color: Colors.grey[200], height: 1),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Divider(color: Colors.grey.shade100, height: 1, thickness: 1),
     );
   }
 
   Widget _buildActionButtons() {
-    return Column(
+    return Row(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _isProcessing ? null : _rejectAppointment,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: Color(0xFFE52329)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: _isProcessing
-                    ? const SizedBox(
-                        height: 20, width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE52329))),
-                      )
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.close, color: Color(0xFFE52329), size: 18),
-                          SizedBox(width: 8),
-                          Text('Reject Request', style: TextStyle(color: Color(0xFFE52329), fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-              ),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _isProcessing ? null : _rejectAppointment,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: const BorderSide(color: Color(0xFFE52329)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _isProcessing ? null : _acceptAppointment,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: Color(0xFF43A047)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: _isProcessing
-                    ? const SizedBox(
-                        height: 20, width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF43A047))),
-                      )
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.check, color: Color(0xFF43A047), size: 18),
-                          SizedBox(width: 8),
-                          Text('Accept Request', style: TextStyle(color: Color(0xFF43A047), fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-              ),
-            ),
-          ],
+            child: _isProcessing
+                ? const SizedBox(
+                    height: 20, width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE52329))),
+                  )
+                : const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.close, color: Color(0xFFE52329), size: 20),
+                      SizedBox(width: 8),
+                      Text('Reject Request', style: TextStyle(color: Color(0xFFE52329), fontWeight: FontWeight.w600, fontSize: 14, fontFamily: 'Poppins')),
+                    ],
+                  ),
+          ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _isProcessing ? null : _acceptAppointment,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: const BorderSide(color: Color(0xFF4CAF50)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: _isProcessing
+                ? const SizedBox(
+                    height: 20, width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50))),
+                  )
+                : const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check, color: Color(0xFF4CAF50), size: 20),
+                      SizedBox(width: 8),
+                      Text('Accept Request', style: TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.w600, fontSize: 14, fontFamily: 'Poppins')),
+                    ],
+                  ),
+          ),
+        ),
       ],
     );
-  }
-
-  String _formatDateFull(String? dateStr) {
-    if (dateStr == null) return 'N/A';
-    try {
-      final date = DateTime.parse(dateStr).toLocal();
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      final hour = date.hour > 12 ? date.hour - 12 : date.hour == 0 ? 12 : date.hour;
-      final period = date.hour >= 12 ? 'PM' : 'AM';
-      return '${date.day} ${months[date.month - 1]}\n${hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')} $period';
-    } catch (e) {
-      return 'N/A';
-    }
   }
 
   String _formatDate(String? dateStr) {
     if (dateStr == null) return 'N/A';
     try {
       final date = DateTime.parse(dateStr).toLocal();
-      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
     } catch (e) {
       return 'N/A';
     }

@@ -3,6 +3,7 @@ import 'package:api_client/api_client.dart';
 import '../services/doctor_detail_screen.dart';
 import '../booking/confirm_doctor_booking_screen.dart';
 import '../booking/confirm_doctor_booking_screen_new.dart';
+import '../booking/doctor_request_sent_screen.dart';
 import 'package:user_app/config/app_config.dart';
 
 class DoctorSummaryScreen extends StatefulWidget {
@@ -59,20 +60,45 @@ class _DoctorSummaryScreenState extends State<DoctorSummaryScreen> {
   }
 
   Future<void> _handlePayAndConsult() async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AppConfig.useNewFlow
-            ? ConfirmDoctorBookingScreenNew(
-                categoryTitle: widget.categoryTitle,
-                symptomName: widget.symptomName,
-              )
-            : ConfirmDoctorBookingScreen(
-                categoryTitle: widget.categoryTitle,
-                symptomName: widget.symptomName,
-              ),
-      ),
-    );
+    setState(() => _isBooking = true);
+    try {
+      final double consultationFee = 499.0; // Dynamic if available
+      final bookingData = {
+        'serviceType': 'doctor',
+        'category': widget.categoryTitle,
+        'specialization': widget.categoryTitle,
+        'description': 'Online consultation for ${widget.categoryTitle} - ${widget.symptomName}',
+        'urgency': 'medium',
+        'address': 'Online',
+        'isEmergency': false,
+        'consultationType': 'video-call',
+        'paymentMethod': 'direct_to_vendor',
+        'totalAmount': consultationFee,
+      };
+
+      final resp = await _apiClient.patient.createRealtimeBooking(bookingData);
+      final newBookingId = resp['_id']?.toString() ?? resp['id']?.toString() ?? '';
+
+      if (mounted) {
+        setState(() => _isBooking = false);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => DoctorRequestSentScreen(
+              bookingId: newBookingId,
+              bookingData: resp,
+            ),
+          ),
+          (route) => route.isFirst,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isBooking = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to request consultation: $e')),
+        );
+      }
+    }
   }
 
   @override
