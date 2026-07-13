@@ -429,9 +429,9 @@ class _ConnectedVendorDetailsScreenState
                       const SizedBox(width: 10),
                       Expanded(
                         child: _buildQuickActionCard(
-                          customIconWidget: const FaIcon(
+                          customIconWidget: FaIcon(
                             FontAwesomeIcons.whatsapp,
-                            color: Color(0xFF25D366),
+                            color: const Color(0xFF25D366),
                             size: 32,
                           ),
                           label: 'WhatsApp',

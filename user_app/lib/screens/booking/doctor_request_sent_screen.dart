@@ -3,7 +3,7 @@ import 'package:api_client/api_client.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
-import 'package:user_app/screens/home/patient_bottom_nav.dart';
+import 'package:user_app/screens/home/home_screen.dart';
 
 class DoctorRequestSentScreen extends StatefulWidget {
   final String bookingId;
@@ -67,7 +67,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> with 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Booking Cancelled')));
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const PatientBottomNav()),
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
           (r) => false,
         );
       }
