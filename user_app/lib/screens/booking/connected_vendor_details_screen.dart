@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:user_app/screens/booking/booking_details_full_page.dart';
 import 'package:user_app/screens/profile/help_support_screen.dart';
 import '../../config/app_config.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ConnectedVendorDetailsScreen extends StatefulWidget {
   final String bookingId;
@@ -429,9 +428,9 @@ class _ConnectedVendorDetailsScreenState
                       const SizedBox(width: 10),
                       Expanded(
                         child: _buildQuickActionCard(
-                          customIconWidget: FaIcon(
-                            FontAwesomeIcons.whatsapp,
-                            color: const Color(0xFF25D366),
+                          customIconWidget: const Icon(
+                            Icons.chat,
+                            color: Color(0xFF25D366),
                             size: 32,
                           ),
                           label: 'WhatsApp',

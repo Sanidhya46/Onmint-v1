@@ -45,7 +45,6 @@ dependencies:
   intl: ^0.18.1
   jitsi_meet_flutter_sdk: ^10.2.0
   webview_flutter: ^4.4.2
-  font_awesome_flutter: ^10.7.0
   
   # File handling - image_picker is more stable and v2 embedding compatible
   image_picker: ^1.0.7
