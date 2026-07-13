@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:api_client/api_client.dart';
 import 'package:ui_components/ui_components.dart';
 import '../../../config/app_colors.dart';
@@ -63,12 +64,12 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
 
   Future<void> _pollOrderDetails() async {
     try {
-      final response = await _apiClient.get('/pharmacist/orders/${widget.order['_id']}');
+      final response = await _apiClient.get('/realTimeBooking/${widget.order['_id']}');
       if (!mounted) return;
       final data = response.data['data'];
+      final status = data['status'];
       setState(() {
         _currentOrder = data;
-        final status = _currentOrder!['status'];
         _offerSent = _currentOrder!['hasOffered'] == true ||
                      status == 'pending_patient_approval' || 
                      status == 'offer_sent';
@@ -613,27 +614,26 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              if (!isPrescriptionBased)
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _rejectOrder,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.close, size: 20),
-                        SizedBox(width: 4),
-                        Expanded(child: Text('Reject Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
-                      ],
-                    ),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _rejectOrder,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.close, size: 20),
+                      SizedBox(width: 4),
+                      Expanded(child: Text('Reject Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
+                    ],
                   ),
                 ),
-              if (!isPrescriptionBased) const SizedBox(width: 16),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
                   onPressed: _offerSent ? () {} : () {
@@ -648,7 +648,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isPrescriptionBased ? const Color(0xFF001F4D) : Colors.green,
+                    backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -656,12 +656,10 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (!_offerSent) Icon(isPrescriptionBased ? Icons.send : Icons.check, size: 20),
+                      if (!_offerSent) const Icon(Icons.check, size: 20),
                       if (!_offerSent) const SizedBox(width: 4),
                       Expanded(
-                        child: Text(isPrescriptionBased 
-                            ? (_offerSent ? 'Waiting for Approval' : 'Send for Approval') 
-                            : 'Accept Order', 
+                        child: Text(_offerSent ? 'Waiting for Approval' : 'Accept Order', 
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,

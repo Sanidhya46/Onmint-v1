@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:intl/intl.dart';
@@ -17,11 +18,34 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
   Map<String, dynamic>? _booking;
   bool _isLoading = true;
   bool _showAllMedicines = false;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _loadBooking();
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _pollBooking();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _pollBooking() async {
+    try {
+      final data = await _apiClient.patient.getRealtimeBookingDetails(widget.bookingId);
+      if (mounted) {
+        setState(() {
+          _booking = data;
+        });
+      }
+    } catch (e) {
+      // Ignore polling errors silently
+    }
   }
 
   Future<void> _loadBooking() async {
