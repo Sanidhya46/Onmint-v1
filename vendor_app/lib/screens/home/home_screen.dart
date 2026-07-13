@@ -135,23 +135,23 @@ class _HomeScreenState extends State<HomeScreen> {
         showUnselectedLabels: true,
         selectedFontSize: 12,
         unselectedFontSize: 12,
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today_outlined),
             activeIcon: Icon(Icons.calendar_today),
             label: 'Appointments',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.star_outline),
-            activeIcon: Icon(Icons.star),
-            label: 'Premium',
+            icon: (role == 'pharmacist') ? const Icon(Icons.account_balance_wallet_outlined) : const Icon(Icons.star_outline),
+            activeIcon: (role == 'pharmacist') ? const Icon(Icons.account_balance_wallet) : const Icon(Icons.star),
+            label: (role == 'pharmacist') ? 'Earnings' : 'Premium',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
             label: 'Profile',

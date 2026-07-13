@@ -141,7 +141,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                                           border: Border.all(
                                               color: Colors.white.withOpacity(0.8),
                                               width: 2.5),
-                                          image: user?.profilePicture != null
+                                          image: user?.profilePicture != null && user!.profilePicture!.isNotEmpty
                                               ? DecorationImage(
                                                   image: NetworkImage(
                                                       user!.profilePicture!),
@@ -149,7 +149,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                                                 )
                                               : null,
                                         ),
-                                        child: user?.profilePicture == null
+                                        child: (user?.profilePicture == null || user!.profilePicture!.isEmpty)
                                             ? const Icon(Icons.person,
                                                 size: 44, color: Colors.blue,)
                                             : null,

@@ -45,17 +45,56 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
   bool _offerSent = false;
+  Timer? _timer;
+  Map<String, dynamic>? _currentOrder;
 
   @override
   void initState() {
     super.initState();
-    _offerSent = widget.order['hasOffered'] == true ||
-                 widget.order['status'] == 'pending_patient_approval' || 
-                 widget.order['status'] == 'offer_sent';
+    _currentOrder = widget.order;
+    _offerSent = _currentOrder!['hasOffered'] == true ||
+                 _currentOrder!['status'] == 'pending_patient_approval' || 
+                 _currentOrder!['status'] == 'offer_sent';
+                 
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _pollOrderDetails();
+    });
+  }
+
+  Future<void> _pollOrderDetails() async {
+    try {
+      final response = await _apiClient.get('/pharmacist/orders/${widget.order['_id']}');
+      if (!mounted) return;
+      final data = response.data['data'];
+      setState(() {
+        _currentOrder = data;
+        final status = _currentOrder!['status'];
+        _offerSent = _currentOrder!['hasOffered'] == true ||
+                     status == 'pending_patient_approval' || 
+                     status == 'offer_sent';
+      });
+      
+      // If patient accepted the offer
+      if (status == 'accepted') {
+        _timer?.cancel();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AcceptedOrderDetailsScreen(bookingId: widget.order['_id']),
+          ),
+        );
+      } else if (status == 'cancelled' || status == 'rejected') {
+        _timer?.cancel();
+        Navigator.pop(context); // Go back if cancelled
+      }
+    } catch (e) {
+      // Ignore polling errors silently
+    }
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _amountController.dispose();
     _timeController.dispose();
     super.dispose();
