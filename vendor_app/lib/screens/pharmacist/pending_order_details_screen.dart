@@ -22,7 +22,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
     setState(() => _isProcessing = true);
     try {
       await _apiClient.initialize();
-      await _apiClient.post('/pharmacist/orders/${widget.order['_id']}/accept');
+      await _apiClient.post('/realtime-bookings/${widget.order['_id']}/accept');
       
       if (!mounted) return;
       
@@ -109,7 +109,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
     setState(() => _isProcessing = true);
     try {
       await _apiClient.initialize();
-      await _apiClient.post('/pharmacist/orders/${widget.order['_id']}/offer', data: {
+      await _apiClient.post('/realtime-bookings/${widget.order['_id']}/offer', data: {
         'amount': amount,
         'deliveryTime': deliveryTime,
       });
