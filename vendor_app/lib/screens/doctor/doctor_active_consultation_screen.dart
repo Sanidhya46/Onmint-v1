@@ -34,10 +34,14 @@ class _DoctorActiveConsultationScreenState extends State<DoctorActiveConsultatio
   String _selectedScheduleTime = '10:00 AM';
   bool _isConfirming = false;
 
+  Timer? _pollingTimer;
+
   @override
   void initState() {
     super.initState();
+    _apiClient.initialize();
     _loadAppointment();
+    _startPolling();
     
     DateTime now = DateTime.now();
     for (int i=0; i<7; i++) {
@@ -46,19 +50,44 @@ class _DoctorActiveConsultationScreenState extends State<DoctorActiveConsultatio
     _selectedScheduleDate = _scheduleDates[0];
   }
 
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _pollAppointment();
+    });
+  }
+
+  Future<void> _pollAppointment() async {
+    try {
+      final res = await _apiClient.get('/realtime-bookings/${widget.appointmentId}');
+      if (mounted) {
+        final data = res.data['data'];
+        if (data == null) return;
+        setState(() {
+          _appointment = data;
+          if (_appointment!['status'] == 'in_progress') {
+            _startTimer();
+          }
+        });
+      }
+    } catch (e) {
+      // Ignore polling errors
+    }
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
+    _pollingTimer?.cancel();
     super.dispose();
   }
 
   Future<void> _loadAppointment() async {
     setState(() => _isLoading = true);
     try {
-      final data = await _apiClient.doctor.getAppointmentDetails(widget.appointmentId);
+      final res = await _apiClient.get('/realtime-bookings/${widget.appointmentId}');
       if (mounted) {
         setState(() {
-          _appointment = data;
+          _appointment = res.data['data'];
           _isLoading = false;
           if (_appointment!['status'] == 'in_progress') {
             _startTimer();
@@ -68,9 +97,6 @@ class _DoctorActiveConsultationScreenState extends State<DoctorActiveConsultatio
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading appointment: $e')),
-        );
       }
     }
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:user_app/screens/home/home_screen.dart';
 
-class UserConsultationEndedScreen extends StatefulWidget {
+class UserConsultationEndedScreen extends StatelessWidget {
   final String bookingId;
   final String doctorName;
   final int duration; // seconds
@@ -12,212 +14,271 @@ class UserConsultationEndedScreen extends StatefulWidget {
     required this.duration,
   });
 
-  @override
-  State<UserConsultationEndedScreen> createState() =>
-      _UserConsultationEndedScreenState();
-}
-
-class _UserConsultationEndedScreenState
-    extends State<UserConsultationEndedScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _checkController;
-  late Animation<double> _checkAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _checkAnimation = CurvedAnimation(
-      parent: _checkController,
-      curve: Curves.elasticOut,
-    );
-    _checkController.forward();
-  }
-
-  @override
-  void dispose() {
-    _checkController.dispose();
-    super.dispose();
-  }
-
   String _formatDuration(int totalSeconds) {
     int minutes = totalSeconds ~/ 60;
     int seconds = totalSeconds % 60;
-    if (minutes > 0) {
-      return '${minutes}m ${seconds}s';
-    }
-    return '${seconds}s';
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} min';
   }
 
-  void _goHome() {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+  void _goHome(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (r) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final dateStr = DateFormat('dd MMM yyyy').format(now);
+    final timeStr = DateFormat('hh:mm a').format(now);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FF),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
+          onPressed: () => _goHome(context),
+        ),
+        title: const Text(
+          'My Booking',
+          style: TextStyle(
+            color: Color(0xFF152238),
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Poppins',
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.grey.shade100, height: 1.0),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            // Top Date Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.calendar_today, size: 16, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  'Completed on $dateStr',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
 
-              // Animated checkmark
-              ScaleTransition(
-                scale: _checkAnimation,
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.green.shade400,
-                        Colors.green.shade700,
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.3),
-                        blurRadius: 20,
-                        spreadRadius: 5,
+            // Doctor Profile Row
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.blue.shade50,
+                  child: const Icon(Icons.person, size: 30, color: Colors.blue),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        doctorName.isEmpty ? 'Dr. Shubham Singh' : (doctorName.startsWith('Dr') ? doctorName : 'Dr. $doctorName'),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF152238),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'MBBS – General Physician', // You can pass actual specialization if available
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 50),
                 ),
-              ),
-              const SizedBox(height: 28),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 24),
 
-              const Text(
-                'Consultation Completed',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF152238),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Your session with ${widget.doctorName} has ended.',
-                style: const TextStyle(color: Colors.grey, fontSize: 14),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
+            // Top Info Row
+            Row(
+              children: [
+                Expanded(child: _buildInfoCard(Icons.calendar_today_outlined, 'Consultation Time', timeStr)),
+                const SizedBox(width: 12),
+                Expanded(child: _buildInfoCard(Icons.timer_outlined, 'Consultation Duration', _formatDuration(duration))),
+                const SizedBox(width: 12),
+                Expanded(child: _buildInfoCard(Icons.security, 'Secure &\nPrivate', '')),
+              ],
+            ),
+            const SizedBox(height: 32),
 
-              // Summary card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    _buildSummaryRow(
-                        Icons.medical_services, 'Doctor', widget.doctorName),
-                    const Divider(height: 24),
-                    _buildSummaryRow(Icons.timer, 'Duration',
-                        _formatDuration(widget.duration)),
-                    const Divider(height: 24),
-                    _buildSummaryRow(
-                        Icons.videocam, 'Type', 'Video Consultation'),
-                    const Divider(height: 24),
-                    _buildSummaryRow(
-                      Icons.check_circle,
-                      'Status',
-                      'Completed',
-                      valueColor: Colors.green,
-                    ),
-                  ],
-                ),
+            // Consultation Completed Box
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F9F4),
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 24),
-
-              // Prescription info
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade100),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.description, color: Colors.blue, size: 20),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Your prescription will be shared by the doctor shortly. You can check it in your bookings.',
-                        style: TextStyle(fontSize: 12, color: Colors.black87),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const Spacer(flex: 3),
-
-              // Back to Home
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: _goHome,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1565C0),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Color(0xFF28A745), size: 36),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Consultation completed successfully.',
+                          style: TextStyle(
+                            color: Color(0xFF28A745),
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            height: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Thank you for using Doctor Consultation.',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: const Text(
-                    'Back to Home',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Menu Items
+            _buildMenuItem(Icons.description_outlined, 'Consultation Summary', () {}),
+            _buildMenuItem(Icons.medical_services_outlined, 'Prescription Ready', () {}),
+            
+            const SizedBox(height: 16),
+            
+            // Download Prescription Button
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // Handle download prescription
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Downloading prescription...')));
+                },
+                icon: const Icon(Icons.download, size: 20),
+                label: const Text(
+                  'Download Prescription',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade50,
+                  foregroundColor: Colors.blue,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+            const SizedBox(height: 32),
+            
+            _buildMenuItem(Icons.star_outline, 'Rate Your Experience', () {}),
+            _buildMenuItem(Icons.help_outline, 'Need Help?', () {}),
+            
+            const SizedBox(height: 32),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSummaryRow(IconData icon, String label, String value,
-      {Color? valueColor}) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: const Color(0xFF1565C0)),
-        const SizedBox(width: 12),
-        Text(label,
-            style: const TextStyle(color: Colors.grey, fontSize: 13)),
-        const Spacer(),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-            color: valueColor ?? const Color(0xFF152238),
+  Widget _buildInfoCard(IconData icon, String title, String value) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.blue, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey.shade600,
+              height: 1.2,
+            ),
           ),
+          if (value.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF152238),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: const Color(0xFF152238), size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF152238),
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey.shade400),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

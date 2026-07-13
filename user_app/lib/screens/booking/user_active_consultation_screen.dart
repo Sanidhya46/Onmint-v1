@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:user_app/screens/booking/user_video_call_screen.dart';
 import 'package:user_app/screens/booking/user_consultation_ended_screen.dart';
+import 'package:user_app/screens/home/home_screen.dart';
 
 class UserActiveConsultationScreen extends StatefulWidget {
   final String bookingId;
@@ -15,33 +15,113 @@ class UserActiveConsultationScreen extends StatefulWidget {
   });
 
   @override
-  State<UserActiveConsultationScreen> createState() =>
-      _UserActiveConsultationScreenState();
+  State<UserActiveConsultationScreen> createState() => _UserActiveConsultationScreenState();
 }
 
-class _UserActiveConsultationScreenState
-    extends State<UserActiveConsultationScreen> {
+class _UserActiveConsultationScreenState extends State<UserActiveConsultationScreen> {
   final _apiClient = OnMintApiClient();
-  final _socketService = SocketService();
   Map<String, dynamic>? _booking;
   bool _isLoading = true;
-  bool _isDoctorOnCall = false;
-  StreamSubscription? _consultationEndedSub;
-  StreamSubscription? _doctorJoinedSub;
+  Timer? _pollingTimer;
+  Timer? _durationTimer;
+  int _durationSeconds = 0;
+  DateTime? _startTime;
 
   @override
   void initState() {
     super.initState();
     _loadBooking();
-    _setupSocketListeners();
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _pollBooking();
+    });
+  }
+
+  void _startDurationTimer() {
+    _durationTimer?.cancel();
+    _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_startTime != null && mounted) {
+        setState(() {
+          _durationSeconds = DateTime.now().difference(_startTime!).inSeconds;
+        });
+      }
+    });
+  }
+
+  Future<void> _pollBooking() async {
+    try {
+      final res = await _apiClient.get('/realtime-bookings/${widget.bookingId}');
+      if (!mounted) return;
+      
+      final data = res.data['data'];
+      if (data == null) return;
+
+      setState(() {
+        _booking = data;
+      });
+
+      if (_startTime == null && _booking!['actualStartTime'] != null) {
+        _startTime = DateTime.parse(_booking!['actualStartTime']).toLocal();
+        _startDurationTimer();
+      }
+
+      final status = _booking!['status'];
+      if (status == 'completed' || status == 'ended') {
+        _pollingTimer?.cancel();
+        _durationTimer?.cancel();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => UserConsultationEndedScreen(
+              bookingId: widget.bookingId,
+              doctorName: 'Doctor',
+              duration: _durationSeconds,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Silently ignore polling errors
+    }
+  }
+
+  Future<void> _loadBooking() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await _apiClient.get('/realtime-bookings/${widget.bookingId}');
+      if (mounted) {
+        setState(() {
+          _booking = res.data['data'];
+          _isLoading = false;
+        });
+        
+        if (_booking != null && _booking!['actualStartTime'] != null) {
+          _startTime = DateTime.parse(_booking!['actualStartTime']).toLocal();
+          _startDurationTimer();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   void dispose() {
-    _consultationEndedSub?.cancel();
-    _doctorJoinedSub?.cancel();
-    _socketService.leaveBooking(widget.bookingId);
+    _pollingTimer?.cancel();
+    _durationTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    }
   }
 
   Map<String, dynamic> _getSafeProvider(Map<String, dynamic>? bookingData) {
@@ -56,613 +136,345 @@ class _UserActiveConsultationScreenState
     return {};
   }
 
-
-  void _setupSocketListeners() {
-    _socketService.joinBooking(widget.bookingId);
-
-    _doctorJoinedSub = _socketService.doctorJoined.listen((data) {
-      if (data['bookingId'] == widget.bookingId && mounted) {
-        setState(() => _isDoctorOnCall = true);
-      }
-    });
-
-    _consultationEndedSub = _socketService.consultationEnded.listen((data) {
-      if (data['bookingId'] == widget.bookingId && mounted) {
-        final provider = _getSafeProvider(_booking);
-        final fullName = provider['fullName'] ??
-            '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => UserConsultationEndedScreen(
-              bookingId: widget.bookingId,
-              doctorName: fullName.isEmpty ? 'Doctor' : fullName,
-              duration: data['duration'] is int ? data['duration'] : 0,
-            ),
-          ),
-        );
-      }
-    });
-  }
-
-  Future<void> _loadBooking() async {
-    setState(() => _isLoading = true);
-    try {
-      final data = await _apiClient.patient.getBookingDetails(widget.bookingId);
-      if (mounted) {
-        setState(() {
-          _booking = data.toJson();
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading consultation: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
-    await launchUrl(launchUri);
-  }
-
-  Future<void> _joinVideoCall() async {
-    final provider = _getSafeProvider(_booking);
-    final fullName = provider['fullName'] ??
-        '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
-        
-    final videoCallLink = _booking!['videoCallLink'];
-
-    if (videoCallLink != null && videoCallLink.toString().isNotEmpty) {
-      final uri = Uri.parse(videoCallLink.toString());
-      try {
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-          return;
-        }
-      } catch (e) {
-        debugPrint('Could not launch video call link: $e');
-      }
-    }
-
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UserVideoCallScreen(
-          bookingId: widget.bookingId,
-          doctorName: fullName.isEmpty ? 'Doctor' : fullName,
-          doctorImage: provider['profilePicture'],
-        ),
-      ),
-    );
-
-    // Reload booking after returning
-    _loadBooking();
+  String _formatDuration(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')} min';
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF1565C0),
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_booking == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF1565C0),
-        appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-        body: const Center(
-            child: Text('Consultation not found',
-                style: TextStyle(color: Colors.white))),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white, 
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(child: Text('Consultation not found')),
       );
     }
 
-    final status = _booking!['status'] ?? 'accepted';
+    final provider = _getSafeProvider(_booking);
+    final docName = provider['fullName'] ?? '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
+    final docSpec = provider['specialization'] ?? _booking!['category'] ?? 'General Physician';
+    final docImage = provider['profilePic'] ?? provider['profilePicture'];
+    
+    String startTimeStr = '10:00 AM';
+    if (_startTime != null) {
+      startTimeStr = DateFormat('hh:mm a').format(_startTime!);
+    } else if (_booking!['scheduledTime'] != null) {
+      startTimeStr = _booking!['scheduledTime'];
+    } else if (_booking!['createdAt'] != null) {
+      startTimeStr = DateFormat('hh:mm a').format(DateTime.parse(_booking!['createdAt']).toLocal());
+    }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FF),
-      body: RefreshIndicator(
-        onRefresh: _loadBooking,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              _buildTopSection(status),
-              const SizedBox(height: 110), // Space for overlapping card
-              _buildServiceProgress(status),
-              const SizedBox(height: 16),
-              if (status == 'in_progress') _buildJoinCallAction(),
-              if (status != 'in_progress') _buildActionButtonsRow(),
-              const SizedBox(height: 32),
-            ],
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              (r) => false,
+            );
+          },
+        ),
+        title: const Text(
+          'My Booking',
+          style: TextStyle(
+            color: Color(0xFF152238),
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Poppins',
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTopSection(String status) {
-    final provider = _getSafeProvider(_booking);
-    final fullName = provider['fullName'] ??
-        '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
-    final specialization = provider['specialization'] ?? 'Doctor';
-
-    final price = _booking!['price'] ??
-        _booking!['totalAmount'] ??
-        _booking!['fees'] ??
-        300;
-
-    String formattedDate = 'Unknown';
-    String formattedTime = 'Unknown';
-    if (_booking!['createdAt'] != null) {
-      final date = DateTime.tryParse(_booking!['createdAt']);
-      if (date != null) {
-        formattedDate = DateFormat('dd MMM yyyy').format(date);
-        formattedTime = DateFormat('hh:mm a').format(date);
-      }
-    }
-
-    // Status UI Configuration
-    String headerTitle;
-    String subTitle;
-    IconData headerIcon;
-
-    switch (status) {
-      case 'in_progress':
-        headerTitle = 'Consultation Live';
-        subTitle = 'The doctor is ready and waiting for you.';
-        headerIcon = Icons.videocam;
-        break;
-      case 'completed':
-        headerTitle = 'Consultation Completed';
-        subTitle = 'The doctor has ended the consultation.';
-        headerIcon = Icons.check_circle;
-        break;
-      case 'requested':
-      case 'pending':
-        headerTitle = 'Request Pending';
-        subTitle = 'Waiting for doctor to accept.';
-        headerIcon = Icons.access_time;
-        break;
-      case 'accepted':
-      default:
-        headerTitle = 'Connected';
-        subTitle =
-            '${fullName.isEmpty ? "The doctor" : fullName} has accepted your request.';
-        headerIcon = Icons.check_circle;
-        break;
-    }
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: double.infinity,
-          height: 260,
-          decoration: const BoxDecoration(
-            color: Color(0xFF0D47A1),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.verified_user_outlined, color: Color(0xFF152238)),
+            onPressed: () {},
           ),
-          child: SafeArea(
-            bottom: false,
-            child: Column(
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.grey.shade100, height: 1.0),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: Colors.blue.shade50,
+                  backgroundImage: docImage != null ? NetworkImage(docImage) : null,
+                  child: docImage == null ? const Icon(Icons.person, size: 30, color: Colors.blue) : null,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const Text(
-                        'Active Consultation',
-                        style: TextStyle(
-                          color: Colors.white,
+                      Text(
+                        docName.isEmpty ? 'Dr. Shubham Singh' : (docName.startsWith('Dr') ? docName : 'Dr. $docName'),
+                        style: const TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF152238),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.refresh, color: Colors.white),
-                        onPressed: _loadBooking,
+                      const SizedBox(height: 4),
+                      Text(
+                        'MBBS – $docSpec',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(headerIcon, color: Colors.white, size: 24),
-                    const SizedBox(width: 8),
-                    Text(
-                      headerTitle,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  subTitle,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
                   ),
                 ),
               ],
             ),
-          ),
-        ),
+            const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 24),
 
-        // Doctor Details Overlapping Card
-        if (status != 'requested' && status != 'pending')
-          Positioned(
-            bottom: -90,
-            left: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(16),
+            Row(
+              children: [
+                Expanded(child: _buildInfoCard(Icons.calendar_today_outlined, 'Consultation Time', startTimeStr)),
+                const SizedBox(width: 12),
+                Expanded(child: _buildInfoCard(Icons.timer_outlined, 'Consultation Duration', _formatDuration(_durationSeconds))),
+                const SizedBox(width: 12),
+                Expanded(child: _buildInfoCard(Icons.security, 'Secure &\nPrivate', '')),
+              ],
+            ),
+            const SizedBox(height: 32),
+
+            Container(
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade100),
                 boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
+                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
                 ],
               ),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          shape: BoxShape.circle,
-                        ),
-                        child: provider['profilePicture'] != null
-                            ? ClipOval(
-                                child: Image.network(
-                                  provider['profilePicture'],
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.person, color: Color(0xFF0D47A1), size: 32),
-                                ),
-                              )
-                            : const Icon(Icons.person, color: Color(0xFF0D47A1), size: 32),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              fullName.isEmpty ? 'Doctor' : fullName,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF152238),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              specialization,
-                              style: const TextStyle(
-                                color: Colors.blue,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  Image.asset(
+                    'assets/images/request_order/doctor.png',
+                    height: 120,
                   ),
                   const SizedBox(height: 16),
-                  Divider(color: Colors.grey.shade200),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_month_outlined,
-                                  size: 16, color: Color(0xFF1565C0)),
-                              const SizedBox(width: 6),
-                              Text(
-                                formattedDate,
-                                style: const TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 22.0),
-                            child: Text(
-                              formattedTime,
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '₹$price',
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
-                          const Text(
-                            'Paid Securely',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ],
+                  const Text(
+                    'Complete your consultation',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF152238),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Your consultation is in progress.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  _buildTimelineStep(
+                    icon: Icons.check,
+                    title: 'Accepted',
+                    isCompleted: true,
+                  ),
+                  _buildTimelineLine(isCompleted: true),
+                  _buildTimelineStep(
+                    icon: Icons.radio_button_checked,
+                    title: 'Complete Consultant',
+                    subtitle: 'Started $startTimeStr',
+                    isCompleted: true,
+                    isCurrent: true,
                   ),
                 ],
               ),
             ),
-          ),
-      ],
+            const SizedBox(height: 24),
+
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade100),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Recall (Call Again)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF152238),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'If the call got disconnected, you can call the doctor again.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      final phone = provider['phone'] ?? _booking!['doctorPhone'];
+                      if (phone != null) _makePhoneCall(phone);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade50,
+                      foregroundColor: Colors.blue,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    child: const Text('Recall Doctor', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildServiceProgress(String status) {
-    if (status == 'requested' || status == 'pending') {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-        child: Center(
-          child: Column(
-            children: [
-              CircularProgressIndicator(color: Color(0xFF1565C0)),
-              SizedBox(height: 16),
-              Text('Waiting for Doctor to accept...',
-                  style: TextStyle(
-                      color: Colors.grey, fontWeight: FontWeight.w600)),
-            ],
-          ),
-        ),
-      );
-    }
-
-    bool isLive = status == 'in_progress';
-    bool isCompleted = status == 'completed';
-
+  Widget _buildInfoCard(IconData icon, String title, String value) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade100),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Consultation Progress',
+          Icon(icon, color: Colors.blue, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF152238),
+              fontSize: 11,
+              color: Colors.grey.shade600,
+              height: 1.2,
             ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              _buildProgressStep('Connected', Icons.check, true, 'Done'),
-              _buildProgressLine(isLive || isCompleted),
-              _buildProgressStep(
-                  'In Consultation',
-                  Icons.videocam,
-                  isCompleted || isLive,
-                  isLive ? 'Live Now' : (isCompleted ? 'Done' : 'Upcoming'),
-                  isActive: isLive),
-              _buildProgressLine(isCompleted),
-              _buildProgressStep('Completed', Icons.flag, isCompleted,
-                  isCompleted ? 'Done' : 'Upcoming',
-                  isGrey: !isCompleted),
-            ],
-          ),
+          if (value.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF152238),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildProgressStep(
-      String label, IconData icon, bool isCompleted, String subLabel,
-      {bool isActive = false, bool isGrey = false}) {
-    Color mainColor;
-    if (isActive) {
-      mainColor = Colors.blue;
-    } else if (isCompleted) {
-      mainColor = Colors.green;
-    } else {
-      mainColor = Colors.grey.shade300;
-    }
-
-    return Column(
+  Widget _buildTimelineStep({required IconData icon, required String title, String? subtitle, required bool isCompleted, bool isCurrent = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 36,
-          height: 36,
+          width: 28,
+          height: 28,
           decoration: BoxDecoration(
-            color: isCompleted || isActive ? mainColor : Colors.white,
+            color: isCompleted ? const Color(0xFF28A745) : Colors.grey.shade200,
             shape: BoxShape.circle,
-            border: isCompleted || isActive
-                ? null
-                : Border.all(color: Colors.grey.shade300, width: 2),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                        color: Colors.blue.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3))
-                  ]
-                : null,
           ),
           child: Icon(
             icon,
-            size: 18,
-            color:
-                isCompleted || isActive ? Colors.white : Colors.grey.shade500,
+            color: isCompleted ? Colors.white : Colors.grey.shade400,
+            size: 16,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: mainColor == Colors.grey.shade300
-                ? Colors.grey.shade600
-                : mainColor,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          subLabel,
-          style: TextStyle(
-            fontSize: 10,
-            color: isActive ? Colors.blue : Colors.grey.shade500,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
+                  color: isCompleted ? const Color(0xFF152238) : Colors.grey.shade500,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildProgressLine(bool isCompleted) {
-    return Expanded(
-      child: Container(
-        height: 2,
-        margin: const EdgeInsets.only(bottom: 30),
-        color: isCompleted ? Colors.green : Colors.grey.shade200,
-      ),
-    );
-  }
-
-  Widget _buildJoinCallAction() {
+  Widget _buildTimelineLine({required bool isCompleted}) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'Doctor has started the call',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text('Please join the consultation room.',
-              style: TextStyle(color: Colors.grey, fontSize: 13)),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton.icon(
-              onPressed: _joinVideoCall,
-              icon: const Icon(Icons.videocam),
-              label: const Text('Join Consultation',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF43A047),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtonsRow() {
-    final status = _booking!['status'];
-    if (status == 'requested' || status == 'completed')
-      return const SizedBox.shrink();
-
-    final provider = _getSafeProvider(_booking);
-    final providerPhone = provider['phone'];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildActionButton(Icons.phone, 'Call Clinic', () {
-            if (providerPhone != null) {
-              _makePhoneCall(providerPhone);
-            }
-          }),
-          _buildActionButton(Icons.chat, 'Chat', () {}),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: const Color(0xFF1565C0), size: 20),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF152238),
-            ),
-          ),
-        ],
+      margin: const EdgeInsets.only(left: 13),
+      height: 32,
+      child: VerticalDivider(
+        color: isCompleted ? const Color(0xFF28A745) : Colors.grey.shade200,
+        thickness: 2,
       ),
     );
   }
