@@ -1320,7 +1320,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                           radius: 38,
                           backgroundColor: Colors.blue.shade50,
                           backgroundImage: drImage.startsWith('http') ? NetworkImage(drImage) : null,
-                          onBackgroundImageError: (e, s) {},
+                          onBackgroundImageError: drImage.startsWith('http') ? (e, s) {} : null,
                           child: !drImage.startsWith('http')
                               ? const Icon(Icons.person, size: 38, color: Colors.blue)
                               : null,

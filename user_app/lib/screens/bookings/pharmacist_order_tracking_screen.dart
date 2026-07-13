@@ -943,7 +943,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                 radius: 16,
                 backgroundColor: Colors.blue[50],
                 backgroundImage: provider['profilePic'] != null ? NetworkImage(provider['profilePic']) : null,
-                onBackgroundImageError: (e, s) {},
+                onBackgroundImageError: provider['profilePic'] != null ? (e, s) {} : null,
                 child: provider['profilePic'] == null ? const Icon(Icons.local_pharmacy, size: 16, color: Color(0xFF0033CC)) : null,
               ),
               const SizedBox(width: 8),

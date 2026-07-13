@@ -428,10 +428,11 @@ class _ConnectedVendorDetailsScreenState
                       const SizedBox(width: 10),
                       Expanded(
                         child: _buildQuickActionCard(
-                          customIconWidget: const Icon(
-                            Icons.chat,
-                            color: Color(0xFF25D366),
-                            size: 32,
+                          customIconWidget: Image.network(
+                            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/150px-WhatsApp.svg.png',
+                            width: 32,
+                            height: 32,
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.chat, color: Color(0xFF25D366), size: 32),
                           ),
                           label: 'WhatsApp',
                           color: const Color(0xFF25D366),

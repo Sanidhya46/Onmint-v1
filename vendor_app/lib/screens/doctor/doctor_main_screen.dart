@@ -64,9 +64,9 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
             label: 'Appointments',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            activeIcon: Icon(Icons.account_balance_wallet),
-            label: 'Earnings',
+            icon: Icon(Icons.star_outline),
+            activeIcon: Icon(Icons.star),
+            label: 'Premium',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

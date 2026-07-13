@@ -8,10 +8,10 @@ class EarningsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Earnings'),
+        title: const Text('Premium'),
       ),
       body: const Center(
-        child: Text('Earnings details coming soon'),
+        child: Text('Premium details coming soon'),
       ),
     );
   }

@@ -69,7 +69,7 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
         'isEmergency': false,
         'city': widget.city,
         'state': widget.state,
-        'paymentMethod': _selectedPayment,
+        'paymentMethod': 'direct_to_vendor',
         'totalAmount': 499, // From UI
       };
 
@@ -150,7 +150,7 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
                               color: Colors.white, size: 16),
                           SizedBox(width: 6),
                           Text(
-                            'Pay Rs. 499 & Confirm Booking',
+                            'Confirm Booking',
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -299,6 +299,7 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
 
                 // Nearest Nurse
