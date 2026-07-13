@@ -185,12 +185,22 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     final dateStr = _appointment!['createdAt'] ?? _appointment!['scheduledTime'];
     final formattedDate = _formatDate(dateStr);
     final formattedTime = _formatTime(dateStr);
-    final problem = _appointment!['requirements']?['description'] ?? _appointment!['notes'] ?? 'Fever, Cold';
+    String problem = 'Fever, Cold';
+    if (_appointment!['requirements'] is Map) {
+      problem = _appointment!['requirements']['description'] ?? _appointment!['notes'] ?? problem;
+    } else if (_appointment!['requirements'] is String) {
+      problem = _appointment!['requirements'];
+    } else if (_appointment!['notes'] != null) {
+      problem = _appointment!['notes'];
+    }
+
     final consultationType = _appointment!['consultationType'] ?? 'General Physician';
     
     String addressText = 'H-101, Shanti Nagar,\nGovindpuram, Ghaziabad,\nUttar Pradesh - 201013';
-    if (_appointment!['location']?['address'] != null) {
+    if (_appointment!['location'] is Map && _appointment!['location']['address'] != null) {
       addressText = _appointment!['location']['address'];
+    } else if (_appointment!['location'] is String && _appointment!['location'].toString().isNotEmpty) {
+      addressText = _appointment!['location'];
     }
 
     return Column(
