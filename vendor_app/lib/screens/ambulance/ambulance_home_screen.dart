@@ -249,7 +249,7 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
                         children: [
                           Expanded(child: _buildStatCard('Completed', '${_stats?['completedRides'] ?? 0}', Icons.check_circle_outline, Colors.green)),
                           const SizedBox(width: 8),
-                          Expanded(child: _buildStatCard('Earnings', '₹${_stats?['totalEarnings'] ?? 0}', Icons.account_balance_wallet_outlined, const Color(0xFF7B1FA2))),
+                          Expanded(child: _buildStatCard('Premium', '₹${_stats?['totalEarnings'] ?? 0}', Icons.star_outline, const Color(0xFF7B1FA2))),
                         ],
                       ),
                     ),

@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final screens = [
       KeyedSubtree(key: ValueKey(_refreshCounters[0]), child: dashboardWidget),
       KeyedSubtree(key: ValueKey(_refreshCounters[1]), child: _getBookingsScreenForRole(role)),
-      KeyedSubtree(key: ValueKey(_refreshCounters[2]), child: const Center(child: Text('Earnings', style: TextStyle(fontSize: 18)))),
+      KeyedSubtree(key: ValueKey(_refreshCounters[2]), child: const Center(child: Text('Premium', style: TextStyle(fontSize: 18)))),
       KeyedSubtree(key: ValueKey(_refreshCounters[3]), child: const ProfileScreen()),
     ];
 
@@ -147,9 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Appointments',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            activeIcon: Icon(Icons.account_balance_wallet),
-            label: 'Earnings',
+            icon: Icon(Icons.star_outline),
+            activeIcon: Icon(Icons.star),
+            label: 'Premium',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

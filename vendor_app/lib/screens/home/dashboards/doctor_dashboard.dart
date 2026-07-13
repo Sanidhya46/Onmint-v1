@@ -306,7 +306,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                             return _buildPatientCard(_pendingAppointments[index]);
                           },
                         ),
-                      const Spacer(),
+                      const SizedBox(height: 20),
 
                       // ─── MANAGE CONSULTATIONS BANNER ───────────────────────────
                       Padding(
