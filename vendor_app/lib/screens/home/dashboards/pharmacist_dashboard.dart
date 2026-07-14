@@ -358,13 +358,10 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: Colors.grey[200],
+                  backgroundColor: Colors.transparent,
                   backgroundImage: order['patient']?['profilePic'] != null 
                       ? NetworkImage(order['patient']['profilePic'])
-                      : null,
-                  child: order['patient']?['profilePic'] == null 
-                      ? const Icon(Icons.person, color: Colors.grey, size: 24)
-                      : null,
+                      : AssetImage((order['patient']?['gender'] ?? order['patientGender'])?.toString().toLowerCase() == 'female' ? 'assets/images/female_profile.png' : 'assets/images/male_profile.png') as ImageProvider,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -376,7 +373,7 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
                         children: [
                           Expanded(
                             child: Text(
-                              order['patientName'] ?? 'Unknown Patient',
+                              order['patient']?['fullName'] ?? order['patientName'] ?? 'Unknown Patient',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -424,7 +421,7 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${order['patientAge'] ?? 0} Years / ${order['patientGender'] ?? "Unknown"}',
+                        '${order['patient']?['age'] ?? order['patientAge'] ?? 0} Years / ${order['patient']?['gender'] ?? order['patientGender'] ?? "Unknown"}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 11, color: Colors.grey),

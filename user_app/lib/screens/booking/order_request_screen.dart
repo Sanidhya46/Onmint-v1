@@ -11,6 +11,7 @@ import '../profile/help_support_screen.dart';
 import '../medicines/medicines_list_screen.dart';
 import 'service_offers_screen.dart';
 import '../home/home_screen.dart';
+import '../bookings/pharmacist_order_tracking_screen.dart';
 
 class OrderRequestScreen extends StatefulWidget {
   final String bookingId;
@@ -62,6 +63,18 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
       
       if (offers.isNotEmpty || updatedBooking['status'] == 'accepted') {
         _pollingTimer?.cancel();
+        
+        final type = widget.serviceType.toLowerCase();
+        if (type == 'medicine' || type == 'pharmacy') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PharmacistOrderTrackingScreen(bookingId: widget.bookingId),
+            ),
+          );
+          return;
+        }
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

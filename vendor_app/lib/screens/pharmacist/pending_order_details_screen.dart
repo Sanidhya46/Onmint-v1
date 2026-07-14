@@ -217,13 +217,10 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                       children: [
                         CircleAvatar(
                           radius: 24,
-                          backgroundColor: Colors.grey[200],
+                          backgroundColor: Colors.transparent,
                           backgroundImage: (order['patient'] is Map && order['patient']['profilePic'] != null)
                               ? NetworkImage(order['patient']['profilePic'])
-                              : null,
-                          child: (order['patient'] is! Map || order['patient']['profilePic'] == null)
-                              ? const Icon(Icons.person, color: Colors.grey, size: 28)
-                              : null,
+                              : AssetImage((order['patient'] is Map ? order['patient']['gender'] : order['patientGender'])?.toString().toLowerCase() == 'female' ? 'assets/images/female_profile.png' : 'assets/images/male_profile.png') as ImageProvider,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -231,12 +228,12 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                order['patientName'] ?? 'Unknown',
+                                (order['patient'] is Map ? order['patient']['fullName'] : null) ?? order['patientName'] ?? 'Unknown',
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${order['patientAge'] ?? 0} Years / ${order['patientGender'] ?? "Unknown"}',
+                                '${(order['patient'] is Map ? order['patient']['age'] : null) ?? order['patientAge'] ?? 0} Years / ${(order['patient'] is Map ? order['patient']['gender'] : null) ?? order['patientGender'] ?? "Unknown"}',
                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
@@ -652,12 +649,12 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                        children: const [
                           Icon(Icons.close, size: 20),
                           SizedBox(width: 4),
-                          Expanded(child: Text('Reject Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
+                          Text('Reject Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
                         ],
                       ),
                     ),
@@ -682,17 +679,15 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                        children: const [
                           Icon(Icons.check, size: 20),
                           SizedBox(width: 4),
-                          Expanded(
-                            child: Text('Accept Order', 
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                            ),
+                          Text('Accept Order', 
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
                           ),
                         ],
                       ),
