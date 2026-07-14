@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'package:user_app/screens/home/home_screen.dart';
+import 'package:user_app/screens/booking/user_active_consultation_screen.dart' as user_active;
+import 'package:user_app/screens/booking/user_consultation_ended_screen.dart' as user_ended;
 
 class DoctorRequestSentScreen extends StatefulWidget {
   final String bookingId;
