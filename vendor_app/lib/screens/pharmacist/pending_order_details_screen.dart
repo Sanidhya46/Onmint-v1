@@ -638,40 +638,16 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                   ],
                 ),
               )
-            : Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _rejectOrder,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.close, size: 20),
-                          SizedBox(width: 4),
-                          Text('Reject Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
+            : isPrescriptionBased 
+                ? SizedBox(
+                    width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (isPrescriptionBased) {
-                          if (_timeController.text.isEmpty) {
-                            ToastUtils.showError('Please enter delivery time');
-                            return;
-                          }
-                          _submitOffer(_amountController.text, '${_timeController.text} Hours');
-                        } else {
-                          _acceptOrder();
+                        if (_timeController.text.isEmpty) {
+                          ToastUtils.showError('Please enter delivery time');
+                          return;
                         }
+                        _submitOffer(_amountController.text, '${_timeController.text} Hours');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -682,19 +658,63 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
-                          Icon(Icons.check, size: 20),
-                          SizedBox(width: 4),
-                          Text('Accept Order', 
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
+                          Icon(Icons.send, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Send for Patient Approval',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                         ],
                       ),
                     ),
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _rejectOrder,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.close, size: 20),
+                              SizedBox(width: 4),
+                              Text('Reject Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _acceptOrder,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.check, size: 20),
+                              SizedBox(width: 4),
+                              Text('Accept Order', 
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
         ),
       ),
     );

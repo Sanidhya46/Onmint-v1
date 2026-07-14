@@ -53,7 +53,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
       });
 
       final status = _booking['status'];
-      if (status == 'active') {
+      if (status == 'active' || status == 'in_progress') {
         _timer?.cancel();
         final provider = _booking['acceptedProvider'] ?? _booking['provider'] ?? {};
         final docName = provider['fullName'] ?? '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
@@ -156,7 +156,13 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
     final docSpec = provider['specialization'] ?? category;
     final docExp = provider['experience']?.toString() ?? '8+';
     final docImage = provider['profilePic'] ?? provider['profilePicture'];
-    final timeStr = _booking['scheduledTime'] ?? DateFormat('hh:mm a').format(dt);
+    String timeStr = _booking['scheduledTime'] ?? DateFormat('hh:mm a').format(dt);
+    if (_booking['scheduledTime'] != null && _booking['scheduledTime'].toString().contains('T')) {
+      try {
+        final st = DateTime.parse(_booking['scheduledTime']).toLocal();
+        timeStr = DateFormat('dd MMM yyyy, hh:mm a').format(st);
+      } catch (_) {}
+    }
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
