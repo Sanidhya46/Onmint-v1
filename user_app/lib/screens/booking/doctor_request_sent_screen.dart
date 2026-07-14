@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:user_app/screens/home/home_screen.dart';
 import 'package:user_app/screens/booking/user_active_consultation_screen.dart' as user_active;
 import 'package:user_app/screens/booking/user_consultation_ended_screen.dart' as user_ended;
+import 'package:user_app/screens/booking/user_video_call_screen.dart';
 
 class DoctorRequestSentScreen extends StatefulWidget {
   final String bookingId;
@@ -54,10 +55,18 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
       final status = _booking['status'];
       if (status == 'active') {
         _timer?.cancel();
+        final provider = _booking['acceptedProvider'] ?? _booking['provider'] ?? {};
+        final docName = provider['fullName'] ?? '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
+        final docImage = provider['profilePic'] ?? provider['profilePicture'];
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => user_active.UserActiveConsultationScreen(bookingId: widget.bookingId),
+            builder: (context) => UserVideoCallScreen(
+              bookingId: widget.bookingId,
+              doctorName: docName.isEmpty ? 'Doctor' : docName,
+              doctorImage: docImage,
+            ),
           ),
         );
       } else if (status == 'completed' || status == 'ended') {
@@ -573,7 +582,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
     final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(dt);
 
     final status = _booking['status'] ?? 'pending';
-    final isAccepted = status == 'accepted' || status == 'confirmed';
+    final isAccepted = (status == 'accepted' || status == 'confirmed') && _booking['scheduledTime'] != null;
 
     return Scaffold(
       backgroundColor: Colors.white,
