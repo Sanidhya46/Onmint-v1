@@ -179,9 +179,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: _isProcessing 
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -614,24 +612,20 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    SizedBox(
-                      width: 20, 
-                      height: 20, 
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue)
-                    ),
-                    SizedBox(width: 12),
+                    Icon(Icons.access_time, size: 20, color: Colors.black54),
+                    SizedBox(width: 8),
                     Text(
                       'Waiting for patient approval...',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Colors.black54,
                         fontSize: 14,
                       ),
                     ),
@@ -642,7 +636,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                 ? SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: _isProcessing ? null : () {
                         if (_timeController.text.isEmpty) {
                           ToastUtils.showError('Please enter delivery time');
                           return;
@@ -652,27 +646,34 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.green.shade300,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.send, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'Send for Patient Approval',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      child: _isProcessing 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.send, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                'Send for Patient Approval',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
                     ),
                   )
                 : Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _rejectOrder,
+                          onPressed: _isProcessing ? null : _rejectOrder,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.red,
                             side: const BorderSide(color: Colors.red),
@@ -692,25 +693,32 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _acceptOrder,
+                          onPressed: _isProcessing ? null : _acceptOrder,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
+                            disabledBackgroundColor: Colors.green.shade300,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.check, size: 20),
-                              SizedBox(width: 4),
-                              Text('Accept Order', 
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
+                          child: _isProcessing
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.check, size: 20),
+                                  SizedBox(width: 4),
+                                  Text('Accept Order', 
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
                         ),
                       ),
                     ],
