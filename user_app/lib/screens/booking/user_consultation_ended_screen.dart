@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:user_app/screens/home/home_screen.dart';
+import 'package:api_client/api_client.dart' as api_client;
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
 class UserConsultationEndedScreen extends StatelessWidget {
   final String bookingId;
@@ -180,9 +182,34 @@ class UserConsultationEndedScreen extends StatelessWidget {
               width: double.infinity,
               height: 52,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  // Handle download prescription
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Downloading prescription...')));
+                onPressed: () async {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fetching prescription...')));
+                  try {
+                    final _apiClient = api_client.OnMintApiClient();
+                    await _apiClient.initialize();
+                    final res = await _apiClient.get('/realtime-bookings/$bookingId');
+                    final data = res.data['data'];
+                    final prescriptionUrl = data['prescriptionUrl'] ?? data['prescription']?['fileUrl'] ?? (data['prescription'] is String ? data['prescription'] : null);
+                    
+                    if (prescriptionUrl != null && prescriptionUrl.toString().startsWith('http')) {
+                      final uri = Uri.parse(prescriptionUrl.toString());
+                      if (await url_launcher.canLaunchUrl(uri)) {
+                        await url_launcher.launchUrl(uri, mode: url_launcher.LaunchMode.externalApplication);
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not open prescription link.')));
+                        }
+                      }
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Prescription not available yet.')));
+                      }
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
+                  }
                 },
                 icon: const Icon(Icons.download, size: 20),
                 label: const Text(

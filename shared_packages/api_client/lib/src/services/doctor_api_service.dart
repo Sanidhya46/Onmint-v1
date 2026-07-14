@@ -67,7 +67,7 @@ class DoctorApiService {
     final response = await _client.uploadMultipartData(
       '/doctor/appointments/$appointmentId/prescription-file',
       {if (notes != null && notes.isNotEmpty) 'notes': notes},
-      namedFiles: {'prescription': filePath},
+      namedFiles: {'file': filePath},
     );
     return response.data['data'] as Map<String, dynamic>;
   }
@@ -84,7 +84,7 @@ class DoctorApiService {
     });
     formData.files.add(
       MapEntry(
-        'prescription',
+        'file',
         MultipartFile.fromBytes(
           bytes,
           filename: filename,
@@ -138,9 +138,16 @@ class DoctorApiService {
 
   // Reject Appointment
   Future<void> rejectAppointment(String appointmentId, {String? reason}) async {
-    await _client.post('/doctor/appointments/$appointmentId/reject', data: {
-      if (reason != null) 'reason': reason,
-    });
+    try {
+      await _client.patch('/realtime-bookings/$appointmentId/status', data: {
+        'status': 'rejected',
+        if (reason != null) 'reason': reason,
+      });
+    } catch (e) {
+      await _client.post('/doctor/appointments/$appointmentId/reject', data: {
+        if (reason != null) 'reason': reason,
+      });
+    }
   }
 
   // Complete Appointment

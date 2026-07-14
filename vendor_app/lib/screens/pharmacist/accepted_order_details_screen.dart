@@ -604,9 +604,12 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
                     currentIndex == 1 ? Icons.moped : Icons.check_circle,
                     size: 16,
                   ),
-                  label: Text(
-                    statuses[currentIndex + 1]['label']!,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      statuses[currentIndex + 1]['label']!,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0033CC),

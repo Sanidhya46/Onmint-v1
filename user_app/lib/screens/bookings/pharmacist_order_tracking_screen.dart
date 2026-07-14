@@ -94,7 +94,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
     
     String appBarTitle = 'Order Details';
     if (status == 'completed') appBarTitle = 'Order Delivered';
-    else if (!isPending) appBarTitle = 'Order Confirmed';
+    else if (!isPending) appBarTitle = 'My Order';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -145,7 +145,9 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
               if (hasOffers)
                 _buildOffersUI(offers)
               else if (isPending)
-                _buildPendingHeader(),
+                _buildPendingHeader()
+              else
+                _buildAcceptedHeader(),
               
               if (!hasOffers) ...[
                 if (isPending) _buildPendingDetails() else _buildAcceptedDetails(),
@@ -941,7 +943,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
     final provider = (pData is Map) ? pData : {};
     final pName = provider['businessName'] ?? provider['fullName'] ?? 'Pharmacy Store';
     final medicines = (_booking!['medicines'] as List?) ?? [];
-    double totalAmt = _booking!['price'] ?? 0.0;
+    double totalAmt = double.tryParse(_booking!['price']?.toString() ?? '0') ?? 0.0;
     totalAmt += 45; // Delivery + packing for UI realism
     
     final createdStr = _booking!['createdAt']?.toString();
@@ -1082,7 +1084,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
                     const Text('Delivered to', style: TextStyle(fontSize: 9, color: Colors.grey)),
                     const SizedBox(height: 2),
                     Text(
-                      _booking!['location']?['address'] ?? 'No address provided',
+                      _getDeliveryAddress(),
                       style: const TextStyle(fontSize: 10, height: 1.2),
                     ),
                   ],
@@ -1106,7 +1108,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
             children: [
               const Text('Medicine Details', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF001F4D))),
               const SizedBox(height: 16),
-              if (_booking!['isPrescriptionBased'] == true) ...[
+              if (_booking!['isPrescriptionBased'] == true || _booking!['isPrescriptionBased'] == 'true') ...[
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
