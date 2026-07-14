@@ -92,6 +92,12 @@ class _DoctorActiveConsultationScreenState extends State<DoctorActiveConsultatio
           if (_appointment!['status'] == 'in_progress') {
             _startTimer();
           }
+          if (_appointment!['scheduleDate'] != null && _appointment!['scheduleTime'] != null) {
+            _scheduleLocked = true;
+            _isStartNowSelected = false;
+            _selectedScheduleDate = DateTime.tryParse(_appointment!['scheduleDate']) ?? _scheduleDates[0];
+            _selectedScheduleTime = _appointment!['scheduleTime'];
+          }
         });
       }
     } catch (e) {

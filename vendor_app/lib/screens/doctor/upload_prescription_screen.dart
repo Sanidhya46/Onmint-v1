@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:ui_components/ui_components.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:vendor_app/screens/home/home_screen.dart';
 
 class UploadPrescriptionScreen extends StatefulWidget {
   final String appointmentId;
@@ -102,7 +103,11 @@ class _UploadPrescriptionScreenState extends State<UploadPrescriptionScreen> {
 
       if (mounted) {
         ToastUtils.showSuccess('Prescription uploaded successfully!');
-        Navigator.pop(context, true);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) {
