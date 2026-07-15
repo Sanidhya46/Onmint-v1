@@ -181,7 +181,7 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${order['patientAge'] ?? 0} Years / ${order['patientGender'] ?? "Unknown"}',
+                        '${order['patientAge'] ?? (order['patient'] is Map ? order['patient']['age'] : null) ?? 'Unknown'} Years / ${order['patientGender'] ?? (order['patient'] is Map ? order['patient']['gender'] : null) ?? "Unknown"}',
                         style: const TextStyle(fontSize: 13, color: Colors.grey),
                       ),
                     ],
@@ -596,19 +596,19 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                height: 35,
+                height: 54,
                 child: ElevatedButton.icon(
                   onPressed: () => _updateStatus(statuses[currentIndex + 1]['key']!),
                   icon: Icon(
                     currentIndex == 0 ? Icons.inventory_2 : 
                     currentIndex == 1 ? Icons.moped : Icons.check_circle,
-                    size: 16,
+                    size: 20,
                   ),
                   label: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
                       statuses[currentIndex + 1]['label']!,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
                   style: ElevatedButton.styleFrom(

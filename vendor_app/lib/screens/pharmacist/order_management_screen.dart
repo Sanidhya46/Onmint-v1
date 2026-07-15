@@ -219,8 +219,8 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
     final address = order['deliveryAddress'] ?? order['location']?['address'] ?? '';
     final orderId = order['_id']?.toString() ?? '';
     final statusRaw = order['status']?.toString().toLowerCase() ?? '';
-    final age = patientData['age'] ?? 35;
-    final gender = patientData['gender'] ?? 'Male';
+    final age = order['patientAge'] ?? patientData['age'] ?? 'Unknown';
+    final gender = order['patientGender'] ?? patientData['gender'] ?? 'Unknown';
 
     // Status logic
     Color statusColor;

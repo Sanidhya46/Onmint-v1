@@ -70,7 +70,9 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
       final status = data['status'];
       setState(() {
         _currentOrder = data;
-        _offerSent = _currentOrder!['hasOffered'] == true ||
+        // Keep _offerSent true if it was already true locally, or if backend says it's pending
+        _offerSent = _offerSent || 
+                     _currentOrder!['hasOffered'] == true ||
                      status == 'pending_patient_approval' || 
                      status == 'offer_sent';
       });
@@ -231,7 +233,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${(order['patient'] is Map ? order['patient']['age'] : null) ?? order['patientAge'] ?? 0} Years / ${(order['patient'] is Map ? order['patient']['gender'] : null) ?? order['patientGender'] ?? "Unknown"}',
+                                '${order['patientAge'] ?? (order['patient'] is Map ? order['patient']['age'] : null) ?? 'Unknown'} Years / ${order['patientGender'] ?? (order['patient'] is Map ? order['patient']['gender'] : null) ?? "Unknown"}',
                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
