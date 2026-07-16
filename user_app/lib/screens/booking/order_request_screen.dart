@@ -147,7 +147,7 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
     final dateStr = data['createdAt'] ?? data['date'];
     if (dateStr == null) return 'Just now';
     try {
-      final date = DateTime.parse(dateStr).toLocal();
+      final date = DateTime.parse(dateStr).toLocal().subtract(const Duration(hours: 5, minutes: 30));
       return DateFormat('dd MMM yyyy, hh:mm a').format(date);
     } catch (e) {
       return 'Just now';
@@ -444,8 +444,9 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
           (route) => false,
         );
         return false;
@@ -459,8 +460,9 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Color(0xFF0F2147)),
             onPressed: () {
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
                 (route) => false,
               );
             },

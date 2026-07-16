@@ -37,7 +37,7 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
     _loadBookingDetails();
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted && _prescriptionUrl == null) {
-        _loadBookingDetails();
+        _checkPrescriptionStatus();
       } else if (_prescriptionUrl != null) {
         _pollingTimer?.cancel();
       }
@@ -50,13 +50,49 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
     super.dispose();
   }
 
+  Future<void> _checkPrescriptionStatus() async {
+    try {
+      final res = await _apiClient.get('/video/call-status/${widget.bookingId}');
+      if (mounted && res.data != null && res.data['data'] != null) {
+        final data = res.data['data'];
+        dynamic presData = data['prescription'];
+        String? pUrl;
+        
+        if (data['prescriptionFileUrl'] != null) {
+          pUrl = data['prescriptionFileUrl'];
+        } else if (data['prescriptionUrl'] != null) {
+          pUrl = data['prescriptionUrl'];
+        } else if (presData != null && presData is Map && presData['fileUrl'] != null) {
+          pUrl = presData['fileUrl'];
+        } else if (presData != null && presData is String) {
+          pUrl = presData;
+        }
+
+        if (pUrl != null && pUrl.isNotEmpty) {
+          setState(() {
+            _prescriptionUrl = pUrl;
+          });
+          _pollingTimer?.cancel();
+          return; // found it in call-status
+        }
+      }
+    } catch (_) {}
+  }
+
   Future<void> _loadBookingDetails() async {
     try {
       await _apiClient.initialize();
-      final res = await _apiClient.get('/realtime-bookings/${widget.bookingId}');
+      // Try realtime-bookings first, if it fails try patient/bookings
+      var res;
+      try {
+        res = await _apiClient.get('/realtime-bookings/${widget.bookingId}');
+      } catch (e) {
+        res = await _apiClient.get('/patient/bookings/${widget.bookingId}');
+      }
+      
       if (mounted) {
-        final data = res.data['data'];
-        final scheduleDate = data['scheduleDate']?.toString();
+        final data = res.data['data'] ?? res.data;
+        final scheduleDate = data['scheduleDate']?.toString() ?? data['createdAt']?.toString();
         final scheduleTime = data['scheduleTime']?.toString();
         final createdAt = data['createdAt']?.toString();
         
@@ -84,7 +120,7 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
               if (cd.endsWith('Z')) cd = cd.substring(0, cd.length - 1);
               final dt = DateTime.parse(cd);
               _completedAtStr = DateFormat('dd MMM yyyy, hh:mm a').format(dt);
-              _timeStr = DateFormat('hh:mm a').format(dt);
+              if (_timeStr.isEmpty) _timeStr = DateFormat('hh:mm a').format(dt);
             } catch (e) {
               _completedAtStr = DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now());
             }
@@ -93,16 +129,20 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
           }
 
           dynamic presData = data['prescription'];
-          if (data['prescriptionUrl'] != null) {
+          if (data['prescriptionFileUrl'] != null) {
+            _prescriptionUrl = data['prescriptionFileUrl'];
+          } else if (data['prescriptionUrl'] != null) {
             _prescriptionUrl = data['prescriptionUrl'];
           } else if (presData is Map && presData['fileUrl'] != null) {
             _prescriptionUrl = presData['fileUrl'];
           } else if (presData is String) {
             _prescriptionUrl = presData;
-          } else {
-            _prescriptionUrl = null;
           }
-          _isLoading = false;
+          if (_prescriptionUrl != null) {
+            _isLoading = false;
+          } else {
+            _isLoading = false;
+          }
         });
       }
     } catch (e) {
@@ -121,9 +161,10 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
   }
 
   void _goHome(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (r) => false,
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/home',
+      (route) => false,
     );
   }
 
@@ -319,6 +360,31 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
               const SizedBox(height: 12),
               _buildActionTile(Icons.medical_information_outlined, 'Prescription Ready', 'Your prescription is ready to download.'),
               const SizedBox(height: 16),
+
+              if (_prescriptionUrl != null) ...[
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      _prescriptionUrl!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        height: 150,
+                        color: Colors.grey.shade50,
+                        child: const Center(
+                          child: Icon(Icons.picture_as_pdf, size: 40, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               
               // Download Prescription Button
               SizedBox(

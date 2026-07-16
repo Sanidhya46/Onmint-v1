@@ -119,9 +119,10 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
       await _apiClient.patch('/realtime-bookings/${widget.bookingId}/status', data: {'status': 'cancelled'});
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Booking Cancelled')));
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (r) => false,
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+          (route) => false,
         );
       }
     } catch (e) {
@@ -159,7 +160,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
     String timeStr = _booking['scheduledTime'] ?? DateFormat('hh:mm a').format(dt);
     if (_booking['scheduledTime'] != null && _booking['scheduledTime'].toString().contains('T')) {
       try {
-        final st = DateTime.parse(_booking['scheduledTime']).toLocal();
+        final st = DateTime.parse(_booking['scheduledTime']).toLocal().subtract(const Duration(hours: 5, minutes: 30));
         timeStr = DateFormat('dd MMM yyyy, hh:mm a').format(st);
       } catch (_) {}
     }
@@ -584,7 +585,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
     
     final dateStr = _booking['createdAt'] ?? DateTime.now().toIso8601String();
     DateTime dt = DateTime.now();
-    try { dt = DateTime.parse(dateStr).toLocal(); } catch (_) {}
+    try { dt = DateTime.parse(dateStr).toLocal().subtract(const Duration(hours: 5, minutes: 30)); } catch (_) {}
     final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(dt);
 
     final status = _booking['status'] ?? 'pending';
@@ -599,10 +600,10 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
           onPressed: () {
-            Navigator.pushAndRemoveUntil(
+            Navigator.pushNamedAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (r) => false,
+              '/home',
+              (route) => false,
             );
           },
         ),

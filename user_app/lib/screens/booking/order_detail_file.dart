@@ -51,10 +51,42 @@ class _OrderDetailFileState extends State<OrderDetailFile>
   void _startPolling() {
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted) {
-        _loadBookingDetails(isPolling: true);
+        if (_booking?['serviceType']?.toString().toLowerCase() == 'doctor') {
+          _pollCallStatus();
+        } else {
+          _loadBookingDetails(isPolling: true);
+        }
       }
     });
   }
+
+  Future<void> _pollCallStatus() async {
+    try {
+      final callStatus = await _apiClient.patient.getCallStatus(widget.bookingId);
+      if (callStatus['success'] == true && callStatus['data'] != null) {
+        if (mounted) {
+          setState(() {
+            if (_booking != null) {
+              _booking!['consultation_ended'] = callStatus['data']['consultation_ended'] == true;
+              _booking!['videoCallCompleted'] = callStatus['data']['videoCallCompleted'] == true;
+              if (callStatus['data']['status'] == 'completed') {
+                _booking!['status'] = 'completed';
+              }
+              if (callStatus['data']['prescriptionFileUrl'] != null) {
+                _booking!['prescriptionFileUrl'] = callStatus['data']['prescriptionFileUrl'];
+                _booking!['prescriptionUrl'] = callStatus['data']['prescriptionFileUrl']; // Also set this so existing UI uses it
+                _booking!['hasPrescription'] = true;
+              } else if (callStatus['data']['prescriptionUrl'] != null) {
+                _booking!['prescriptionUrl'] = callStatus['data']['prescriptionUrl'];
+                _booking!['hasPrescription'] = true;
+              }
+            }
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
 
   @override
   void dispose() {
@@ -93,7 +125,9 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         final isDoctorOnCall = _booking?['doctor_on_call'] == true;
         
         // Ensure consultation_ended flag is robust by explicitly calling getCallStatus if it's a doctor consultation
-        if (serviceType == 'doctor') {
+        final bool isCallCompleted = _booking?['status'] == 'completed' || _booking?['consultation_ended'] == true || _booking?['videoCallCompleted'] == true;
+        
+        if (serviceType == 'doctor' && !isCallCompleted) {
           try {
             final callStatus = await _apiClient.patient.getCallStatus(widget.bookingId);
             if (callStatus['success'] == true && callStatus['data'] != null) {
@@ -146,7 +180,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
       if (t.endsWith('Z')) {
         t = t.substring(0, t.length - 1);
       }
-      return DateTime.parse(t);
+      return DateTime.parse(t).subtract(const Duration(hours: 5, minutes: 30));
     } catch (e) {
       return DateTime.now();
     }
@@ -1270,13 +1304,74 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     );
   }
   String? _getPrescriptionUrl(Map<String, dynamic> data) {
+    // Root level direct access
+    if (data['prescriptionFileUrl'] != null && data['prescriptionFileUrl'].toString().isNotEmpty) {
+      return data['prescriptionFileUrl'].toString();
+    }
+    
+    // Inside prescription object
+    if (data['prescription'] != null) {
+      if (data['prescription'] is Map) {
+        final Map p = data['prescription'];
+        if (p['prescriptionFile'] != null && p['prescriptionFile'].toString().isNotEmpty) return p['prescriptionFile'].toString();
+        if (p['fileUrl'] != null && p['fileUrl'].toString().isNotEmpty) return p['fileUrl'].toString();
+        if (p['url'] != null && p['url'].toString().isNotEmpty) return p['url'].toString();
+      } else if (data['prescription'].toString().isNotEmpty) {
+        return data['prescription'].toString();
+      }
+    }
+
     if (data['prescriptionUrl'] != null && data['prescriptionUrl'].toString().isNotEmpty) return data['prescriptionUrl'].toString();
-    if (data['prescription'] != null && data['prescription'].toString().isNotEmpty) return data['prescription'].toString();
     if (data['prescription_url'] != null && data['prescription_url'].toString().isNotEmpty) return data['prescription_url'].toString();
     if (data['report'] != null && data['report'].toString().isNotEmpty) return data['report'].toString();
     if (data['prescriptionImages'] != null && data['prescriptionImages'] is List && (data['prescriptionImages'] as List).isNotEmpty) return data['prescriptionImages'][0].toString();
     if (data['prescriptionFile'] != null && data['prescriptionFile'].toString().isNotEmpty) return data['prescriptionFile'].toString();
-    return null;
+    
+    // Fallback: deep search for any URL that looks like a prescription
+    String? foundUrl;
+    void searchMap(Map m) {
+      m.forEach((key, value) {
+        if (foundUrl != null) return;
+        if (value is String) {
+          final valLower = value.toLowerCase();
+          if (!valLower.contains('profile') && !valLower.contains('zoom') && !valLower.contains('avatar')) {
+            if (valLower.startsWith('http') || valLower.contains('uploads/') || valLower.contains('/api/')) {
+              if (valLower.contains('prescription') || valLower.contains('report') || valLower.endsWith('.pdf') || valLower.endsWith('.jpg') || valLower.endsWith('.png') || valLower.endsWith('.jpeg')) {
+                foundUrl = value;
+              }
+            } else if (valLower.endsWith('.pdf') || valLower.endsWith('.jpg') || valLower.endsWith('.png') || valLower.endsWith('.jpeg')) {
+              foundUrl = value;
+            }
+          }
+        } else if (value is Map) {
+          searchMap(value);
+        } else if (value is List) {
+          for (var item in value) {
+            if (item is Map) searchMap(item);
+            else if (item is String) {
+              final itemLower = item.toLowerCase();
+              if (!itemLower.contains('profile') && !itemLower.contains('zoom') && !itemLower.contains('avatar')) {
+                if (itemLower.startsWith('http') || itemLower.contains('uploads/') || itemLower.contains('/api/')) {
+                  if (itemLower.contains('prescription') || itemLower.contains('report') || itemLower.endsWith('.pdf') || itemLower.endsWith('.png') || itemLower.endsWith('.jpg') || itemLower.endsWith('.jpeg')) {
+                    foundUrl = item;
+                  }
+                } else if (itemLower.endsWith('.pdf') || itemLower.endsWith('.jpg') || itemLower.endsWith('.png') || itemLower.endsWith('.jpeg')) {
+                  foundUrl = item;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    searchMap(data);
+    
+    if (foundUrl != null && !foundUrl!.startsWith('http')) {
+      if (!foundUrl!.startsWith('/')) foundUrl = '/$foundUrl';
+      foundUrl = 'http://192.168.1.6:5000$foundUrl'; // Fallback base URL based on existing codebase
+    }
+    
+    return foundUrl;
   }
 
   Widget _buildDoctorCompletedScreen(Map<String, dynamic> booking) {
@@ -1302,13 +1397,13 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     try {
       final scheduledTime = booking['scheduledTime'] ?? booking['createdAt'];
       if (scheduledTime != null) {
-        final sDate = DateTime.parse(scheduledTime).toLocal();
+        final sDate = DateTime.parse(scheduledTime).toLocal().subtract(const Duration(hours: 5, minutes: 30));
         consultationDate = DateFormat('dd MMM yyyy').format(sDate);
         consultationTime = DateFormat('hh:mm a').format(sDate);
       }
       final acceptedAt = booking['acceptedAt'] ?? booking['createdAt'];
       if (acceptedAt != null) {
-        final aDate = DateTime.parse(acceptedAt).toLocal();
+        final aDate = DateTime.parse(acceptedAt).toLocal().subtract(const Duration(hours: 5, minutes: 30));
         acceptedDateStr = DateFormat('dd MMM, hh:mm a').format(aDate);
       }
     } catch (_) {}
@@ -1617,14 +1712,16 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    final String? pUrl = _getPrescriptionUrl(booking);
+                  onPressed: () async {
+                    // Fetch fresh booking details first to ensure we have the latest prescription URL
+                    await _loadBookingDetails(isPolling: true);
+                    final String? pUrl = _getPrescriptionUrl(_booking ?? booking);
                     final bool hasPrescriptionUrl = pUrl != null && pUrl.isNotEmpty;
                     if (hasPrescriptionUrl) {
-                      launchUrl(Uri.parse(pUrl));
+                      _showPrescriptionPreview(pUrl);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('prescription not uploaded yet wait for some time ...')),
+                        const SnackBar(content: Text('Prescription not uploaded yet, wait for some time...')),
                       );
                     }
                   },
@@ -1642,6 +1739,84 @@ class _OrderDetailFileState extends State<OrderDetailFile>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showPrescriptionPreview(String url) {
+    final isPdf = url.toLowerCase().endsWith('.pdf');
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Prescription Preview', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (isPdf)
+                Container(
+                  height: 200,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.picture_as_pdf, size: 64, color: Colors.red),
+                      SizedBox(height: 8),
+                      Text('PDF Document', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                )
+              else
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    url,
+                    height: 300,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox(
+                      height: 200,
+                      child: Center(child: Icon(Icons.broken_image, size: 64, color: Colors.grey)),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                    }
+                  },
+                  icon: const Icon(Icons.download, color: Colors.white),
+                  label: const Text('Download to Gallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0038FF),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1685,114 +1860,69 @@ class _OrderDetailFileState extends State<OrderDetailFile>
   }
 
   Widget _buildHorizontalTimeline(Map<String, dynamic> booking, String acceptedDate, String consultationTime, bool hasPrescription) {
-    return Row(
+    return Column(
       children: [
-        // Step 1: Accepted
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: const BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+              child: const Icon(Icons.check, color: Colors.white, size: 16),
+            ),
+            Expanded(child: Container(height: 2, color: Colors.green)),
+            Container(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+              child: const Icon(Icons.check, color: Colors.white, size: 16),
+            ),
+            Expanded(child: Container(height: 2, color: hasPrescription ? Colors.green : Colors.grey.shade300)),
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: hasPrescription ? Colors.green : Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: hasPrescription ? Colors.green : Colors.grey.shade300, width: 2),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Accepted',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                acceptedDate,
-                style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
-              ),
-            ],
-          ),
+              child: hasPrescription ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
+            ),
+          ],
         ),
-
-        // Line 1
-        Container(
-          width: 30,
-          height: 2,
-          color: Colors.green,
-        ),
-
-        // Step 2: Complete Consultant
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: const BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 16),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  const Text('Accepted', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green)),
+                  const SizedBox(height: 2),
+                  Text(acceptedDate, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: Colors.grey)),
+                ],
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Complete Consultant',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  const Text('Complete Consultant', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green)),
+                  const SizedBox(height: 2),
+                  Text('Started $consultationTime', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: Colors.grey)),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                'Started $consultationTime',
-                style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Text('Download Prescription', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: hasPrescription ? Colors.green : Colors.grey.shade500)),
+                  const SizedBox(height: 2),
+                  Text(hasPrescription ? 'Completed' : 'Pending', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: hasPrescription ? Colors.green : Colors.grey.shade400)),
+                ],
               ),
-            ],
-          ),
-        ),
-
-        // Line 2
-        Container(
-          width: 30,
-          height: 2,
-          color: hasPrescription ? Colors.green : Colors.grey.shade300,
-        ),
-
-        // Step 3: Download Prescription
-        Expanded(
-          child: Column(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: hasPrescription ? Colors.green : Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: hasPrescription ? Colors.green : Colors.grey.shade300,
-                    width: 2,
-                  ),
-                ),
-                child: hasPrescription
-                    ? const Icon(Icons.check, color: Colors.white, size: 16)
-                    : null,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Download Prescription',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: hasPrescription ? Colors.green : Colors.grey.shade500,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                        hasPrescription ? 'Completed' : 'Pending',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: hasPrescription ? Colors.green : Colors.grey.shade400,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );

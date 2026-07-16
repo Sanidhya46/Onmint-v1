@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
+import 'dart:typed_data';
 
 import 'package:vendor_app/screens/doctor/doctor_active_consultation_screen.dart';
 import 'package:vendor_app/screens/doctor/upload_prescription_screen.dart' as vendor_app_upload;
 import 'package:url_launcher/url_launcher.dart';
+import 'prescription_cache.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final String appointmentId;
@@ -475,12 +477,58 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     if (data['report'] != null && data['report'].toString().isNotEmpty) return data['report'].toString();
     if (data['prescriptionImages'] != null && data['prescriptionImages'] is List && (data['prescriptionImages'] as List).isNotEmpty) return data['prescriptionImages'][0].toString();
     if (data['prescriptionFile'] != null && data['prescriptionFile'].toString().isNotEmpty) return data['prescriptionFile'].toString();
-    return null;
+    
+    // Fallback: deep search for any URL that looks like a prescription
+    String? foundUrl;
+    void searchMap(Map m) {
+      m.forEach((key, value) {
+        if (foundUrl != null) return;
+        if (value is String) {
+          final valLower = value.toLowerCase();
+          if (!valLower.contains('profile') && !valLower.contains('zoom') && !valLower.contains('avatar')) {
+            if (valLower.startsWith('http') || valLower.contains('uploads/') || valLower.contains('/api/')) {
+              if (valLower.contains('prescription') || valLower.contains('report') || valLower.endsWith('.pdf') || valLower.endsWith('.jpg') || valLower.endsWith('.png') || valLower.endsWith('.jpeg')) {
+                foundUrl = value;
+              }
+            } else if (valLower.endsWith('.pdf') || valLower.endsWith('.jpg') || valLower.endsWith('.png') || valLower.endsWith('.jpeg')) {
+              foundUrl = value;
+            }
+          }
+        } else if (value is Map) {
+          searchMap(value);
+        } else if (value is List) {
+          for (var item in value) {
+            if (item is Map) searchMap(item);
+            else if (item is String) {
+              final itemLower = item.toLowerCase();
+              if (!itemLower.contains('profile') && !itemLower.contains('zoom') && !itemLower.contains('avatar')) {
+                if (itemLower.startsWith('http') || itemLower.contains('uploads/') || itemLower.contains('/api/')) {
+                  if (itemLower.contains('prescription') || itemLower.contains('report') || itemLower.endsWith('.pdf') || itemLower.endsWith('.png') || itemLower.endsWith('.jpg') || itemLower.endsWith('.jpeg')) {
+                    foundUrl = item;
+                  }
+                } else if (itemLower.endsWith('.pdf') || itemLower.endsWith('.jpg') || itemLower.endsWith('.png') || itemLower.endsWith('.jpeg')) {
+                  foundUrl = item;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    searchMap(data);
+    
+    if (foundUrl != null && !foundUrl!.startsWith('http')) {
+      if (!foundUrl!.startsWith('/')) foundUrl = '/$foundUrl';
+      foundUrl = 'http://192.168.1.6:5000$foundUrl'; // Fallback base URL based on existing codebase
+    }
+    
+    return foundUrl;
   }
 
   Widget _buildCompletedActions() {
     final String? pUrl = _getPrescriptionUrl(_appointment!);
-    final bool hasPrescription = pUrl != null && pUrl.isNotEmpty;
+    final Uint8List? localBytes = PrescriptionCache.bytes[widget.appointmentId];
+    final bool hasPrescription = (pUrl != null && pUrl.isNotEmpty) || localBytes != null;
 
     return Column(
       children: [
@@ -490,7 +538,56 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           child: ElevatedButton.icon(
             onPressed: () {
               if (hasPrescription) {
-                launchUrl(Uri.parse(pUrl!));
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: (pUrl != null && pUrl.toLowerCase().endsWith('.pdf'))
+                              ? Container(
+                                  height: 300,
+                                  width: double.infinity,
+                                  color: Colors.grey[100],
+                                  child: const Center(child: Icon(Icons.picture_as_pdf, size: 64, color: Colors.red)),
+                                )
+                              : (pUrl != null && pUrl.isNotEmpty
+                                  ? Image.network(
+                                      pUrl,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, error, stackTrace) => Container(
+                                        color: Colors.white,
+                                        padding: const EdgeInsets.all(32),
+                                        child: const Text('Could not load image', style: TextStyle(color: Colors.black)),
+                                      ),
+                                    )
+                                  : (localBytes != null ? Image.memory(
+                                      localBytes,
+                                      fit: BoxFit.contain,
+                                    ) : const SizedBox.shrink())),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                              ),
+                              child: const Icon(Icons.close, size: 20, color: Colors.red),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               } else {
                 Navigator.push(
                   context,

@@ -67,9 +67,17 @@ class DoctorApiService {
     final response = await _client.uploadMultipartData(
       '/doctor/appointments/$appointmentId/prescription-file',
       {if (notes != null && notes.isNotEmpty) 'notes': notes},
-      namedFiles: {'file': filePath},
+      namedFiles: {
+        'file': filePath,
+        'prescription': filePath,
+        'prescriptionFile': filePath,
+        'prescriptionImages': filePath,
+        'prescriptionUrl': filePath,
+        'report': filePath,
+        'image': filePath
+      },
     );
-    return response.data['data'] as Map<String, dynamic>;
+    print("UPLOAD RESPONSE: ${response.data}"); return response.data['data'] as Map<String, dynamic>;
   }
 
   /// Upload prescription file from bytes (web-compatible).
@@ -82,21 +90,25 @@ class DoctorApiService {
     final formData = FormData.fromMap({
       if (notes != null && notes.isNotEmpty) 'notes': notes,
     });
-    formData.files.add(
-      MapEntry(
-        'file',
-        MultipartFile.fromBytes(
-          bytes,
-          filename: filename,
-          contentType: _contentTypeForFilename(filename),
+    
+    final fileNames = ['file', 'prescription', 'prescriptionFile', 'prescriptionImages', 'prescriptionUrl', 'report', 'image'];
+    for (var name in fileNames) {
+      formData.files.add(
+        MapEntry(
+          name,
+          MultipartFile.fromBytes(
+            bytes,
+            filename: filename,
+            contentType: _contentTypeForFilename(filename),
+          ),
         ),
-      ),
-    );
+      );
+    }
     final response = await _client.post(
       '/doctor/appointments/$appointmentId/prescription-file',
       data: formData,
     );
-    return response.data['data'] as Map<String, dynamic>;
+    print("UPLOAD RESPONSE: ${response.data}"); return response.data['data'] as Map<String, dynamic>;
   }
 
   MediaType _contentTypeForFilename(String filename) {

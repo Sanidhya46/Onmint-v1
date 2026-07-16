@@ -189,10 +189,10 @@ class _UserActiveConsultationScreenState extends State<UserActiveConsultationScr
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
           onPressed: () {
-            Navigator.pushAndRemoveUntil(
+            Navigator.pushNamedAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (r) => false,
+              '/home',
+              (route) => false,
             );
           },
         ),
