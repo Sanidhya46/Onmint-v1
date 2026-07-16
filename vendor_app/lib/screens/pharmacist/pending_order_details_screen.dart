@@ -233,7 +233,7 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${order['patientAge'] ?? (order['patient'] is Map ? order['patient']['age'] : null) ?? 'Unknown'} Years / ${order['patientGender'] ?? (order['patient'] is Map ? order['patient']['gender'] : null) ?? "Unknown"}',
+                                '${(order['patient'] is Map ? order['patient']['age'] : null) ?? order['patientAge'] ?? 'Unknown'} Years / ${(order['patient'] is Map ? order['patient']['gender'] : null) ?? order['patientGender'] ?? "Unknown"}',
                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
@@ -614,20 +614,19 @@ class _PendingOrderDetailsScreenState extends State<PendingOrderDetailsScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
+                  color: const Color(0xFF0033CC),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(Icons.access_time, size: 20, color: Colors.black54),
+                    Icon(Icons.access_time, size: 20, color: Colors.white),
                     SizedBox(width: 8),
                     Text(
                       'Waiting for patient approval...',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black54,
+                        color: Colors.white,
                         fontSize: 14,
                       ),
                     ),

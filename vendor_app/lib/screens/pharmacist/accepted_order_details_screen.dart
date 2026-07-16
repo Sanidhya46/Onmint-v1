@@ -181,7 +181,7 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${order['patientAge'] ?? (order['patient'] is Map ? order['patient']['age'] : null) ?? 'Unknown'} Years / ${order['patientGender'] ?? (order['patient'] is Map ? order['patient']['gender'] : null) ?? "Unknown"}',
+                        '${(order['patient'] is Map ? order['patient']['age'] : null) ?? order['patientAge'] ?? 'Unknown'} Years / ${(order['patient'] is Map ? order['patient']['gender'] : null) ?? order['patientGender'] ?? "Unknown"}',
                         style: const TextStyle(fontSize: 13, color: Colors.grey),
                       ),
                     ],
@@ -596,20 +596,17 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                height: 54,
+                height: 80, // Increased height
                 child: ElevatedButton.icon(
                   onPressed: () => _updateStatus(statuses[currentIndex + 1]['key']!),
                   icon: Icon(
                     currentIndex == 0 ? Icons.inventory_2 : 
                     currentIndex == 1 ? Icons.moped : Icons.check_circle,
-                    size: 20,
+                    size: 32, // Increased icon size
                   ),
-                  label: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      statuses[currentIndex + 1]['label']!,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
+                  label: Text(
+                    statuses[currentIndex + 1]['label']!,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24), // Increased font size and removed FittedBox
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0033CC),

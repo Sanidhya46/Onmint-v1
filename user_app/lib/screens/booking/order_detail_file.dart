@@ -149,7 +149,14 @@ class _OrderDetailFileState extends State<OrderDetailFile>
 
     if (serviceType == 'doctor' && !isRequested) {
       if (status == 'completed') {
-        return _buildDoctorCompletedScreen(booking);
+        final provD = booking['provider'] ?? booking['acceptedProvider'] ?? {};
+        final drName = provD['fullName'] ??
+            '${provD['firstName'] ?? ''} ${provD['lastName'] ?? ''}'.trim();
+        return UserConsultationEndedScreen(
+          bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? widget.bookingId,
+          doctorName: drName.isEmpty ? 'Doctor' : drName,
+          duration: booking['duration'] ?? 0,
+        );
       } else {
         return _buildDoctorAcceptedScreen(booking, status);
       }
@@ -922,15 +929,19 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         : '230+ Reviews';
     final isAssigned = provider.isNotEmpty;
     
-    // Scheduled time formatting
-    String scheduledTimeStr = '10:00 AM';
+    String scheduledTimeStr = booking['scheduleTime']?.toString() ?? '10:00 AM';
     String acceptedDateStr = 'Accepted on 12 May 2025, 09:30 AM';
     try {
-      final scheduledTime = booking['scheduledTime'] ?? booking['createdAt'];
-      if (scheduledTime != null) {
-        final date = DateTime.parse(scheduledTime).toLocal();
-        scheduledTimeStr = DateFormat('hh:mm a').format(date);
-        acceptedDateStr = 'Accepted on ' + DateFormat('dd MMM yyyy, hh:mm a').format(date);
+      final sDateStr = booking['scheduleDate']?.toString();
+      final cDateStr = booking['createdAt']?.toString();
+      
+      if (sDateStr != null && sDateStr.isNotEmpty) {
+        final sDate = DateTime.parse(sDateStr).toLocal();
+        acceptedDateStr = 'Scheduled for ' + DateFormat('dd MMM yyyy').format(sDate);
+      } else if (cDateStr != null) {
+        final cDate = DateTime.parse(cDateStr).toLocal();
+        scheduledTimeStr = DateFormat('hh:mm a').format(cDate);
+        acceptedDateStr = 'Accepted on ' + DateFormat('dd MMM yyyy, hh:mm a').format(cDate);
       }
     } catch (_) {}
 

@@ -72,7 +72,16 @@ class _UserConsultationEndedScreenState extends State<UserConsultationEndedScree
             _completedAtStr = DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now());
           }
 
-          _prescriptionUrl = data['prescriptionUrl'] ?? data['prescription']?['fileUrl'] ?? (data['prescription'] is String ? data['prescription'] : null);
+          dynamic presData = data['prescription'];
+          if (data['prescriptionUrl'] != null) {
+            _prescriptionUrl = data['prescriptionUrl'];
+          } else if (presData is Map && presData['fileUrl'] != null) {
+            _prescriptionUrl = presData['fileUrl'];
+          } else if (presData is String) {
+            _prescriptionUrl = presData;
+          } else {
+            _prescriptionUrl = null;
+          }
           _isLoading = false;
         });
       }

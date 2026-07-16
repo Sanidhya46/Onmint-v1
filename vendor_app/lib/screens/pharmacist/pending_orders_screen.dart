@@ -189,7 +189,7 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${order['patientAge'] ?? 0} Years / ${order['patientGender'] ?? "Unknown"}',
+                      '${order['patientAge'] ?? (order['patient'] is Map ? order['patient']['age'] : null) ?? "Unknown"} Years / ${order['patientGender'] ?? (order['patient'] is Map ? order['patient']['gender'] : null) ?? "Unknown"}',
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
