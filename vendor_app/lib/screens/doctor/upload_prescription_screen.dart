@@ -4,6 +4,8 @@ import 'package:api_client/api_client.dart';
 import 'package:ui_components/ui_components.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vendor_app/screens/home/home_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:vendor_app/screens/doctor/consultation_success_screen.dart';
 
 class UploadPrescriptionScreen extends StatefulWidget {
   final String appointmentId;
@@ -105,8 +107,12 @@ class _UploadPrescriptionScreenState extends State<UploadPrescriptionScreen> {
         ToastUtils.showSuccess('Prescription uploaded successfully!');
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (route) => false,
+          MaterialPageRoute(
+            builder: (context) => ConsultationSuccessScreen(
+              appointment: widget.appointment,
+            ),
+          ),
+          (route) => route.isFirst,
         );
       }
     } catch (e) {
@@ -125,17 +131,24 @@ class _UploadPrescriptionScreenState extends State<UploadPrescriptionScreen> {
     final age = (widget.appointment?['patientAge'] ?? patient['age'] ?? '28').toString();
     final price = widget.appointment?['price'] ?? widget.appointment?['totalAmount'] ?? 300;
 
-    String dateStr = '13 May 2025'; // Default mock to match design if not available
-    String timeStr = '06:45 PM';
-    if (widget.appointment?['endTime'] != null) {
-      final d = DateTime.tryParse(widget.appointment!['endTime']);
-      if (d != null) {
-        dateStr = '${d.day} ${_getMonth(d.month)} ${d.year}';
-        final hour = d.hour > 12 ? d.hour - 12 : d.hour;
-        final period = d.hour >= 12 ? 'PM' : 'AM';
-        timeStr = '${hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')} $period';
+    DateTime parseLocalTime(String? timeStr) {
+      if (timeStr == null || timeStr.isEmpty) return DateTime.now();
+      try {
+        String t = timeStr;
+        if (t.endsWith('Z')) {
+          t = t.substring(0, t.length - 1);
+        }
+        return DateTime.parse(t);
+      } catch (e) {
+        return DateTime.now();
       }
     }
+
+    final String scheduledTimeStr = widget.appointment?['scheduledTime'] ?? widget.appointment?['createdAt'] ?? '';
+    final dt = parseLocalTime(scheduledTimeStr);
+    final dateStr = DateFormat('dd MMM yyyy').format(dt);
+    final timeStr = DateFormat('hh:mm a').format(dt);
+
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),

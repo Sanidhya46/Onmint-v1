@@ -136,6 +136,7 @@ class _DoctorActiveConsultationScreenState extends State<DoctorActiveConsultatio
           bookingId: widget.appointmentId,
           patientName: '${_appointment?['patient']?['firstName'] ?? ''} ${_appointment?['patient']?['lastName'] ?? ''}',
           patientImage: _appointment?['patient']?['profilePicture'],
+          appointment: _appointment,
         )));
         _loadAppointment();
       }
@@ -152,6 +153,7 @@ class _DoctorActiveConsultationScreenState extends State<DoctorActiveConsultatio
       bookingId: widget.appointmentId,
       patientName: '${_appointment?['patient']?['firstName'] ?? ''} ${_appointment?['patient']?['lastName'] ?? ''}',
       patientImage: _appointment?['patient']?['profilePicture'],
+      appointment: _appointment,
     )));
   }
 

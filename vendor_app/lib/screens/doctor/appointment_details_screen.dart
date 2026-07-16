@@ -3,6 +3,7 @@ import 'package:api_client/api_client.dart';
 
 import 'package:vendor_app/screens/doctor/doctor_active_consultation_screen.dart';
 import 'package:vendor_app/screens/doctor/upload_prescription_screen.dart' as vendor_app_upload;
+import 'package:url_launcher/url_launcher.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final String appointmentId;
@@ -467,36 +468,52 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     }
   }
 
+  String? _getPrescriptionUrl(Map<String, dynamic> data) {
+    if (data['prescriptionUrl'] != null && data['prescriptionUrl'].toString().isNotEmpty) return data['prescriptionUrl'].toString();
+    if (data['prescription'] != null && data['prescription'].toString().isNotEmpty) return data['prescription'].toString();
+    if (data['prescription_url'] != null && data['prescription_url'].toString().isNotEmpty) return data['prescription_url'].toString();
+    if (data['report'] != null && data['report'].toString().isNotEmpty) return data['report'].toString();
+    if (data['prescriptionImages'] != null && data['prescriptionImages'] is List && (data['prescriptionImages'] as List).isNotEmpty) return data['prescriptionImages'][0].toString();
+    if (data['prescriptionFile'] != null && data['prescriptionFile'].toString().isNotEmpty) return data['prescriptionFile'].toString();
+    return null;
+  }
+
   Widget _buildCompletedActions() {
+    final String? pUrl = _getPrescriptionUrl(_appointment!);
+    final bool hasPrescription = pUrl != null && pUrl.isNotEmpty;
+
     return Column(
       children: [
-        const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 48,
           child: ElevatedButton.icon(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => vendor_app_upload.UploadPrescriptionScreen(
-                    appointmentId: widget.appointmentId,
-                    appointment: _appointment,
+              if (hasPrescription) {
+                launchUrl(Uri.parse(pUrl!));
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => vendor_app_upload.UploadPrescriptionScreen(
+                      appointmentId: widget.appointmentId,
+                      appointment: _appointment,
+                    ),
                   ),
-                ),
-              ).then((value) {
-                if (value == true) {
-                  _loadAppointment();
-                }
-              });
+                ).then((value) {
+                  if (value == true) {
+                    _loadAppointment();
+                  }
+                });
+              }
             },
-            icon: const Icon(Icons.upload_file, color: Colors.white),
-            label: const Text(
-              'Upload Prescription',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+            icon: Icon(hasPrescription ? Icons.description : Icons.upload_file, color: Colors.white),
+            label: Text(
+              hasPrescription ? 'Uploaded Prescription' : 'Upload Prescription',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1565C0),
+              backgroundColor: hasPrescription ? Colors.green : const Color(0xFF1565C0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
           ),

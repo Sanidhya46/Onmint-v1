@@ -10,7 +10,7 @@ import 'package:user_app/screens/booking/user_active_consultation_screen.dart';
 import 'package:user_app/screens/booking/active_service_tracking_screen.dart';
 import 'package:user_app/screens/booking/order_request_screen.dart';
 import 'package:user_app/screens/booking/service_offers_screen.dart';
-
+import 'package:user_app/screens/booking/user_consultation_ended_screen.dart';
 class OrderDetailFile extends StatefulWidget {
   final String bookingId;
   final Map<String, dynamic>? bookingData;
@@ -34,6 +34,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
   late AnimationController _animationController;
   bool _isDoctorOnCall = false;
   StreamSubscription? _doctorJoinedSub;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
@@ -44,11 +45,21 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     )..repeat();
     _loadBookingDetails();
     _setupSocketListener();
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (mounted) {
+        _loadBookingDetails(isPolling: true);
+      }
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _pollingTimer?.cancel();
     _doctorJoinedSub?.cancel();
     _socketService.leaveBooking(widget.bookingId);
     super.dispose();
@@ -63,8 +74,8 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     });
   }
 
-  Future<void> _loadBookingDetails() async {
-    setState(() => _isLoading = true);
+  Future<void> _loadBookingDetails({bool isPolling = false}) async {
+    if (!isPolling) setState(() => _isLoading = true);
     try {
       await _apiClient.initialize();
       // Fetch fresh details to get provider and precise status
@@ -73,14 +84,33 @@ class _OrderDetailFileState extends State<OrderDetailFile>
 
       if (mounted) {
         setState(() {
-          _booking = booking.toJson(); // Or just use the raw map if returned
+          _booking = booking.rawData ?? booking.toJson();
           _isLoading = false;
         });
 
         // Direct auto-join to live video call if doctor is on call
         final serviceType = _booking?['serviceType']?.toString().toLowerCase() ?? '';
         final isDoctorOnCall = _booking?['doctor_on_call'] == true;
-        final consultationEnded = _booking?['consultation_ended'] == true;
+        
+        // Ensure consultation_ended flag is robust by explicitly calling getCallStatus if it's a doctor consultation
+        if (serviceType == 'doctor') {
+          try {
+            final callStatus = await _apiClient.patient.getCallStatus(widget.bookingId);
+            if (callStatus['success'] == true && callStatus['data'] != null) {
+              if (mounted) {
+                setState(() {
+                  _booking?['consultation_ended'] = callStatus['data']['consultation_ended'] == true;
+                  _booking?['videoCallCompleted'] = callStatus['data']['videoCallCompleted'] == true;
+                  if (callStatus['data']['status'] == 'completed') {
+                    _booking?['status'] = 'completed';
+                  }
+                });
+              }
+            }
+          } catch (_) {}
+        }
+        
+        final consultationEnded = _booking?['consultation_ended'] == true || _booking?['videoCallCompleted'] == true;
 
         if (serviceType == 'doctor' && isDoctorOnCall && !consultationEnded) {
           final provD = _booking?['provider'] ?? _booking?['acceptedProvider'] ?? {};
@@ -109,23 +139,25 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     }
   }
 
+  DateTime _parseLocalTime(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return DateTime.now();
+    try {
+      String t = timeStr;
+      if (t.endsWith('Z')) {
+        t = t.substring(0, t.length - 1);
+      }
+      return DateTime.parse(t);
+    } catch (e) {
+      return DateTime.now();
+    }
+  }
+
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
-      final date = DateTime.parse(dateStr).toLocal();
+      final date = _parseLocalTime(dateStr);
       const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec'
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
       ];
       return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]}, ${date.year} - ${date.hour > 12 ? date.hour - 12 : (date.hour == 0 ? 12 : date.hour)}:${date.minute.toString().padLeft(2, '0')} ${date.hour >= 12 ? 'PM' : 'AM'}';
     } catch (e) {
@@ -144,22 +176,15 @@ class _OrderDetailFileState extends State<OrderDetailFile>
 
     final booking = _booking ?? widget.bookingData ?? {};
     final status = booking['status']?.toString().toLowerCase() ?? 'pending';
-    final isRequested = status == 'requested' || status == 'pending';
+    final isConsultationEnded = booking['consultation_ended'] == true || booking['videoCallCompleted'] == true || status == 'completed';
+    final isRequested = (status == 'requested' || status == 'pending') && !isConsultationEnded;
     final serviceType = booking['serviceType']?.toString().toLowerCase() ?? '';
 
     if (serviceType == 'doctor' && !isRequested) {
-      if (status == 'completed') {
-        final provD = booking['provider'] ?? booking['acceptedProvider'] ?? {};
-        final drName = provD['fullName'] ??
-            '${provD['firstName'] ?? ''} ${provD['lastName'] ?? ''}'.trim();
-        return UserConsultationEndedScreen(
-          bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? widget.bookingId,
-          doctorName: drName.isEmpty ? 'Doctor' : drName,
-          duration: booking['duration'] ?? 0,
-        );
-      } else {
-        return _buildDoctorAcceptedScreen(booking, status);
+      if (isConsultationEnded) {
+        return _buildDoctorCompletedScreen(booking);
       }
+      return _buildDoctorAcceptedScreen(booking, status);
     }
 
     if (isRequested) {
@@ -936,10 +961,10 @@ class _OrderDetailFileState extends State<OrderDetailFile>
       final cDateStr = booking['createdAt']?.toString();
       
       if (sDateStr != null && sDateStr.isNotEmpty) {
-        final sDate = DateTime.parse(sDateStr).toLocal();
+        final sDate = _parseLocalTime(sDateStr);
         acceptedDateStr = 'Scheduled for ' + DateFormat('dd MMM yyyy').format(sDate);
       } else if (cDateStr != null) {
-        final cDate = DateTime.parse(cDateStr).toLocal();
+        final cDate = _parseLocalTime(cDateStr);
         scheduledTimeStr = DateFormat('hh:mm a').format(cDate);
         acceptedDateStr = 'Accepted on ' + DateFormat('dd MMM yyyy, hh:mm a').format(cDate);
       }
@@ -975,7 +1000,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Accept Consultation Success Banner
+            // Accept Consultation Success / Completed Banner
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -990,9 +1015,11 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Accept Your Consultation',
-                          style: TextStyle(
+                        Text(
+                          status == 'completed' || booking['consultation_ended'] == true
+                              ? 'Consultation completed successfully.'
+                              : 'Accept Your Consultation',
+                          style: const TextStyle(
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -1000,9 +1027,11 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          isAssigned 
-                              ? 'Your consultation request has been accepted. You\'re all set for your appointment.'
-                              : 'We are currently assigning a doctor to your consultation request.',
+                          status == 'completed' || booking['consultation_ended'] == true
+                              ? 'Thank you for consulting with us.'
+                              : (isAssigned 
+                                  ? 'Your consultation request has been accepted. You\'re all set for your appointment.'
+                                  : 'We are currently assigning a doctor to your consultation request.'),
                           style: TextStyle(color: Colors.green[800], fontSize: 12),
                         ),
                       ],
@@ -1239,6 +1268,15 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         ),
       ),
     );
+  }
+  String? _getPrescriptionUrl(Map<String, dynamic> data) {
+    if (data['prescriptionUrl'] != null && data['prescriptionUrl'].toString().isNotEmpty) return data['prescriptionUrl'].toString();
+    if (data['prescription'] != null && data['prescription'].toString().isNotEmpty) return data['prescription'].toString();
+    if (data['prescription_url'] != null && data['prescription_url'].toString().isNotEmpty) return data['prescription_url'].toString();
+    if (data['report'] != null && data['report'].toString().isNotEmpty) return data['report'].toString();
+    if (data['prescriptionImages'] != null && data['prescriptionImages'] is List && (data['prescriptionImages'] as List).isNotEmpty) return data['prescriptionImages'][0].toString();
+    if (data['prescriptionFile'] != null && data['prescriptionFile'].toString().isNotEmpty) return data['prescriptionFile'].toString();
+    return null;
   }
 
   Widget _buildDoctorCompletedScreen(Map<String, dynamic> booking) {
@@ -1571,63 +1609,36 @@ class _OrderDetailFileState extends State<OrderDetailFile>
             ),
           ),
           
-          // Bottom button / Status text
+          // Bottom button
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: hasPrescription
-                  ? SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          if (booking['prescriptionUrl'] != null) {
-                            launchUrl(Uri.parse(booking['prescriptionUrl']));
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('No prescription URL available')),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.description, color: Colors.white, size: 18),
-                        label: const Text(
-                          'Go to Download Prescription',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2E7D32), // Green color
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                        ),
-                      ),
-                    )
-                  : Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Waiting for prescription to be uploaded...',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final String? pUrl = _getPrescriptionUrl(booking);
+                    final bool hasPrescriptionUrl = pUrl != null && pUrl.isNotEmpty;
+                    if (hasPrescriptionUrl) {
+                      launchUrl(Uri.parse(pUrl));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('prescription not uploaded yet wait for some time ...')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.download, color: Colors.white, size: 18),
+                  label: const Text(
+                    'Download Prescription',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0038FF), // Blue color from screenshot
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -1774,7 +1785,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
               ),
               const SizedBox(height: 2),
               Text(
-                hasPrescription ? 'Completed' : 'Pending',
+                        hasPrescription ? 'Completed' : 'Pending',
                 style: TextStyle(
                   fontSize: 10,
                   color: hasPrescription ? Colors.green : Colors.grey.shade400,

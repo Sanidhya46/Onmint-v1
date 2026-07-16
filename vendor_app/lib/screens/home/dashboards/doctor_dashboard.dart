@@ -53,7 +53,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                 ?.map((e) => Booking.fromJson(e as Map<String, dynamic>))
                 .toList() ?? [];
         final currentUserId = Provider.of<AuthProvider>(context, listen: false).currentUser?.id;
-        _pendingAppointments = allBookings.where((b) {
+        final List<Booking> filteredAppointments = allBookings.where((b) {
           final s = b.status?.toLowerCase() ?? '';
           if (s == 'offer_send' || s == 'offer_sent') return false;
           final isPending = s == 'requested' || s == 'pending';
@@ -72,6 +72,17 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
           
           return true;
         }).toList();
+
+        filteredAppointments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        final Set<String> seenPatients = {};
+        _pendingAppointments = [];
+        for (var booking in filteredAppointments) {
+          final pId = booking.patient;
+          if (!seenPatients.contains(pId)) {
+            seenPatients.add(pId);
+            _pendingAppointments.add(booking);
+          }
+        }
         _isLoading = false;
       });
     } catch (e) {

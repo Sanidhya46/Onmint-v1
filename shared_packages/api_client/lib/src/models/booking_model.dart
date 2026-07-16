@@ -289,6 +289,9 @@ class Booking {
     if (value is DateTime) return value;
     if (value is String) {
       try {
+        if (value.endsWith('Z')) {
+          value = value.substring(0, value.length - 1);
+        }
         return DateTime.parse(value);
       } catch (e) {
         print('Error parsing datetime string: $value');

@@ -57,9 +57,12 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
     _connectToCall();
   }
 
+  Timer? _statusTimer;
+
   @override
   void dispose() {
     _timer?.cancel();
+    _statusTimer?.cancel();
     _pulseController.dispose();
     _doctorJoinedSub?.cancel();
     _consultationEndedSub?.cancel();
@@ -102,6 +105,11 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
 
         // Check initial status
         _checkCallStatus();
+
+        // Start polling for status
+        _statusTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+          _checkCallStatus();
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -123,7 +131,10 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
         if (status['doctor_on_call'] == true) {
           setState(() => _isDoctorConnected = true);
         }
-        if (status['consultation_ended'] == true) {
+        if (status['consultation_ended'] == true || 
+            status['status'] == 'completed' || 
+            status['videoCallCompleted'] == true) {
+          _statusTimer?.cancel();
           _navigateToEndedScreen(null);
         }
       }
