@@ -29,7 +29,7 @@ Widget buildDoctorStep2(_RegisterScreenState state) {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
               child: Form(
                 key: state._formKey2,
                 child: Column(

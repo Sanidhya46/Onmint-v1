@@ -780,7 +780,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         
                         Expanded(
                           child: SingleChildScrollView(
-                            child: Padding(
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Padding(
                               padding: EdgeInsets.only(bottom: 20 * s),
                               child: Form(
                                 key: _formKey1,

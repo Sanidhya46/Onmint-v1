@@ -97,6 +97,7 @@ class _ConsultationEndedScreenState extends State<ConsultationEndedScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 100),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

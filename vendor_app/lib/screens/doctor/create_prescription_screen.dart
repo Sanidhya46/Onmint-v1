@@ -380,6 +380,7 @@ class _AddMedicineDialogState extends State<_AddMedicineDialog> {
     return AlertDialog(
       title: const Text('Add Medicine'),
       content: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -29,7 +29,7 @@ Widget buildBloodBankStep2(_RegisterScreenState state) {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+              padding: const EdgeInsets.only(left: 12, right: 12, top: 20, bottom: 100),
               child: Form(
                 key: state._formKey2,
                 child: Column(

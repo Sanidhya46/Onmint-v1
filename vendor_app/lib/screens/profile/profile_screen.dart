@@ -41,7 +41,8 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              child: Column(
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Column(
           children: [
             // Profile Card
             Padding(

@@ -25,7 +25,7 @@ Widget buildAmbulanceStep2(_RegisterScreenState state) {
       centerTitle: true,
     ),
     body: SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 100),
       child: Form(
         key: state._ambulanceFormKey,
         child: Column(

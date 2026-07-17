@@ -175,6 +175,7 @@ class _LabTestRequestDetailsScreenState extends State<LabTestRequestDetailsScree
         centerTitle: true,
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 100),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Column(

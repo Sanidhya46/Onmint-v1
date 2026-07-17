@@ -187,7 +187,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 100),
               child: Form(
                 key: _formKey,
                 child: Column(

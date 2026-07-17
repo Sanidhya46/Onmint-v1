@@ -168,7 +168,7 @@ class _BookingDetailsScreenEnhancedState
       body: RefreshIndicator(
         onRefresh: _fetchDetails,
         child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 100),
         child: Column(
           children: [
             // Request Summary

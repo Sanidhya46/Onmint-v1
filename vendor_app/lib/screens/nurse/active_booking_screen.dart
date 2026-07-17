@@ -329,6 +329,7 @@ class _ActiveBookingScreenState extends State<ActiveBookingScreen> {
         ),
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           children: [
             const SizedBox(height: 16),

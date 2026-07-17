@@ -148,7 +148,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         onRefresh: _loadAppointment,
                         child: SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

@@ -248,7 +248,8 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
       body: RefreshIndicator(
         onRefresh: _fetchDetails,
         child: SingleChildScrollView(
-          child: Column(
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Column(
           children: [
             const SizedBox(height: 16),
             Padding(

@@ -32,7 +32,7 @@ Widget buildPharmacistStep2(_RegisterScreenState state) {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 100),
               child: Form(
                 key: state._formKey2,
                 child: Container(

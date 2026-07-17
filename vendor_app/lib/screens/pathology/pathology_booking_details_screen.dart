@@ -111,7 +111,7 @@ class _PathologyBookingDetailsScreenState extends State<PathologyBookingDetailsS
     final notes = _booking!['notes'] ?? 'No notes';
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -315,7 +315,7 @@ class _PathologyBookingDetailsScreenState extends State<PathologyBookingDetailsS
     final price = _booking!['fees'] ?? _booking!['price'] ?? 300;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
       child: Column(
         children: [
           _buildProgressCard(patientName, testType, price),

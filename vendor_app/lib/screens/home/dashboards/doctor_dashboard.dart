@@ -107,8 +107,9 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
       body: RefreshIndicator(
         onRefresh: _loadDashboard,
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header Section

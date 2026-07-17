@@ -69,7 +69,8 @@ class _InventoryManagementScreenState extends State<InventoryManagementScreen> {
         builder: (context, setDialogState) => AlertDialog(
           title: const Text('Add Medicine'),
           content: SingleChildScrollView(
-            child: Column(
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
@@ -185,7 +186,8 @@ class _InventoryManagementScreenState extends State<InventoryManagementScreen> {
         builder: (context, setDialogState) => AlertDialog(
           title: const Text('Edit Medicine'),
           content: SingleChildScrollView(
-            child: Column(
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(

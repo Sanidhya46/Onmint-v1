@@ -350,7 +350,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
               onRefresh: _loadRide,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -379,7 +379,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       children: [
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1494,7 +1494,8 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       body: RefreshIndicator(
         onRefresh: _loadRide,
         child: SingleChildScrollView(
-          child: Column(
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Column(
           children: [
             const SizedBox(height: 16),
 
