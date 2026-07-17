@@ -77,7 +77,11 @@ class _UserConsultationEndedScreenState extends State<UserConsultationEndedScree
   }
 
   void _goHome(BuildContext context) {
-    Navigator.of(context).pop();
+    if (Navigator.canPop(context)) {
+      Navigator.popUntil(context, (route) => route.isFirst);
+    } else {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   @override
@@ -103,7 +107,13 @@ class _UserConsultationEndedScreenState extends State<UserConsultationEndedScree
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
-          onPressed: () => _goHome(context),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            } else {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
+          },
         ),
         title: const Text(
           'Completed Consultation',

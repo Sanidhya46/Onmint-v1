@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen>
   Map<String, dynamic>? _activeBookingDetails;
   String _activeServiceType = '';
   int _activeBookingCount = 0;
+  int _inProgressCount = 0;
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen>
       final bookingsData = await _patientService.getBookings(page: 1, limit: 10);
       
       int activeCount = 0;
+      int inProgressCount = 0;
       Map<String, dynamic>? mostRecentRequested;
       Map<String, dynamic>? mostRecentInProgress;
 
@@ -79,15 +81,17 @@ class _HomeScreenState extends State<HomeScreen>
         if (['requested', 'pending', 'waiting for pharmacist'].contains(status)) {
           if (mostRecentRequested == null) mostRecentRequested = b;
         } else if (['accepted', 'confirmed', 'in_progress', 'processing', 'on_the_way'].contains(status)) {
+          inProgressCount++;
           if (mostRecentInProgress == null) mostRecentInProgress = b;
         }
       }
 
-      final targetBooking = mostRecentRequested ?? mostRecentInProgress;
+      final targetBooking = mostRecentInProgress ?? mostRecentRequested;
 
       if (mounted) {
         setState(() {
           _activeBookingCount = activeCount;
+          _inProgressCount = inProgressCount;
           if (targetBooking != null && activeCount > 0) {
             _hasActiveBooking = true;
             _activeBookingDetails = targetBooking;
@@ -160,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _openTrackingScreen() {
-    if (_activeBookingCount > 1) {
+    if (_inProgressCount > 1 || (_inProgressCount == 0 && _activeBookingCount > 1)) {
       setState(() => _selectedIndex = 2);
       return;
     }
@@ -391,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           if (MediaQuery.of(context).viewInsets.bottom == 0)
             Positioned(
-              bottom: 25, // Adjusted to match the centerDocked position approximately
+              bottom: 25 + MediaQuery.of(context).padding.bottom, // Adjusted to match the centerDocked position and account for system nav bar
               left: 0,
               right: 0,
               child: Center(

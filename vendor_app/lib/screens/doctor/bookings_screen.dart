@@ -57,6 +57,10 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
           ?.map((e) => Booking.fromJson(e as Map<String, dynamic>))
           .toList() ?? [];
 
+      allBookings.sort((a, b) {
+        return b.createdAt.compareTo(a.createdAt);
+      });
+
       setState(() {
         _requestedBookings = allBookings.where((b) {
           final s = b.status?.toLowerCase() ?? '';
@@ -92,75 +96,117 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text('My Bookings'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text('My Booking', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: 'Poppins')),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.headset_mic_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
+        iconTheme: const IconThemeData(color: Colors.black),
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
-            Tab(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Requested'),
-                  if (_requestedBookings.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '${_requestedBookings.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Tab(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Accepted'),
-                  if (_acceptedBookings.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '${_acceptedBookings.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const Tab(text: 'Completed'),
+          labelColor: Colors.blue.shade700,
+          unselectedLabelColor: Colors.grey.shade600,
+          indicatorColor: Colors.blue.shade700,
+          indicatorWeight: 3,
+          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Poppins', fontSize: 14),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontFamily: 'Poppins', fontSize: 14),
+          tabs: const [
+            Tab(text: 'All'),
+            Tab(text: 'In Progress'),
+            Tab(text: 'Completed'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildBookingsList(_requestedBookings, _isLoadingRequested, 'requested'),
-          _buildBookingsList(_acceptedBookings, _isLoadingAccepted, 'accepted'),
+          _buildAllTab(),
+          _buildBookingsList([..._requestedBookings, ..._acceptedBookings], _isLoadingRequested || _isLoadingAccepted, 'in_progress'),
           _buildBookingsList(_completedBookings, _isLoadingCompleted, 'completed'),
         ],
       ),
+    );
+  }
+
+  Widget _buildAllTab() {
+    if (_isLoadingRequested || _isLoadingAccepted || _isLoadingCompleted) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final inProgress = [..._requestedBookings, ..._acceptedBookings];
+    final completed = _completedBookings;
+
+    return RefreshIndicator(
+      onRefresh: _loadAllBookings,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        children: [
+          if (inProgress.isNotEmpty) ...[
+            _buildSectionHeader('In Progress', inProgress.length, Colors.blue.shade50, Colors.blue.shade700),
+            const SizedBox(height: 12),
+            ...inProgress.map((b) => _buildBookingCard(b, 'in_progress')),
+            const SizedBox(height: 24),
+          ],
+          if (completed.isNotEmpty) ...[
+            _buildSectionHeader('Completed', completed.length, Colors.green.shade50, Colors.green.shade700),
+            const SizedBox(height: 12),
+            ...completed.map((b) => _buildBookingCard(b, 'completed')),
+          ],
+          if (inProgress.isEmpty && completed.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 100),
+                child: Text('No bookings available', style: TextStyle(color: Colors.grey)),
+              ),
+            ),
+          const SizedBox(height: 24),
+          if (inProgress.isNotEmpty || completed.isNotEmpty)
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF0F5FF),
+                  foregroundColor: Colors.blue.shade700,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('View All Bookings', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Poppins')),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, int count, Color badgeBgColor, Color badgeTextColor) {
+    return Row(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF152238), fontFamily: 'Poppins'),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: badgeBgColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            count.toString(),
+            style: TextStyle(color: badgeTextColor, fontWeight: FontWeight.bold, fontSize: 12),
+          ),
+        ),
+      ],
     );
   }
 
@@ -175,19 +221,14 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              type == 'requested' ? Icons.pending_actions : 
-              type == 'accepted' ? Icons.event_available : 
-              Icons.check_circle_outline,
+              type == 'in_progress' ? Icons.pending_actions : Icons.check_circle_outline,
               size: 64,
               color: Colors.grey[400],
             ),
             const SizedBox(height: 16),
             Text(
-              'No ${type} bookings',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              'No  bookings',
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -200,8 +241,7 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
         padding: const EdgeInsets.all(16),
         itemCount: bookings.length,
         itemBuilder: (context, index) {
-          final booking = bookings[index];
-          return _buildBookingCard(booking, type);
+          return _buildBookingCard(bookings[index], type);
         },
       ),
     );
@@ -209,9 +249,7 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
 
   Widget _buildBookingCard(Booking booking, String type) {
     final patientName = booking.patientDetails?.fullName ?? 'Patient';
-    final patientPhone = booking.patientDetails?.phone ?? '';
     
-    // Calculate age from dateOfBirth if available
     int patientAge = 0;
     if (booking.patientDetails?.dateOfBirth != null) {
       final birthDate = booking.patientDetails!.dateOfBirth!;
@@ -223,344 +261,181 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
     }
     
     final patientGender = booking.patientDetails?.gender ?? 'Male';
-    final consultationType = booking.consultationType ?? 'Video Consultation';
     
-    Color statusColor;
+    Color statusBgColor;
+    Color statusTextColor;
     String statusLabel;
-    bool isCompleted = false;
+    bool isCompleted = type == 'completed' || (booking.status?.toLowerCase() == 'completed');
+    bool isRequested = booking.status?.toLowerCase() == 'requested' || booking.status?.toLowerCase() == 'pending';
     
-    switch (type) {
-      case 'requested':
-        statusColor = Colors.orange;
-        statusLabel = 'Pending';
-        break;
-      case 'accepted':
-        statusColor = const Color(0xFF1565C0);
-        statusLabel = 'Accepted';
-        break;
-      case 'completed':
-        statusColor = Colors.green;
-        statusLabel = 'Completed';
-        isCompleted = true;
-        break;
-      default:
-        statusColor = Colors.grey;
-        statusLabel = type.toUpperCase();
+    if (isCompleted) {
+      statusBgColor = const Color(0xFFE8F5E9);
+      statusTextColor = const Color(0xFF4CAF50);
+      statusLabel = 'Completed';
+    } else if (isRequested) {
+      statusBgColor = const Color(0xFFFFF4E5);
+      statusTextColor = const Color(0xFFFF9800);
+      statusLabel = 'Requested';
+    } else {
+      statusBgColor = const Color(0xFFF0F5FF);
+      statusTextColor = const Color(0xFF1565C0);
+      statusLabel = 'In Progress';
     }
 
     String completedDateStr = '';
-    if (isCompleted && booking.scheduledTime != null) {
-      final dt = booking.scheduledTime!;
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      completedDateStr = '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+    if (booking.status == 'completed') {
+      DateTime? completedDate;
+      if (booking.rawData != null && booking.rawData!['endTime'] != null) {
+        completedDate = DateTime.tryParse(booking.rawData!['endTime'].toString());
+      }
+      if (completedDate == null && booking.rawData != null && booking.rawData!['updatedAt'] != null) {
+        completedDate = DateTime.tryParse(booking.rawData!['updatedAt'].toString());
+      }
+      completedDate ??= booking.createdAt; // Fallback to createdAt if nothing else
+
+      completedDateStr = 'Completed on\n${completedDate.day.toString().padLeft(2, '0')}/${completedDate.month.toString().padLeft(2, '0')}/${completedDate.year}';
+    } else {
+      completedDateStr = 'Requested on\n${booking.createdAt.day.toString().padLeft(2, '0')}/${booking.createdAt.month.toString().padLeft(2, '0')}/${booking.createdAt.year}';
+    }
+    
+    String addressText = booking.location.address ?? 'Address not provided';
+
+    // Sometimes backend address is literally formatted as "Instance of 'Address'" due to bug
+    if (addressText.contains('Instance of') || addressText.contains('Instance of \'Address\'')) {
+      if (booking.patientDetails != null && booking.patientDetails!.address != null) {
+         addressText = booking.patientDetails!.address!.toString();
+      } else if (booking.rawData != null && booking.rawData!['location'] != null && booking.rawData!['location'] is Map) {
+         final locMap = booking.rawData!['location'] as Map;
+         if (locMap['address'] is Map) {
+           final addrMap = locMap['address'] as Map;
+           addressText = '${addrMap['street'] ?? ''}, ${addrMap['city'] ?? ''}, ${addrMap['state'] ?? ''}'.trim().replaceAll(RegExp(r'^,+|,+$'), '');
+         }
+      } else {
+         addressText = 'Address not provided';
+      }
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.zero,
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: () => _navigateToDetails(booking.id),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Avatar
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.blue.shade50,
-                    backgroundImage: booking.patientDetails?.profilePicture != null &&
-                            booking.patientDetails!.profilePicture!.isNotEmpty
-                        ? NetworkImage(booking.patientDetails!.profilePicture!)
-                        : AssetImage(patientGender.toLowerCase() == 'female'
-                            ? 'assets/images/female_profile.png'
-                            : 'assets/images/male_profile.png') as ImageProvider,
-                  ),
-                  const SizedBox(width: 12),
-                  // Details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Avatar
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey.shade100,
+                  image: booking.patientDetails?.profilePicture != null && booking.patientDetails!.profilePicture!.isNotEmpty
+                      ? DecorationImage(image: NetworkImage(booking.patientDetails!.profilePicture!), fit: BoxFit.cover)
+                      : DecorationImage(image: AssetImage(patientGender.toLowerCase() == 'female' ? 'assets/images/female_profile.png' : 'assets/images/male_profile.png'), fit: BoxFit.cover),
+                ),
+              ),
+              const SizedBox(width: 16),
+              
+              // Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      patientName.isNotEmpty ? patientName : 'Patient Name',
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF152238)),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
                       children: [
+                        const Icon(Icons.person_outline, size: 14, color: Colors.grey),
+                        const SizedBox(width: 4),
                         Text(
-                          patientName.isNotEmpty ? patientName : 'Patient Name',
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF152238),
-                            height: 1.1,
-                          ),
+                          '$patientAge Years',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.grey.shade700),
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(Icons.person_outline, size: 12, color: Colors.grey),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${patientAge > 0 ? "$patientAge Years" : "--"}',
-                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.grey.shade600),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(patientGender.toLowerCase() == 'female' ? Icons.female : Icons.male, size: 12, color: Colors.grey),
-                            const SizedBox(width: 2),
-                            Text(
-                              patientGender,
-                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.grey.shade600),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(Icons.medical_services_outlined, size: 12, color: Colors.grey),
-                            const SizedBox(width: 2),
-                            Text(
-                              consultationType,
-                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.grey.shade600),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${_formatDate(booking.scheduledTime)} • ${_formatTime(booking.scheduledTime)}',
-                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: Colors.grey.shade600),
-                            ),
-                          ],
+                        const SizedBox(width: 8),
+                        Text('|', style: TextStyle(color: Colors.grey.shade400)),
+                        const SizedBox(width: 8),
+                        Icon(patientGender.toLowerCase() == 'female' ? Icons.female : Icons.male, size: 14, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          patientGender,
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.grey.shade700),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Status Badge
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              statusLabel,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 10,
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          if (isCompleted && completedDateStr.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              'Completed on\n$completedDateStr',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontFamily: 'Poppins', fontSize: 9, color: Colors.grey.shade600, height: 1.1),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.chevron_right, color: Colors.black54, size: 18),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            if (booking.notes != null && booking.notes!.isNotEmpty) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[500]!.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.note, size: 14, color: Colors.grey[600]),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          booking.notes!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[700],
+                    const SizedBox(height: 6),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 2),
+                          child: Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            addressText,
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.grey.shade700, height: 1.3),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-            if (type == 'accepted') ...[
-              Divider(color: Colors.grey.shade200, height: 1, thickness: 1),
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: () {
-                  if (booking.prescription != null) {
-                    return ElevatedButton(
-                      onPressed: () => _navigateToDetails(booking.id),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 36),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              
+              const SizedBox(width: 12),
+              
+              // Status Badge & Arrow
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: statusBgColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          statusLabel,
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: statusTextColor, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      child: const Text('Complete Appointment', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                    );
-                  } else if (booking.videoCallCompleted == true) {
-                    return ElevatedButton(
-                      onPressed: () => _navigateToDetails(booking.id),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 36),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.chevron_right, color: Colors.black, size: 20),
+                    ],
+                  ),
+                  if (completedDateStr.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 28), // align with badge left
+                      child: Text(
+                        completedDateStr,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 10, color: Colors.grey.shade600, height: 1.2),
                       ),
-                      child: const Text('Create Prescription', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                    );
-                  } else {
-                    return ElevatedButton(
-                      onPressed: () => _navigateToDetails(booking.id),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1565C0),
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 36),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: const Text('Start Consultation', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                    );
-                  }
-                }(),
+                    ),
+                  ],
+                ],
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final tomorrow = DateTime(now.year, now.month, now.day + 1);
-    final dateOnly = DateTime(date.year, date.month, date.day);
-    
-    if (dateOnly == DateTime(now.year, now.month, now.day)) {
-      return 'Today';
-    } else if (dateOnly == tomorrow) {
-      return 'Tomorrow';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
-  }
-
-  String _formatTime(DateTime time) {
-    final hour = time.hour > 12 ? time.hour - 12 : time.hour;
-    final period = time.hour >= 12 ? 'PM' : 'AM';
-    return '${hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} $period';
-  }
-
-  Future<void> _quickAccept(String bookingId) async {
-    try {
-      await _apiClient.doctor.acceptAppointment(bookingId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Appointment accepted')),
-        );
-        _loadAllBookings();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _quickReject(String bookingId) async {
-    final reason = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        final controller = TextEditingController();
-        return AlertDialog(
-          title: const Text('Reject Appointment'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'Reason (optional)',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 2,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, controller.text),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Reject'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (reason != null) {
-      try {
-        await _apiClient.doctor.rejectAppointment(bookingId, reason: reason);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Appointment rejected')),
-          );
-          _loadAllBookings();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
-          );
-        }
-      }
-    }
   }
 
   void _navigateToDetails(String bookingId) {

@@ -242,7 +242,13 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            } else {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
+          },
         ),
         title: const Text(
           'My Booking',
@@ -480,27 +486,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
             ),
             const SizedBox(height: 24),
 
-            const Text(
-              'Request Sent Successfully',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF152238),
-                fontFamily: 'Poppins',
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              waitText,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-                fontFamily: 'Poppins',
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 32),
+
 
             // Booking Details Card
             Container(
@@ -1011,7 +997,13 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            } else {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
+          },
         ),
         title: const Text(
           'My Booking',
@@ -1417,7 +1409,13 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            } else {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
+          },
         ),
         title: const Text(
           'My Booking',
@@ -1824,7 +1822,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
   Widget _buildStatItem({required IconData icon, required String title, required String value}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      height: 120,
+      constraints: const BoxConstraints(minHeight: 120),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),

@@ -20,6 +20,7 @@ class ApiClient {
 
     // Add interceptors
     _dio.interceptors.add(PrettyDioLogger(
+      request: true,
       requestHeader: true,
       requestBody: true,
       responseBody: true,

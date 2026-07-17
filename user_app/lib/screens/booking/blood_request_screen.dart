@@ -133,7 +133,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
         scrolledUnderElevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       body: SingleChildScrollView(
         controller: _scrollController,
         child: Form(
@@ -157,10 +157,10 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
               ),
               
               Container(
-                margin: EdgeInsets.only(
+                margin: const EdgeInsets.only(
                   left: 16, 
                   right: 16, 
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+                  bottom: 16,
                 ),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(

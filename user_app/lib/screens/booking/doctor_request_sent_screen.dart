@@ -508,29 +508,6 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
         ),
         const SizedBox(height: 24),
         
-        // Success Texts
-        const Text(
-          'Request Sent Successfully',
-          style: TextStyle(
-            color: Color(0xFF1A1A60),
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            fontFamily: 'Poppins',
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'We are waiting for a doctor to accept\nyour request.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 14,
-            height: 1.5,
-            fontFamily: 'Poppins',
-          ),
-        ),
-        const SizedBox(height: 32),
-        
         // Booking Details Card
         Container(
           padding: const EdgeInsets.all(20),

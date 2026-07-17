@@ -128,9 +128,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text(
-          'Consultation Request',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, fontFamily: 'Poppins'),
+        title: Text(
+          (_appointment?['status'] == 'requested' || _appointment?['status'] == 'pending') ? 'Consultation Request' : 'Appointment Details',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, fontFamily: 'Poppins'),
         ),
         backgroundColor: const Color(0xFF0052CC), // Darker blue matching the mockup
         foregroundColor: Colors.white,
@@ -154,7 +154,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             children: [
                               _buildCompactDetails(),
                               const SizedBox(height: 12),
-                              if (_appointment!['status'] == 'completed')
+                              if (_appointment!['status'] == 'completed' || _appointment!['status'] == 'accepted')
                                 _buildCompletedActions(),
                             ],
                           ),
@@ -188,7 +188,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     final dateStr = _appointment!['createdAt'] ?? _appointment!['scheduledTime'];
     final formattedDate = _formatDate(dateStr);
     final formattedTime = _formatTime(dateStr);
-    String problem = 'Fever, Cold';
+    String problem = 'Not provided';
     if (_appointment!['requirements'] is Map) {
       problem = _appointment!['requirements']['description'] ?? _appointment!['notes'] ?? problem;
     } else if (_appointment!['requirements'] is String) {
@@ -199,7 +199,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
     final consultationType = _appointment!['consultationType'] ?? 'General Physician';
     
-    String addressText = 'H-101, Shanti Nagar,\nGovindpuram, Ghaziabad,\nUttar Pradesh - 201013';
+    String addressText = 'Address not provided';
     if (_appointment!['location'] is Map && _appointment!['location']['address'] != null) {
       addressText = _appointment!['location']['address'];
     } else if (_appointment!['location'] is String && _appointment!['location'].toString().isNotEmpty) {
@@ -471,8 +471,17 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   String? _getPrescriptionUrl(Map<String, dynamic> data) {
+    if (data['prescriptionFileUrl'] != null && data['prescriptionFileUrl'].toString().isNotEmpty) return data['prescriptionFileUrl'].toString();
     if (data['prescriptionUrl'] != null && data['prescriptionUrl'].toString().isNotEmpty) return data['prescriptionUrl'].toString();
-    if (data['prescription'] != null && data['prescription'].toString().isNotEmpty) return data['prescription'].toString();
+    if (data['prescription'] != null) {
+      if (data['prescription'] is Map) {
+        final p = data['prescription'] as Map;
+        if (p['prescriptionFile'] != null && p['prescriptionFile'].toString().isNotEmpty) return p['prescriptionFile'].toString();
+        if (p['fileUrl'] != null && p['fileUrl'].toString().isNotEmpty) return p['fileUrl'].toString();
+      } else if (data['prescription'].toString().isNotEmpty) {
+        return data['prescription'].toString();
+      }
+    }
     if (data['prescription_url'] != null && data['prescription_url'].toString().isNotEmpty) return data['prescription_url'].toString();
     if (data['report'] != null && data['report'].toString().isNotEmpty) return data['report'].toString();
     if (data['prescriptionImages'] != null && data['prescriptionImages'] is List && (data['prescriptionImages'] as List).isNotEmpty) return data['prescriptionImages'][0].toString();
@@ -529,65 +538,93 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     final String? pUrl = _getPrescriptionUrl(_appointment!);
     final Uint8List? localBytes = PrescriptionCache.bytes[widget.appointmentId];
     final bool hasPrescription = (pUrl != null && pUrl.isNotEmpty) || localBytes != null;
+    final bool isAccepted = _appointment!['status'] == 'accepted';
 
     return Column(
       children: [
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              if (hasPrescription) {
-                showDialog(
-                  context: context,
-                  builder: (context) => Dialog(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: (pUrl != null && pUrl.toLowerCase().endsWith('.pdf'))
-                              ? Container(
-                                  height: 300,
-                                  width: double.infinity,
-                                  color: Colors.grey[100],
-                                  child: const Center(child: Icon(Icons.picture_as_pdf, size: 64, color: Colors.red)),
-                                )
-                              : (pUrl != null && pUrl.isNotEmpty
-                                  ? Image.network(
-                                      pUrl,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) => Container(
-                                        color: Colors.white,
-                                        padding: const EdgeInsets.all(32),
-                                        child: const Text('Could not load image', style: TextStyle(color: Colors.black)),
-                                      ),
-                                    )
-                                  : (localBytes != null ? Image.memory(
-                                      localBytes,
-                                      fit: BoxFit.contain,
-                                    ) : const SizedBox.shrink())),
-                        ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
-                              ),
-                              child: const Icon(Icons.close, size: 20, color: Colors.red),
-                            ),
-                          ),
-                        ),
-                      ],
+        if (isAccepted && !hasPrescription) ...[
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DoctorActiveConsultationScreen(
+                      appointmentId: widget.appointmentId,
                     ),
                   ),
-                );
+                ).then((value) {
+                  if (value == true) _loadAppointment();
+                });
+              },
+              icon: const Icon(Icons.video_camera_front, color: Colors.white),
+              label: const Text(
+                'Start Consultation',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1565C0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ),
+        ],
+        if (hasPrescription || !isAccepted)
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                if (hasPrescription) {
+                  if (pUrl != null && pUrl.toLowerCase().endsWith('.pdf')) {
+                    launchUrl(Uri.parse(pUrl), mode: LaunchMode.externalApplication);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: (pUrl != null && pUrl.isNotEmpty)
+                                ? Image.network(
+                                    pUrl,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      color: Colors.white,
+                                      padding: const EdgeInsets.all(32),
+                                      child: const Text('Could not load image', style: TextStyle(color: Colors.black)),
+                                    ),
+                                  )
+                                : (localBytes != null ? Image.memory(
+                                    localBytes,
+                                    fit: BoxFit.contain,
+                                  ) : const SizedBox.shrink()),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                                ),
+                                child: const Icon(Icons.close, size: 20, color: Colors.red),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
               } else {
                 Navigator.push(
                   context,

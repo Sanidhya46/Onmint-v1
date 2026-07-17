@@ -389,7 +389,6 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
               // Download Prescription Button
               SizedBox(
                 width: double.infinity,
-                height: 50,
                 child: ElevatedButton.icon(
                   onPressed: () async {
                     if (_prescriptionUrl != null && _prescriptionUrl.toString().startsWith('http')) {
@@ -416,6 +415,7 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
                     backgroundColor: const Color(0xFF0033CC), // Blue matching Image 2
                     foregroundColor: Colors.white,
                     elevation: 0,
+                    minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -512,7 +512,6 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
   Widget _buildOutlinedButton(IconData icon, String label) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
       child: OutlinedButton.icon(
         onPressed: () {},
         icon: Icon(icon, size: 20),
@@ -523,6 +522,7 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFF0033CC),
           side: const BorderSide(color: Color(0xFF0033CC), width: 1.5),
+          minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
