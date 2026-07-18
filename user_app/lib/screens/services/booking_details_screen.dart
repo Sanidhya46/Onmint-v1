@@ -134,7 +134,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           ),
         ],
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(
@@ -424,7 +424,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                             ),
                         ],
                       ),
-                    ),
+                    )),
       floatingActionButton: _showRatingDialog
           ? null
           : FloatingActionButton(

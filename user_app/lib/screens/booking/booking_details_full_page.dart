@@ -80,9 +80,9 @@ class BookingDetailsFullPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -173,7 +173,7 @@ class BookingDetailsFullPage extends StatelessWidget {
             const SizedBox(height: 24),
           ],
         ),
-      ),
+      )),
     );
   }
 

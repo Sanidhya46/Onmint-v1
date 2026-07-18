@@ -131,13 +131,13 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> {
         backgroundColor: const Color(0xFFFF9A9E),
         foregroundColor: Colors.white,
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           _buildEmergencySection(),
           _buildTypesSection(),
           Expanded(child: _buildAmbulancesList()),
         ],
-      ),
+      )),
     );
   }
 

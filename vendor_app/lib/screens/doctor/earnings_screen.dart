@@ -9,6 +9,7 @@ class EarningsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Premium'),
+        automaticallyImplyLeading: false,
       ),
       body: const Center(
         child: Text('Premium details coming soon'),

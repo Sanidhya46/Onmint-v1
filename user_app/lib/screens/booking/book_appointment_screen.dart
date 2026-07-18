@@ -344,8 +344,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
         child: Form(
           key: _formKey,
           child: Column(
@@ -665,7 +665,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

@@ -4,6 +4,7 @@ import '../../utils/app_colors.dart';
 
 // Import UserTimeSlot specifically from user_model to avoid conflicts
 import 'package:api_client/src/models/user_model.dart' show UserTimeSlot;
+import 'package:user_app/screens/booking/doctor_request_sent_screen.dart';
 import 'package:user_app/screens/booking/order_request_screen.dart';
 
 class BookingFlowScreen extends StatefulWidget {
@@ -196,8 +197,8 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
         backgroundColor: _serviceColor,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -401,7 +402,7 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
             const SizedBox(height: 24),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -730,11 +731,16 @@ class _BookingFlowScreenState extends State<BookingFlowScreen> {
                 onPressed: () {
                   Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
-                      builder: (context) => OrderRequestScreen(
-                        bookingId: booking['_id'] ?? booking['id'] ?? '',
-                        bookingData: bookingData,
-                        serviceType: widget.serviceType,
-                      ),
+                      builder: (context) => (widget.serviceType.toLowerCase() == 'doctor' || widget.serviceType.toLowerCase() == 'consultation') 
+                        ? DoctorRequestSentScreen(
+                            bookingId: booking['_id'] ?? booking['id'] ?? '',
+                            bookingData: bookingData,
+                          )
+                        : OrderRequestScreen(
+                            bookingId: booking['_id'] ?? booking['id'] ?? '',
+                            bookingData: bookingData,
+                            serviceType: widget.serviceType,
+                          ),
                     ),
                     (route) => route.isFirst,
                   );

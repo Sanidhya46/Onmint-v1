@@ -110,6 +110,7 @@ class _LabTestSelectionScreenState extends State<LabTestSelectionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Select Tests',
             style: TextStyle(
                 color: Colors.black87,
@@ -119,10 +120,11 @@ class _LabTestSelectionScreenState extends State<LabTestSelectionScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           Expanded(
             child: ListView.separated(
+              padding: const EdgeInsets.only(bottom: 100),
               itemCount: _allTests.length,
               separatorBuilder: (context, index) =>
                   Divider(color: Colors.grey[200], height: 1),
@@ -240,7 +242,7 @@ class _LabTestSelectionScreenState extends State<LabTestSelectionScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

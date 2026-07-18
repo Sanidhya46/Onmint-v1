@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
 import 'package:api_client/api_client.dart';
+import 'package:user_app/screens/booking/doctor_request_sent_screen.dart';
 import '../booking/order_request_screen.dart';
 
 /// Instant Booking Screen - Quick emergency service booking
@@ -345,11 +346,16 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => OrderRequestScreen(
-              bookingId: newBookingId,
-              bookingData: createdData.isNotEmpty ? createdData : {},
-              serviceType: widget.serviceType,
-            ),
+            builder: (context) => (widget.serviceType.toLowerCase() == 'doctor' || widget.serviceType.toLowerCase() == 'consultation') 
+              ? DoctorRequestSentScreen(
+                  bookingId: newBookingId,
+                  bookingData: createdData.isNotEmpty ? createdData : {},
+                )
+              : OrderRequestScreen(
+                  bookingId: newBookingId,
+                  bookingData: createdData.isNotEmpty ? createdData : {},
+                  serviceType: widget.serviceType,
+                ),
           ),
         );
       }
@@ -415,7 +421,7 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
         backgroundColor: color,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
@@ -1037,7 +1043,7 @@ class _InstantBookingScreenState extends State<InstantBookingScreen> {
             const SizedBox(height: 100), // Added to prevent bottom nav bar overlap
           ],
         ),
-      ),
+      )),
     );
   }
 }

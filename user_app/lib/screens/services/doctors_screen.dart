@@ -66,7 +66,7 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
         backgroundColor: AppColors.doctor,
         foregroundColor: Colors.white,
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           // Specialization Filter
           Container(
@@ -129,7 +129,7 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 

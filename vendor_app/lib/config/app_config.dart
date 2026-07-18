@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppConfig {
-  static const String appName = 'OnMint Vendor';
+  static const String appName = 'Onmint Partner';
   
   static String get apiBaseUrl {
     if (kIsWeb) return 'http://localhost:5000/api/v1';

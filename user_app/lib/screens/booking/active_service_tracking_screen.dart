@@ -162,7 +162,7 @@ class ActiveServiceTrackingScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
+      body: SafeArea(top: false, bottom: true, child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Column(
           children: [
@@ -354,7 +354,7 @@ class ActiveServiceTrackingScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

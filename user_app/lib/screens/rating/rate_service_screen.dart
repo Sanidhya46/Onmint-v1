@@ -73,7 +73,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
       appBar: AppBar(
         title: const Text('Rate Service'),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -211,7 +211,7 @@ class _RateServiceScreenState extends State<RateServiceScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

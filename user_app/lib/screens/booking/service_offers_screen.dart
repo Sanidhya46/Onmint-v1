@@ -207,7 +207,7 @@ class _ServiceOffersScreenState extends State<ServiceOffersScreen> {
           ],
         ),
       ),
-      body: _isLoading && _offers.isEmpty
+      body: SafeArea(top: false, bottom: true, child: _isLoading && _offers.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _fetchBookingDetails,
@@ -580,8 +580,9 @@ class _ServiceOffersScreenState extends State<ServiceOffersScreen> {
                   ],
                 ),
               ),
-            ),
-      bottomNavigationBar: Container(
+            )),
+      bottomNavigationBar: SafeArea(
+child: Container(
         color: Colors.white,
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20, top: 12),
         child: Container(
@@ -615,7 +616,8 @@ class _ServiceOffersScreenState extends State<ServiceOffersScreen> {
             ],
           ),
         ),
-      ),
+      )
+),
     );
   }
 }

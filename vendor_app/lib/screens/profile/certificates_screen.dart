@@ -89,8 +89,8 @@ class CertificatesScreen extends StatelessWidget {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        const Icon(Icons.shield, color: Colors.blue, size: 48),
-                        const Icon(Icons.verified, color: Colors.white, size: 20),
+                        const Icon(Icons.shield, color: Colors.blue, size: 36),
+                        const Icon(Icons.verified, color: Colors.white, size: 16),
                         Positioned(
                           bottom: 0,
                           right: 0,
@@ -99,7 +99,7 @@ class CertificatesScreen extends StatelessWidget {
                               color: Colors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                            child: const Icon(Icons.check_circle, color: Colors.green, size: 16),
                           ),
                         ),
                       ],
@@ -113,7 +113,7 @@ class CertificatesScreen extends StatelessWidget {
                         const Text(
                           'Your Credentials',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF152238),
                           ),
@@ -122,7 +122,7 @@ class CertificatesScreen extends StatelessWidget {
                         const Text(
                           'Add and manage your documents.',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 13,
                             color: Colors.grey,
                           ),
                         ),
@@ -138,7 +138,7 @@ class CertificatesScreen extends StatelessWidget {
             Text(
               'Your Documents ($uploadedCount)',
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF152238),
               ),
@@ -177,7 +177,7 @@ class CertificatesScreen extends StatelessWidget {
                       color: Colors.blue.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.security, color: Colors.blue, size: 32),
+                    child: const Icon(Icons.security, color: Colors.blue, size: 24),
                   ),
                   const SizedBox(width: 24),
                   const Expanded(
@@ -187,7 +187,7 @@ class CertificatesScreen extends StatelessWidget {
                         Text(
                           'Keep Documents Updated',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF152238),
                           ),
@@ -196,7 +196,7 @@ class CertificatesScreen extends StatelessWidget {
                         Text(
                           'Make sure your documents are valid.',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 13,
                             color: Colors.grey,
                           ),
                         ),
@@ -217,7 +217,7 @@ class CertificatesScreen extends StatelessWidget {
                  Text(
                    'Your information is secure and confidential.',
                    style: TextStyle(
-                     fontSize: 20,
+                     fontSize: 12,
                      color: Colors.grey.shade600,
                    ),
                  ),
@@ -229,7 +229,7 @@ class CertificatesScreen extends StatelessWidget {
               child: Text(
                 '© Onmint. All Rights Reserved.',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 11,
                   color: Colors.grey.shade500,
                 ),
               ),
@@ -266,7 +266,7 @@ class CertificatesScreen extends StatelessWidget {
               color: iconBgColor,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: iconColor, size: 32),
+            child: Icon(icon, color: iconColor, size: 24),
           ),
           const SizedBox(width: 20),
           Expanded(
@@ -276,7 +276,7 @@ class CertificatesScreen extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF152238),
                   ),
@@ -285,7 +285,7 @@ class CertificatesScreen extends StatelessWidget {
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 12,
                     color: Colors.grey,
                   ),
                 ),

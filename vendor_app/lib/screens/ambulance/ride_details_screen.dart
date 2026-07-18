@@ -1140,22 +1140,22 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
   Widget _buildActionShortcuts() {
     final items = [
       _ShortcutItem(
-        icon: Icons.phone,
+        iconWidget: const Icon(Icons.phone, color: Color(0xFF1A56DB), size: 16),
         label: 'Call Patient',
         onTap: _callPatient,
       ),
       _ShortcutItem(
-        icon: Icons.chat,
+        iconWidget: Image.asset('assets/images/whatsap_icon.png', width: 16, height: 16),
         label: 'Chat',
         onTap: () {},
       ),
       _ShortcutItem(
-        icon: Icons.map,
+        iconWidget: const Icon(Icons.map, color: Color(0xFF1A56DB), size: 16),
         label: 'Open Map',
         onTap: _openMap,
       ),
       _ShortcutItem(
-        icon: Icons.description,
+        iconWidget: const Icon(Icons.description, color: Color(0xFF1A56DB), size: 16),
         label: 'Trip Details',
         onTap: () => _showTripDetails(),
       ),
@@ -1182,8 +1182,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                     color: const Color(0xFFF0F5FF),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(item.icon,
-                      color: const Color(0xFF1A56DB), size: 16),
+                  child: item.iconWidget,
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -1772,11 +1771,13 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                           child: ElevatedButton.icon(
                             onPressed: () async {
                               final url = "https://wa.me/${phone.replaceAll(RegExp(r'[^\d]'), '')}";
-                              if (await canLaunchUrl(Uri.parse(url))) {
-                                await launchUrl(Uri.parse(url));
+                              try {
+                                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                              } catch (e) {
+                                debugPrint("Could not launch WhatsApp: $e");
                               }
                             },
-                            icon: const Icon(Icons.chat_bubble, color: Colors.white, size: 18),
+                            icon: Image.asset('assets/images/whatsap_icon.png', width: 24, height: 24),
                             label: const Text(
                               'WhatsApp',
                               style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
@@ -1893,11 +1894,11 @@ class _StepData {
 }
 
 class _ShortcutItem {
-  final IconData icon;
+  final Widget iconWidget;
   final String label;
   final VoidCallback onTap;
   _ShortcutItem(
-      {required this.icon, required this.label, required this.onTap});
+      {required this.iconWidget, required this.label, required this.onTap});
 }
 
 class _DashedLinePainter extends CustomPainter {

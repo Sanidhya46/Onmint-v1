@@ -88,7 +88,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
       appBar: AppBar(
         title: const Text('Upload Document'),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,7 +266,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

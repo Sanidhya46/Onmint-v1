@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
@@ -72,7 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
           });
           return false;
         }
-        return true;
+        SystemNavigator.pop();
+        return false;
       },
       child: Scaffold(
       appBar: hideAppBar ? null : AppBar(

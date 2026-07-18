@@ -125,6 +125,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
   Widget build(BuildContext context) {
     final canPop = Navigator.canPop(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -134,7 +135,11 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
       backgroundColor: const Color(0xFFF8F9FA),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: false, child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: 20 + MediaQuery.of(context).viewInsets.bottom),
         controller: _scrollController,
         child: Form(
           key: _formKey,
@@ -531,10 +536,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                             isDense: true,
                             hintText: 'Any special instructions...',
                             hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12),
-                            prefixIcon: Padding(
-                              padding: const EdgeInsets.only(bottom: 50),
-                              child: Icon(Icons.note_alt_outlined, color: Colors.grey[500], size: 18),
-                            ),
+                            prefixIcon: Icon(Icons.note_alt_outlined, color: Colors.grey[500], size: 18),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -612,11 +614,10 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 40),
             ],
           ),
         ),
-      ),
+      ))),
     );
   }
 

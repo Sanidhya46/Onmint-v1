@@ -89,7 +89,7 @@ class _UserConsultationEndedScreenState extends State<UserConsultationEndedScree
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFFF8F9FA),
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(top: false, bottom: true, child: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -131,8 +131,8 @@ class _UserConsultationEndedScreenState extends State<UserConsultationEndedScree
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 100),
         child: Column(
           children: [
             // Success Header Box
@@ -487,7 +487,7 @@ class _UserConsultationEndedScreenState extends State<UserConsultationEndedScree
             const SizedBox(height: 24),
           ],
         ),
-      ),
+      )),
     );
   }
 

@@ -98,7 +98,8 @@ class _ConfirmAmbulanceBookingScreenNewState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF5F5), // Ice Red background
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SafeArea(
+child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -178,8 +179,9 @@ class _ConfirmAmbulanceBookingScreenNewState
             SizedBox(height: MediaQuery.of(context).padding.bottom > 0 ? 0 : 6),
           ],
         ),
-      ),
-      body: SingleChildScrollView(
+      )
+),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           children: [
             // Top Section
@@ -197,17 +199,7 @@ class _ConfirmAmbulanceBookingScreenNewState
                             Icon(Icons.image_not_supported, color: Colors.red)),
                   ),
                 ),
-                Positioned(
-                  top: MediaQuery.of(context).padding.top > 0
-                      ? MediaQuery.of(context).padding.top - 5
-                      : 10,
-                  left: 10,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back,
-                        color: Colors.black87, size: 24),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
+
               ],
             ),
             Column(
@@ -425,7 +417,7 @@ class _ConfirmAmbulanceBookingScreenNewState
             const SizedBox(height: 24),
           ],
         ),
-      ),
+      )),
     );
   }
 

@@ -57,7 +57,7 @@ class _ProviderReviewsScreenState extends State<ProviderReviewsScreen> {
       appBar: AppBar(
         title: Text('${widget.providerName} Reviews'),
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadReviews,
@@ -148,7 +148,7 @@ class _ProviderReviewsScreenState extends State<ProviderReviewsScreen> {
                   ],
                 ),
               ),
-            ),
+            )),
     );
   }
 

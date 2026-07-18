@@ -106,7 +106,7 @@ class _DoctorCategoriesScreenState extends State<DoctorCategoriesScreen> {
         backgroundColor: const Color(0xFF283593), // Dark blue from image
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -134,7 +134,7 @@ class _DoctorCategoriesScreenState extends State<DoctorCategoriesScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

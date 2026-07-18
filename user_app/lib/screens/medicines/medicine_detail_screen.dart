@@ -111,7 +111,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
           ),
         ],
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _medicine == null
               ? const Center(child: Text('Medicine not found'))
@@ -301,7 +301,7 @@ class _MedicineDetailScreenState extends State<MedicineDetailScreen> {
                       ),
                     ],
                   ),
-                ),
+                )),
       bottomNavigationBar: _medicine != null && _medicine!['stock'] > 0
           ? Container(
               padding: const EdgeInsets.all(16),

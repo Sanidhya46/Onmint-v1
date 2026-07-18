@@ -93,7 +93,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
         foregroundColor: Colors.black87,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -202,7 +202,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

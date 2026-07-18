@@ -128,7 +128,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -310,7 +310,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

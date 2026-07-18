@@ -491,7 +491,7 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
             ),
           ],
         ),
-        body: Stack(
+        body: SafeArea(top: false, bottom: true, child: Stack(
           children: [
             RefreshIndicator(
               onRefresh: _refreshStatus,
@@ -775,7 +775,7 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
                 ),
               ),
           ],
-        ),
+        )),
       ),
     );
   }

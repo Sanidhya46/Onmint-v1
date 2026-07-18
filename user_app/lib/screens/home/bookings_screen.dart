@@ -82,7 +82,7 @@ class _BookingsScreenState extends State<BookingsScreen>
           ],
         ),
       ),
-      body: RefreshIndicator(
+      body: SafeArea(top: false, bottom: true, child: RefreshIndicator(
         onRefresh: _loadBookings,
         child: _isLoading
             ? const LoadingWidget(message: 'Loading bookings...')
@@ -102,7 +102,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                       return _buildBookingCard(booking);
                     },
                   ),
-      ),
+      )),
     );
   }
 

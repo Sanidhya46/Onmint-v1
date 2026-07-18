@@ -68,7 +68,7 @@ class _PrescriptionViewerScreenState extends State<PrescriptionViewerScreen> {
           ),
         ],
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _prescription == null
               ? const Center(child: Text('Prescription not found'))
@@ -296,7 +296,7 @@ class _PrescriptionViewerScreenState extends State<PrescriptionViewerScreen> {
                       ),
                     ],
                   ),
-                ),
+                )),
     );
   }
 

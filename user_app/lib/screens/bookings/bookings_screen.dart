@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ui_components/ui_components.dart';
+import "../booking/user_active_consultation_screen.dart";
 import 'package:api_client/api_client.dart';
+import 'package:user_app/screens/booking/doctor_request_sent_screen.dart';
 import '../../config/app_colors.dart';
 import '../booking/user_unified_tracking_screen.dart';
 import 'pharmacist_order_tracking_screen.dart';
@@ -112,6 +114,16 @@ class _BookingsScreenState extends State<BookingsScreen>
           context,
           '/pharmacist-tracking?id=$bookingId'
         ).then((_) => _loadBookings());
+      } else if (serviceType.toLowerCase() == 'doctor' || serviceType.toLowerCase() == 'consultation') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DoctorRequestSentScreen(
+              bookingId: bookingId,
+              bookingData: request,
+            ),
+          ),
+        ).then((_) => _loadBookings());
       } else {
         final hasOffers = request['offers'] is List && (request['offers'] as List).isNotEmpty;
         final isSupportedService = serviceType.toLowerCase() == 'nurse' || 
@@ -172,14 +184,25 @@ class _BookingsScreenState extends State<BookingsScreen>
             ),
           ).then((_) => _loadBookings());
         } else if (serviceType.toLowerCase() == 'doctor' || serviceType.toLowerCase() == 'consultation') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => OrderDetailFile(
-                bookingId: bookingId,
+          if (status == 'in_progress') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UserActiveConsultationScreen(
+                  bookingId: bookingId,
+                ),
               ),
-            ),
-          ).then((_) => _loadBookings());
+            ).then((_) => _loadBookings());
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OrderDetailFile(
+                  bookingId: bookingId,
+                ),
+              ),
+            ).then((_) => _loadBookings());
+          }
         } else {
           Navigator.push(
             context,
@@ -232,7 +255,7 @@ class _BookingsScreenState extends State<BookingsScreen>
           ],
         ),
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadBookings,
@@ -250,7 +273,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                   ),
                 ],
               ),
-            ),
+            )),
     );
   }
 

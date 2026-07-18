@@ -4,6 +4,7 @@ import 'package:api_client/api_client.dart';
 import 'package:intl/intl.dart';
 import '../bookings/booking_details_screen.dart';
 import '../booking/order_request_screen.dart';
+import 'package:user_app/screens/booking/doctor_request_sent_screen.dart';
 import '../booking/order_detail_file.dart';
 import '../booking/user_unified_tracking_screen.dart';
 import '../booking/connected_vendor_details_screen.dart';
@@ -231,7 +232,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> with SingleTickerPr
           ],
         ),
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
               controller: _tabController,
@@ -245,7 +246,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> with SingleTickerPr
                   child: _buildBookingsList(),
                 ),
               ],
-            ),
+            )),
     );
   }
 
@@ -708,6 +709,19 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> with SingleTickerPr
 
     return GestureDetector(
       onTap: () {
+        if (serviceType == 'doctor' || serviceType == 'consultation') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DoctorRequestSentScreen(
+                bookingId: booking['_id']?.toString() ?? booking['id']?.toString() ?? '',
+                bookingData: booking,
+              ),
+            ),
+          );
+          return;
+        }
+
         if (status == 'requested' || status == 'pending') {
           final hasOffers = booking['offers'] is List && (booking['offers'] as List).isNotEmpty;
           if (hasOffers) {

@@ -58,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (user == null) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(top: false, bottom: true, child: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -98,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -478,7 +478,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

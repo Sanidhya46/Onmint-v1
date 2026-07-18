@@ -11,6 +11,8 @@ import 'package:user_app/screens/booking/order_detail_file.dart';
 import 'package:user_app/screens/booking/coming_soon_screen.dart';
 import 'package:user_app/screens/medicines/order_tracking_screen.dart';
 import 'package:user_app/screens/booking/service_offers_screen.dart';
+import 'package:user_app/screens/booking/doctor_request_sent_screen.dart';
+import 'package:user_app/screens/home/home_screen.dart';
 
 /// Unified My Bookings Screen with 3 tabs:
 /// 1. Active Orders - Active service bookings
@@ -202,11 +204,25 @@ class _MyBookingsUnifiedScreenState extends State<MyBookingsUnifiedScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        } else {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (route) => false,
+          );
+        }
+        return false;
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('My Bookings'),
         backgroundColor: const Color(0xFF4CAF50),
         foregroundColor: Colors.white,
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -226,14 +242,15 @@ class _MyBookingsUnifiedScreenState extends State<MyBookingsUnifiedScreen>
           ],
         ),
       ),
-      body: TabBarView(
+      body: SafeArea(top: false, bottom: true, child: TabBarView(
         controller: _tabController,
         children: [
           _buildActiveOrdersTab(),
           _buildMedicineOrdersTab(),
           _buildAllServicesTab(),
         ],
-      ),
+      )),
+    );
     );
   }
 
@@ -390,6 +407,19 @@ class _MyBookingsUnifiedScreenState extends State<MyBookingsUnifiedScreen>
         final currentStatus = status.toLowerCase();
         final sType = serviceType.toLowerCase();
 
+        if (sType == 'doctor' || sType == 'consultation') {
+           Navigator.push(
+             context,
+             MaterialPageRoute(
+               builder: (context) => DoctorRequestSentScreen(
+                 bookingId: bookingId,
+                 bookingData: booking,
+               ),
+             ),
+           ).then((_) => _loadData());
+           return;
+        }
+
         if (currentStatus == 'requested' || currentStatus == 'pending') {
           if (sType == 'pharmacist' || sType == 'pharmacy') {
             Navigator.push(
@@ -462,15 +492,6 @@ class _MyBookingsUnifiedScreenState extends State<MyBookingsUnifiedScreen>
             MaterialPageRoute(
               builder: (context) => UserUnifiedTrackingScreen(
                   bookingId: bookingId, serviceType: serviceType),
-            ),
-          ).then((_) => _loadActiveBookings());
-        } else if (serviceType.toLowerCase() == 'doctor' || serviceType.toLowerCase() == 'consultation') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => OrderDetailFile(
-                bookingId: bookingId,
-              ),
             ),
           ).then((_) => _loadActiveBookings());
         } else if (serviceType.toLowerCase() == 'pharmacist' ||

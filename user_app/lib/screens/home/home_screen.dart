@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:api_client/api_client.dart';
 import 'dashboard_screen_simple.dart';
 import '../booking/blood_request_screen.dart';
@@ -44,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen>
   String _activeServiceType = '';
   int _activeBookingCount = 0;
   int _inProgressCount = 0;
+  Timer? _bookingTimer;
 
   @override
   void initState() {
@@ -54,6 +56,9 @@ class _HomeScreenState extends State<HomeScreen>
       duration: const Duration(seconds: 3),
     )..repeat();
     _fetchActiveBooking();
+    _bookingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _fetchActiveBooking();
+    });
   }
 
   Future<void> _fetchActiveBooking() async {
@@ -108,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void dispose() {
+    _bookingTimer?.cancel();
     _rotationController.dispose();
     super.dispose();
   }
@@ -164,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _openTrackingScreen() {
-    if (_inProgressCount > 1 || (_inProgressCount == 0 && _activeBookingCount > 1)) {
+    if (_activeBookingCount > 1) {
       setState(() => _selectedIndex = 2);
       return;
     }
@@ -244,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen>
         children: [
           Scaffold(
             resizeToAvoidBottomInset: false,
-            body: Stack(
+            body: SafeArea(top: false, bottom: true, child: Stack(
               children: [
                 _screens[_selectedIndex],
                 if (_hasActiveBooking && _selectedIndex == 0 && MediaQuery.of(context).viewInsets.bottom == 0)
@@ -329,15 +335,17 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                   
                 // Sticky Bottom Cart Bar
-                const Positioned(
-                  bottom: 12,
-                  left: 0,
-                  right: 0,
-                  child: CartFloatingBar(),
-                ),
+                if (_selectedIndex == 0)
+                  const Positioned(
+                    bottom: 12,
+                    left: 0,
+                    right: 0,
+                    child: CartFloatingBar(),
+                  ),
               ],
-            ),
-            bottomNavigationBar: Container(
+            )),
+            bottomNavigationBar: SafeArea(
+child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
@@ -391,11 +399,12 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-            ),
+            )
+),
           ),
           if (MediaQuery.of(context).viewInsets.bottom == 0)
             Positioned(
-              bottom: 25 + MediaQuery.of(context).padding.bottom, // Adjusted to match the centerDocked position and account for system nav bar
+              bottom: 10 + MediaQuery.of(context).padding.bottom, // Adjusted to match the centerDocked position and account for system nav bar
               left: 0,
               right: 0,
               child: Center(

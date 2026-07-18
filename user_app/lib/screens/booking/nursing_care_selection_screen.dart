@@ -159,7 +159,7 @@ class _NursingCareSelectionScreenState
           ),
         ),
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
@@ -176,7 +176,7 @@ class _NursingCareSelectionScreenState
           Expanded(
             child: ListView.builder(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 100.0),
               itemCount: _allCares.length,
               itemBuilder: (context, index) {
                 final care = _allCares[index];
@@ -269,7 +269,7 @@ class _NursingCareSelectionScreenState
             ),
           ),
         ],
-      ),
+      )),
       bottomNavigationBar: _selectedCares.isEmpty
           ? const SizedBox.shrink()
           : Container(

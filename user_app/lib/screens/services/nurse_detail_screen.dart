@@ -57,7 +57,7 @@ class _NurseDetailScreenState extends State<NurseDetailScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const LoadingWidget()
           : _error != null
               ? CustomErrorWidget(
@@ -82,7 +82,7 @@ class _NurseDetailScreenState extends State<NurseDetailScreen> {
                           const SizedBox(height: 80),
                         ],
                       ),
-                    ),
+                    )),
       bottomNavigationBar: _nurse != null ? _buildBookButton() : null,
     );
   }

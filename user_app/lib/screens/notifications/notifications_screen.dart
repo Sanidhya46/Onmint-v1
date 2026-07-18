@@ -61,7 +61,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
         ],
       ),
-      body: _notifications.isEmpty
+      body: SafeArea(top: false, bottom: true, child: _notifications.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -82,7 +82,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 final notification = _notifications[index];
                 return _buildNotificationCard(notification);
               },
-            ),
+            )),
     );
   }
 

@@ -1,3 +1,4 @@
+import '../home/home_screen.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
@@ -246,12 +247,17 @@ class _DoctorActiveConsultationScreenState extends State<DoctorActiveConsultatio
       if (d != null) formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(d.toLocal());
     }
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
+        return false;
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Color(0xFF1E3A8A)), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Color(0xFF1E3A8A)), onPressed: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false)),
         title: const Column(
           children: [
             Text('Consultation Options', style: TextStyle(color: Color(0xFF1E3A8A), fontWeight: FontWeight.bold, fontSize: 18)),
@@ -547,6 +553,7 @@ class _DoctorActiveConsultationScreenState extends State<DoctorActiveConsultatio
           )
         )
       ),
+    ),
     );
   }
 }

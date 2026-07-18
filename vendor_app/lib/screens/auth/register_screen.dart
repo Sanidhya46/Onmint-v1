@@ -1192,7 +1192,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   controller.clear();
                                   setState(() { _selectedState = null; _cityController.clear(); });
                                 },
-                                child: Icon(Icons.close, size: 16, color: Colors.grey.shade400))
+                            
+  Widget _buildDocUploadCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isMandatory,
+    required XFile? file,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow    child: Icon(Icons.close, size: 16, color: Colors.grey.shade400))
                             : const Icon(Icons.arrow_drop_down, size: 20),
                         suffixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                       ),

@@ -264,7 +264,7 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
           return Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(backgroundColor: Colors.black, foregroundColor: Colors.white, elevation: 0),
-            body: const Center(child: CircularProgressIndicator(color: Colors.white)),
+            body: SafeArea(top: false, bottom: true, child: const Center(child: CircularProgressIndicator(color: Colors.white))),
           );
         }
         return Scaffold(
@@ -275,7 +275,7 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
             foregroundColor: Colors.white,
             elevation: 0,
           ),
-          body: Column(
+          body: SafeArea(top: false, bottom: true, child: Column(
             children: [
               Expanded(
                 child: Container(
@@ -319,7 +319,7 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
                 ),
               ),
             ],
-          ),
+          )),
         );
       } else {
         return Scaffold(
@@ -330,9 +330,9 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
             foregroundColor: Colors.black,
             elevation: 0,
           ),
-          body: Center(
+          body: SafeArea(top: false, bottom: true, child: Center(
             child: CircularProgressIndicator(color: const Color(0xFF0D47A1)),
-          ),
+          )),
         );
       }
     }
@@ -352,7 +352,7 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -640,7 +640,7 @@ class _PrescriptionCameraScreenState extends State<PrescriptionCameraScreen> {
             ),
           ],
         ),
-      ),
+      )),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),

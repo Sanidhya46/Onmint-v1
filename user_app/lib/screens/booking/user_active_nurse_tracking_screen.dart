@@ -61,7 +61,7 @@ class _UserActiveNurseTrackingScreenState
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF1565C0),
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+        body: SafeArea(top: false, bottom: true, child: Center(child: CircularProgressIndicator(color: Colors.white))),
       );
     }
 
@@ -69,9 +69,9 @@ class _UserActiveNurseTrackingScreenState
       return Scaffold(
         backgroundColor: const Color(0xFF1565C0),
         appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-        body: const Center(
+        body: SafeArea(top: false, bottom: true, child: const Center(
             child: Text('Booking not found',
-                style: TextStyle(color: Colors.white))),
+                style: TextStyle(color: Colors.white)))),
       );
     }
 
@@ -79,7 +79,7 @@ class _UserActiveNurseTrackingScreenState
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FF),
-      body: RefreshIndicator(
+      body: SafeArea(top: false, bottom: true, child: RefreshIndicator(
         onRefresh: _loadBooking,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -94,7 +94,7 @@ class _UserActiveNurseTrackingScreenState
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

@@ -115,7 +115,7 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
           ),
         ],
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _document == null
               ? const Center(child: Text('Document not found'))
@@ -243,7 +243,7 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
                         ),
                     ],
                   ),
-                ),
+                )),
     );
   }
 

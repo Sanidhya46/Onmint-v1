@@ -194,7 +194,7 @@ class _AmbulanceBookingScreenState extends State<AmbulanceBookingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF5F5), // Ice Red color
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: false, child: SingleChildScrollView(
         controller: _scrollController,
         child: Column(
           children: [
@@ -714,7 +714,7 @@ class _AmbulanceBookingScreenState extends State<AmbulanceBookingScreen> {
             const SizedBox(height: 24),
           ],
         ),
-      ),
+      )),
     );
   }
 

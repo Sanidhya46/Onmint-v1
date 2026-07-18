@@ -4,8 +4,10 @@ import 'appointment_details_screen.dart';
 import 'dart:async';
 
 /// Bookings management screen for doctors - Complete consultation flow
+import 'doctor_main_screen.dart';
 class BookingsScreen extends StatefulWidget {
-  const BookingsScreen({super.key});
+  const BookingsScreen({super.key, this.isTab = true});
+  final bool isTab;
 
   @override
   State<BookingsScreen> createState() => _BookingsScreenState();
@@ -53,9 +55,18 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
     try {
       await _apiClient.initialize();
       final response = await _apiClient.doctor.getAppointments(page: 1, limit: 100);
-      final allBookings = (response['data'] as List?)
+      var allBookings = (response['data'] as List?)
           ?.map((e) => Booking.fromJson(e as Map<String, dynamic>))
           .toList() ?? [];
+
+      // Deduplicate bookings by ID
+      final Set<String> seenIds = {};
+      allBookings.retainWhere((b) {
+        if (b.id == null || b.id.isEmpty) return true;
+        if (seenIds.contains(b.id)) return false;
+        seenIds.add(b.id);
+        return true;
+      });
 
       allBookings.sort((a, b) {
         return b.createdAt.compareTo(a.createdAt);
@@ -100,14 +111,23 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: !widget.isTab ? IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const DoctorMainScreen()),
+                (route) => false,
+              );
+            }
+          },
+        ) : null,
         centerTitle: true,
         title: const Text('My Booking', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: 'Poppins')),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.headset_mic_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
         iconTheme: const IconThemeData(color: Colors.black),
         bottom: TabBar(
           controller: _tabController,

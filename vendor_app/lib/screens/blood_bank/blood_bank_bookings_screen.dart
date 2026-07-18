@@ -133,6 +133,7 @@ class _BloodBankBookingsScreenState extends State<BloodBankBookingsScreen>
         foregroundColor: const Color(0xFF152238),
         centerTitle: true,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           'My Booking',
           style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, fontSize: 18),

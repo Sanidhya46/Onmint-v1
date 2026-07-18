@@ -3,6 +3,7 @@ import 'package:api_client/api_client.dart';
 import 'booking_details_screen.dart';
 import '../booking/order_detail_file.dart';
 import '../booking/user_unified_tracking_screen.dart';
+import 'package:user_app/screens/booking/doctor_request_sent_screen.dart';
 import '../booking/order_request_screen.dart';
 
 /// Booking history screen for patients
@@ -130,7 +131,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
           ],
         ),
       ),
-      body: TabBarView(
+      body: SafeArea(top: false, bottom: true, child: TabBarView(
         controller: _tabController,
         children: [
           _buildBookingsList(_activeBookings, _isLoadingActive, 'active'),
@@ -139,7 +140,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
           _buildBookingsList(
               _cancelledBookings, _isLoadingCancelled, 'cancelled'),
         ],
-      ),
+      )),
     );
   }
 
@@ -239,6 +240,20 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen>
       child: InkWell(
         onTap: () async {
           final sType = booking.serviceType.toLowerCase();
+
+          if (sType == 'doctor' || sType == 'consultation') {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DoctorRequestSentScreen(
+                  bookingId: booking.id,
+                  bookingData: booking.toJson(), // assuming there's a toJson or we pass raw map. Wait, booking is an object here! Let's check how we can get a map
+                ),
+              ),
+            );
+            if (result == true) _loadBookings();
+            return;
+          }
 
           if (booking.status.toLowerCase() == 'requested' ||
               booking.status.toLowerCase() == 'pending') {

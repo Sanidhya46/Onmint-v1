@@ -1,7 +1,9 @@
+import '../home/home_screen.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:url_launcher/url_launcher.dart';
+import "user_active_consultation_screen.dart";
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
 import 'package:user_app/screens/booking/user_unified_tracking_screen.dart';
@@ -150,13 +152,11 @@ class _OrderDetailFileState extends State<OrderDetailFile>
           final provD = _booking?['provider'] ?? _booking?['acceptedProvider'] ?? {};
           final drName = provD['fullName'] ??
               '${provD['firstName'] ?? ''} ${provD['lastName'] ?? ''}'.trim();
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => UserVideoCallScreen(
+              builder: (context) => UserActiveConsultationScreen(
                 bookingId: widget.bookingId,
-                doctorName: drName.isEmpty ? 'Doctor' : drName,
-                doctorImage: provD['profilePicture'],
               ),
             ),
           ).then((_) => _loadBookingDetails());
@@ -244,7 +244,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
           onPressed: () {
             if (Navigator.canPop(context)) {
-              Navigator.popUntil(context, (route) => route.isFirst);
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
             } else {
               Navigator.pushReplacementNamed(context, '/home');
             }
@@ -810,10 +810,8 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => UserVideoCallScreen(
+                              builder: (context) => UserActiveConsultationScreen(
                                 bookingId: widget.bookingId,
-                                doctorName: drName.isEmpty ? 'Doctor' : drName,
-                                doctorImage: provD['profilePicture'],
                               ),
                             ),
                           ).then((_) => _loadBookingDetails());
@@ -999,7 +997,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
           onPressed: () {
             if (Navigator.canPop(context)) {
-              Navigator.popUntil(context, (route) => route.isFirst);
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
             } else {
               Navigator.pushReplacementNamed(context, '/home');
             }
@@ -1021,8 +1019,10 @@ class _OrderDetailFileState extends State<OrderDetailFile>
           )
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
+        bottom: true,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1292,71 +1292,74 @@ class _OrderDetailFileState extends State<OrderDetailFile>
             )
           ],
         ),
-      ),
+      )),
     );
   }
   String? _getPrescriptionUrl(Map<String, dynamic> data) {
+    String? foundUrl;
+
     // Root level direct access
     if (data['prescriptionFileUrl'] != null && data['prescriptionFileUrl'].toString().isNotEmpty) {
-      return data['prescriptionFileUrl'].toString();
+      foundUrl = data['prescriptionFileUrl'].toString();
     }
     
     // Inside prescription object
-    if (data['prescription'] != null) {
+    else if (data['prescription'] != null) {
       if (data['prescription'] is Map) {
         final Map p = data['prescription'];
-        if (p['prescriptionFile'] != null && p['prescriptionFile'].toString().isNotEmpty) return p['prescriptionFile'].toString();
-        if (p['fileUrl'] != null && p['fileUrl'].toString().isNotEmpty) return p['fileUrl'].toString();
-        if (p['url'] != null && p['url'].toString().isNotEmpty) return p['url'].toString();
+        if (p['prescriptionFile'] != null && p['prescriptionFile'].toString().isNotEmpty) foundUrl = p['prescriptionFile'].toString();
+        else if (p['fileUrl'] != null && p['fileUrl'].toString().isNotEmpty) foundUrl = p['fileUrl'].toString();
+        else if (p['url'] != null && p['url'].toString().isNotEmpty) foundUrl = p['url'].toString();
       } else if (data['prescription'].toString().isNotEmpty) {
-        return data['prescription'].toString();
+        foundUrl = data['prescription'].toString();
       }
     }
 
-    if (data['prescriptionUrl'] != null && data['prescriptionUrl'].toString().isNotEmpty) return data['prescriptionUrl'].toString();
-    if (data['prescription_url'] != null && data['prescription_url'].toString().isNotEmpty) return data['prescription_url'].toString();
-    if (data['report'] != null && data['report'].toString().isNotEmpty) return data['report'].toString();
-    if (data['prescriptionImages'] != null && data['prescriptionImages'] is List && (data['prescriptionImages'] as List).isNotEmpty) return data['prescriptionImages'][0].toString();
-    if (data['prescriptionFile'] != null && data['prescriptionFile'].toString().isNotEmpty) return data['prescriptionFile'].toString();
+    if (foundUrl == null && data['prescriptionUrl'] != null && data['prescriptionUrl'].toString().isNotEmpty) foundUrl = data['prescriptionUrl'].toString();
+    if (foundUrl == null && data['prescription_url'] != null && data['prescription_url'].toString().isNotEmpty) foundUrl = data['prescription_url'].toString();
+    if (foundUrl == null && data['report'] != null && data['report'].toString().isNotEmpty) foundUrl = data['report'].toString();
+    if (foundUrl == null && data['prescriptionImages'] != null && data['prescriptionImages'] is List && (data['prescriptionImages'] as List).isNotEmpty) foundUrl = data['prescriptionImages'][0].toString();
+    if (foundUrl == null && data['prescriptionFile'] != null && data['prescriptionFile'].toString().isNotEmpty) foundUrl = data['prescriptionFile'].toString();
     
     // Fallback: deep search for any URL that looks like a prescription
-    String? foundUrl;
-    void searchMap(Map m) {
-      m.forEach((key, value) {
-        if (foundUrl != null) return;
-        if (value is String) {
-          final valLower = value.toLowerCase();
-          if (!valLower.contains('profile') && !valLower.contains('zoom') && !valLower.contains('avatar')) {
-            if (valLower.startsWith('http') || valLower.contains('uploads/') || valLower.contains('/api/')) {
-              if (valLower.contains('prescription') || valLower.contains('report') || valLower.endsWith('.pdf') || valLower.endsWith('.jpg') || valLower.endsWith('.png') || valLower.endsWith('.jpeg')) {
+    if (foundUrl == null) {
+      void searchMap(Map m) {
+        m.forEach((key, value) {
+          if (foundUrl != null) return;
+          if (value is String) {
+            final valLower = value.toLowerCase();
+            if (!valLower.contains('profile') && !valLower.contains('zoom') && !valLower.contains('avatar')) {
+              if (valLower.startsWith('http') || valLower.contains('uploads/') || valLower.contains('/api/')) {
+                if (valLower.contains('prescription') || valLower.contains('report') || valLower.endsWith('.pdf') || valLower.endsWith('.jpg') || valLower.endsWith('.png') || valLower.endsWith('.jpeg')) {
+                  foundUrl = value;
+                }
+              } else if (valLower.endsWith('.pdf') || valLower.endsWith('.jpg') || valLower.endsWith('.png') || valLower.endsWith('.jpeg')) {
                 foundUrl = value;
               }
-            } else if (valLower.endsWith('.pdf') || valLower.endsWith('.jpg') || valLower.endsWith('.png') || valLower.endsWith('.jpeg')) {
-              foundUrl = value;
             }
-          }
-        } else if (value is Map) {
-          searchMap(value);
-        } else if (value is List) {
-          for (var item in value) {
-            if (item is Map) searchMap(item);
-            else if (item is String) {
-              final itemLower = item.toLowerCase();
-              if (!itemLower.contains('profile') && !itemLower.contains('zoom') && !itemLower.contains('avatar')) {
-                if (itemLower.startsWith('http') || itemLower.contains('uploads/') || itemLower.contains('/api/')) {
-                  if (itemLower.contains('prescription') || itemLower.contains('report') || itemLower.endsWith('.pdf') || itemLower.endsWith('.png') || itemLower.endsWith('.jpg') || itemLower.endsWith('.jpeg')) {
+          } else if (value is Map) {
+            searchMap(value);
+          } else if (value is List) {
+            for (var item in value) {
+              if (item is Map) searchMap(item);
+              else if (item is String) {
+                final itemLower = item.toLowerCase();
+                if (!itemLower.contains('profile') && !itemLower.contains('zoom') && !itemLower.contains('avatar')) {
+                  if (itemLower.startsWith('http') || itemLower.contains('uploads/') || itemLower.contains('/api/')) {
+                    if (itemLower.contains('prescription') || itemLower.contains('report') || itemLower.endsWith('.pdf') || itemLower.endsWith('.png') || itemLower.endsWith('.jpg') || itemLower.endsWith('.jpeg')) {
+                      foundUrl = item;
+                    }
+                  } else if (itemLower.endsWith('.pdf') || itemLower.endsWith('.jpg') || itemLower.endsWith('.png') || itemLower.endsWith('.jpeg')) {
                     foundUrl = item;
                   }
-                } else if (itemLower.endsWith('.pdf') || itemLower.endsWith('.jpg') || itemLower.endsWith('.png') || itemLower.endsWith('.jpeg')) {
-                  foundUrl = item;
                 }
               }
             }
           }
-        }
-      });
+        });
+      }
+      searchMap(data);
     }
-    searchMap(data);
     
     if (foundUrl != null && !foundUrl!.startsWith('http')) {
       if (!foundUrl!.startsWith('/')) foundUrl = '/$foundUrl';
@@ -1411,7 +1414,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
           onPressed: () {
             if (Navigator.canPop(context)) {
-              Navigator.popUntil(context, (route) => route.isFirst);
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
             } else {
               Navigator.pushReplacementNamed(context, '/home');
             }
@@ -1433,7 +1436,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
           )
         ],
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -1737,7 +1740,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 
@@ -1800,8 +1803,10 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                 height: 48,
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    if (await canLaunchUrl(Uri.parse(url))) {
+                    try {
                       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                    } catch (e) {
+                      debugPrint('Could not launch $url');
                     }
                   },
                   icon: const Icon(Icons.download, color: Colors.white),
@@ -2059,7 +2064,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
   }
 
   void _rescheduleAppointment() {
-    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
   }
 
   void _contactSupport() {

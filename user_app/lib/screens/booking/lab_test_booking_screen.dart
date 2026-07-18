@@ -158,13 +158,16 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
           const Color(0xFFF8F9FA), // Very light grey/white background
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: false, child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: SingleChildScrollView(
         child: Column(
           children: [
             // 100% visible banner
@@ -735,10 +738,10 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
                 ),
               ),
             ),
-            SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 40),
+            const SizedBox(height: 40),
           ],
         ),
-      ),
+      ))),
     );
   }
 

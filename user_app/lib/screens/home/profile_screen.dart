@@ -31,7 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      body: user == null
+      body: SafeArea(top: false, bottom: true, child: user == null
           ? const Center(child: Text('No user data'))
           : SingleChildScrollView(
               child: Column(
@@ -218,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                 ],
               ),
-            ),
+            )),
     );
   }
 

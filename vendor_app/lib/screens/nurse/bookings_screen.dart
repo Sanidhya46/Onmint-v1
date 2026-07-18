@@ -157,6 +157,7 @@ class _BookingsScreenState extends State<BookingsScreen>
         foregroundColor: const Color(0xFF152238),
         centerTitle: true,
         elevation: 0,
+        automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),

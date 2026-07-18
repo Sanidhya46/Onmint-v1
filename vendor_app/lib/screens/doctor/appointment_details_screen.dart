@@ -1,3 +1,4 @@
+import '../doctor/doctor_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'dart:typed_data';
@@ -125,7 +126,16 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     final showActionButtons = _appointment != null &&
         (_appointment!['status'] == 'requested' || _appointment!['status'] == 'pending');
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        } else {
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const DoctorMainScreen()), (route) => false);
+        }
+        return false;
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
@@ -136,6 +146,16 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const DoctorMainScreen()), (route) => false);
+            }
+          },
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF0052CC)))
@@ -177,6 +197,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
               ),
             )
           : null,
+    ),
     );
   }
 

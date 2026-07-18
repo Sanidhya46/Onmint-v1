@@ -77,7 +77,8 @@ class LocationUpdateService {
 
   /// Send current location to backend via Socket.IO
   Future<void> _sendCurrentLocation() async {
-    if (_currentBookingId == null) return;
+    final bookingId = _currentBookingId;
+    if (bookingId == null) return;
 
     try {
       final position = await Geolocator.getCurrentPosition(
@@ -85,7 +86,7 @@ class LocationUpdateService {
       );
 
       _socketService.updateLocation(
-        bookingId: _currentBookingId!,
+        bookingId: bookingId,
         latitude: position.latitude,
         longitude: position.longitude,
       );

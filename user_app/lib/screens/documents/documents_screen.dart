@@ -118,7 +118,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
           ],
         ),
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
               controller: _tabController,
@@ -128,7 +128,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
                 _buildDocumentList('medical_report'),
                 _buildDocumentList('lab_report'),
               ],
-            ),
+            )),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final result = await Navigator.push(

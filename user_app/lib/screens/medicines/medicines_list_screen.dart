@@ -240,7 +240,7 @@ class _MedicinesListScreenState extends State<MedicinesListScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           // Search Bar
           Padding(
@@ -304,15 +304,9 @@ class _MedicinesListScreenState extends State<MedicinesListScreen> {
                       ),
           ),
           
-          // Sticky Bottom Cart Bar
-          const Positioned(
-            bottom: 12,
-            left: 0,
-            right: 0,
-            child: CartFloatingBar(),
-          ),
+
         ],
-      ),
+      )),
     );
   }
 

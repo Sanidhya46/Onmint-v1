@@ -70,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      body: LayoutBuilder(
+      body: SafeArea(top: false, bottom: true, child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
             child: ConstrainedBox(
@@ -345,7 +345,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         },
-      ),
+      )),
     );
   }
 

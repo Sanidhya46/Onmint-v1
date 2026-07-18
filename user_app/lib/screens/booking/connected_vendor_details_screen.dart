@@ -77,15 +77,7 @@ class _ConnectedVendorDetailsScreenState
     final Uri webUrl = Uri.parse('https://wa.me/$cleanNumber');
     
     try {
-      if (await canLaunchUrl(appUrl)) {
-        await launchUrl(appUrl, mode: LaunchMode.externalApplication);
-      } else if (await canLaunchUrl(webUrl)) {
-        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch WhatsApp')),
-        );
-      }
+      await launchUrl(webUrl, mode: LaunchMode.externalApplication);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error launching WhatsApp: $e')),
@@ -252,7 +244,7 @@ class _ConnectedVendorDetailsScreenState
           ],
         ),
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -428,10 +420,10 @@ class _ConnectedVendorDetailsScreenState
                       const SizedBox(width: 10),
                       Expanded(
                         child: _buildQuickActionCard(
-                          customIconWidget: Image.network(
-                            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/150px-WhatsApp.svg.png',
-                            width: 32,
+                          customIconWidget: Image.asset(
+                            'assets/images/whatsap_icon.png',
                             height: 32,
+                            width: 32,
                             errorBuilder: (context, error, stackTrace) => const Icon(Icons.chat, color: Color(0xFF25D366), size: 32),
                           ),
                           label: 'WhatsApp',
@@ -704,7 +696,7 @@ class _ConnectedVendorDetailsScreenState
                   const SizedBox(height: 24),
                 ],
               ),
-            ),
+            )),
     );
   }
 

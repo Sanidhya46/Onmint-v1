@@ -81,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     
     return Scaffold(
       backgroundColor: Colors.white,
-      body: FadeTransition(
+      body: SafeArea(top: false, bottom: true, child: FadeTransition(
         opacity: _fadeAnimation,
         child: Stack(
           children: [
@@ -134,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }

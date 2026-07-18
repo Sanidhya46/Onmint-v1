@@ -62,7 +62,7 @@ class _MedicineDetailsScreenState extends State<MedicineDetailsScreen> {
           backgroundColor: AppColors.pharmacy,
           foregroundColor: Colors.white,
         ),
-        body: const Center(child: Text('Medicine not found')),
+        body: SafeArea(top: false, bottom: true, child: const Center(child: Text('Medicine not found'))),
       );
     }
 
@@ -144,7 +144,7 @@ class _MedicineDetailsScreenState extends State<MedicineDetailsScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -446,7 +446,7 @@ class _MedicineDetailsScreenState extends State<MedicineDetailsScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 

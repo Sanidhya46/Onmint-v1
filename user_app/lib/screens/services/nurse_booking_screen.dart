@@ -165,14 +165,18 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F8FB),
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
         extendBodyBehindAppBar: true,
-        body: SingleChildScrollView(
+        body: SafeArea(top: false, bottom: true, child: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 100),
           controller: _scrollController,
           child: Column(
             children: [
@@ -502,7 +506,7 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
             ),
           ],
         ),
-      ),
+      ))),
     );
   }
 

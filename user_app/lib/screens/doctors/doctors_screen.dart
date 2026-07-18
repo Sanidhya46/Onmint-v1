@@ -139,7 +139,7 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           // Search and Filters
           Container(
@@ -414,7 +414,7 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                       ),
           ),
         ],
-      ),
+      )),
     );
   }
 

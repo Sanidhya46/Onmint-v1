@@ -74,14 +74,14 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(top: false, bottom: true, child: Center(child: CircularProgressIndicator())),
       );
     }
 
     if (_booking == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Order Details')),
-        body: const Center(child: Text('Order not found')),
+        body: SafeArea(top: false, bottom: true, child: const Center(child: Text('Order not found'))),
       );
     }
 
@@ -135,7 +135,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
         ] : null,
       ),
       bottomNavigationBar: isPending && !hasOffers ? _buildPendingBottomBar() : null,
-      body: RefreshIndicator(
+      body: SafeArea(top: false, bottom: true, child: RefreshIndicator(
         onRefresh: _loadBooking,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -156,7 +156,7 @@ class _PharmacistOrderTrackingScreenState extends State<PharmacistOrderTrackingS
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

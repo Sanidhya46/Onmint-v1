@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import '../../config/app_colors.dart';
 import '../home/dashboards/doctor_dashboard.dart';
@@ -34,7 +35,8 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
           });
           return false;
         }
-        return true;
+        SystemNavigator.pop();
+        return false;
       },
       child: Scaffold(
       body: IndexedStack(

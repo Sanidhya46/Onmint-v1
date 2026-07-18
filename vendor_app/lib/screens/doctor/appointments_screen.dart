@@ -33,7 +33,15 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         status: _selectedStatus,
       );
       setState(() {
-        _appointments = response['data'] ?? response['items'] ?? [];
+        List<dynamic> rawAppointments = response['data'] ?? response['items'] ?? [];
+        final Set<String> seenIds = {};
+        _appointments = rawAppointments.where((app) {
+          final id = app['_id']?.toString() ?? app['id']?.toString() ?? '';
+          if (id.isEmpty) return true;
+          if (seenIds.contains(id)) return false;
+          seenIds.add(id);
+          return true;
+        }).toList();
         _isLoading = false;
       });
     } catch (e) {

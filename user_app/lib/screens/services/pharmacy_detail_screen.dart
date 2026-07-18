@@ -67,7 +67,7 @@ class _PharmacyDetailScreenState extends State<PharmacyDetailScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const LoadingWidget()
           : _error != null
               ? CustomErrorWidget(
@@ -101,7 +101,7 @@ class _PharmacyDetailScreenState extends State<PharmacyDetailScreen> {
                                 ),
                         ),
                       ],
-                    ),
+                    )),
     );
   }
 

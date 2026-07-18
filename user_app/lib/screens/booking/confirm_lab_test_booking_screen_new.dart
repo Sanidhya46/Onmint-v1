@@ -111,12 +111,14 @@ class _ConfirmLabTestBookingScreenNewState
       backgroundColor: const Color(0xFFF8F9FA),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SafeArea(
+child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -197,8 +199,9 @@ class _ConfirmLabTestBookingScreenNewState
             SizedBox(height: MediaQuery.of(context).padding.bottom > 0 ? 0 : 6),
           ],
         ),
-      ),
-      body: SingleChildScrollView(
+      )
+),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -443,7 +446,7 @@ class _ConfirmLabTestBookingScreenNewState
             const SizedBox(height: 24),
           ],
         ),
-      ),
+      )),
     );
   }
 

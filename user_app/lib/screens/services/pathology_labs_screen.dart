@@ -64,7 +64,7 @@ class _PathologyLabsScreenState extends State<PathologyLabsScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           // Search Bar
           Container(
@@ -115,7 +115,7 @@ class _PathologyLabsScreenState extends State<PathologyLabsScreen> {
                           ),
           ),
         ],
-      ),
+      )),
     );
   }
 

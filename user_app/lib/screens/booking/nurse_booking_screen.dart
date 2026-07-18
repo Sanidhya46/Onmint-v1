@@ -1,3 +1,4 @@
+import '../home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:provider/provider.dart';
@@ -127,9 +128,7 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Go back to nurse detail
-              Navigator.of(context).pop(); // Go back to nurses list
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -151,13 +150,13 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+
         title: const Text('Book Nurse'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(top: false, bottom: false, child: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -439,7 +438,7 @@ class _NurseBookingScreenState extends State<NurseBookingScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

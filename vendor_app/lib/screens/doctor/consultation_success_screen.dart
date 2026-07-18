@@ -54,7 +54,12 @@ class ConsultationSuccessScreen extends StatelessWidget {
     final dateStr = DateFormat('dd MMM yyyy').format(dt);
     final timeStr = DateFormat('hh:mm a').format(dt);
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
+        return false;
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -62,7 +67,7 @@ class ConsultationSuccessScreen extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+          onPressed: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false),
         ),
         title: const Text(
           'Consultation Completed',
@@ -297,10 +302,9 @@ class ConsultationSuccessScreen extends StatelessWidget {
                 height: 52,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
+                    Navigator.popUntil(
                       context,
-                      '/home',
-                      (route) => false,
+                      (route) => route.isFirst,
                     );
                   },
                   icon: const Icon(Icons.home_outlined, color: Colors.white),
@@ -369,6 +373,7 @@ class ConsultationSuccessScreen extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

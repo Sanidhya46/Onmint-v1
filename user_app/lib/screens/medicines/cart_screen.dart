@@ -39,7 +39,7 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer<CartService>(
+      body: SafeArea(top: false, bottom: true, child: Consumer<CartService>(
         builder: (context, cart, child) {
           if (cart.isLoading) {
             return const Center(child: CircularProgressIndicator(color: Color(0xFF0F2147)));
@@ -67,7 +67,7 @@ class CartScreen extends StatelessWidget {
             ],
           );
         },
-      ),
+      )),
     );
   }
 

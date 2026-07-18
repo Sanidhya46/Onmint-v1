@@ -574,11 +574,13 @@ class _ActiveBookingScreenState extends State<ActiveBookingScreen> {
                           child: ElevatedButton.icon(
                             onPressed: () async {
                               final url = "https://wa.me/${displayPhone.replaceAll(RegExp(r'[^\d]'), '')}";
-                              if (await canLaunchUrl(Uri.parse(url))) {
-                                await launchUrl(Uri.parse(url));
+                              try {
+                                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                              } catch (e) {
+                                debugPrint("Could not launch WhatsApp: $e");
                               }
                             },
-                            icon: const Icon(Icons.chat_bubble, color: Colors.white, size: 18),
+                            icon: Image.asset('assets/images/whatsap_icon.png', width: 24, height: 24),
                             label: const Text(
                               'WhatsApp',
                               style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),

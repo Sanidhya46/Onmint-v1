@@ -70,8 +70,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           backgroundColor: const Color(0xFF4CAF50),
           foregroundColor: Colors.white,
         ),
-        body: const Center(
-            child: CircularProgressIndicator(color: Color(0xFF4CAF50))),
+        body: SafeArea(top: false, bottom: true, child: const Center(
+            child: CircularProgressIndicator(color: Color(0xFF4CAF50)))),
       );
     }
 
@@ -82,7 +82,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           backgroundColor: const Color(0xFF4CAF50),
           foregroundColor: Colors.white,
         ),
-        body: const Center(child: Text('Booking not found')),
+        body: SafeArea(top: false, bottom: true, child: const Center(child: Text('Booking not found'))),
       );
     }
 
@@ -104,7 +104,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         backgroundColor: const Color(0xFF4CAF50),
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -306,7 +306,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

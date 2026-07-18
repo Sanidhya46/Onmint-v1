@@ -121,7 +121,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: _isJoining
+      body: SafeArea(top: false, bottom: true, child: _isJoining
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -148,7 +148,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                 ],
               ),
             )
-          : const SizedBox.shrink(), // Jitsi will take over the screen
+          : const SizedBox.shrink()), // Jitsi will take over the screen
     );
   }
 

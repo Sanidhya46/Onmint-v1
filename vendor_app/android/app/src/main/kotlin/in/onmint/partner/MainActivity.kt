@@ -1,4 +1,4 @@
-package com.example.vendor_app
+package `in`.onmint.partner
 
 import io.flutter.embedding.android.FlutterActivity
 

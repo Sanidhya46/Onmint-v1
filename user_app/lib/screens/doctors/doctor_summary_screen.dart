@@ -114,7 +114,7 @@ class _DoctorSummaryScreenState extends State<DoctorSummaryScreen> {
         backgroundColor: const Color(0xFF283593),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -387,8 +387,9 @@ class _DoctorSummaryScreenState extends State<DoctorSummaryScreen> {
             const SizedBox(height: 24), // padding for bottom bar
           ],
         ),
-      ),
-      bottomNavigationBar: Container(
+      )),
+      bottomNavigationBar: SafeArea(
+child: Container(
         color: Colors.white,
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -449,7 +450,8 @@ class _DoctorSummaryScreenState extends State<DoctorSummaryScreen> {
             )
           ],
         ),
-      ),
+      )
+),
     );
   }
 

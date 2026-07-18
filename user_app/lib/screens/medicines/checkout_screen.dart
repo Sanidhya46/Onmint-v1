@@ -227,7 +227,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ],
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF0F2147)))
           : Column(
               children: [
@@ -251,7 +251,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 _buildStickyBottomBar(context, cart),
               ],
-            ),
+            )),
     );
   }
 

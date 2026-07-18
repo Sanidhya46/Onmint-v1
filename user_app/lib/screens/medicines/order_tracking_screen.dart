@@ -90,21 +90,21 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(elevation: 0, backgroundColor: Colors.white),
-        body: const Center(child: CircularProgressIndicator(color: Color(0xFF0F2147))),
+        body: SafeArea(top: false, bottom: true, child: const Center(child: CircularProgressIndicator(color: Color(0xFF0F2147)))),
       );
     }
     
     if (_error != null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Error')),
-        body: Center(child: Text('Error: $_error')),
+        body: SafeArea(top: false, bottom: true, child: Center(child: Text('Error: $_error'))),
       );
     }
 
     if (_order == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Order Not Found')),
-        body: const Center(child: Text('Order not found')),
+        body: SafeArea(top: false, bottom: true, child: const Center(child: Text('Order not found'))),
       );
     }
 
@@ -120,7 +120,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: RefreshIndicator(
+      body: SafeArea(top: false, bottom: true, child: RefreshIndicator(
         onRefresh: _loadOrder,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -140,7 +140,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

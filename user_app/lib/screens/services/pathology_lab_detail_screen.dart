@@ -87,7 +87,7 @@ class _PathologyLabDetailScreenState extends State<PathologyLabDetailScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const LoadingWidget()
           : _error != null
               ? CustomErrorWidget(
@@ -121,7 +121,7 @@ class _PathologyLabDetailScreenState extends State<PathologyLabDetailScreen> {
                                 ),
                         ),
                       ],
-                    ),
+                    )),
     );
   }
 

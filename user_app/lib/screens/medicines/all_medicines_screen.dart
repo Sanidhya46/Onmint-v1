@@ -157,7 +157,7 @@ class _AllMedicinesScreenState extends State<AllMedicinesScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: NestedScrollView(
+      body: SafeArea(top: false, bottom: true, child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
@@ -346,7 +346,7 @@ class _AllMedicinesScreenState extends State<AllMedicinesScreen>
                   _buildMedicineGrid(_filteredMedicines),
                 ],
               ),
-      ),
+      )),
     );
   }
 

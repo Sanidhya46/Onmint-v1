@@ -16,7 +16,7 @@ class DoctorDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.doctor,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -249,8 +249,9 @@ class DoctorDetailScreen extends StatelessWidget {
             const SizedBox(height: 100), // Space for button
           ],
         ),
-      ),
-      bottomNavigationBar: Container(
+      )),
+      bottomNavigationBar: SafeArea(
+child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -287,7 +288,8 @@ class DoctorDetailScreen extends StatelessWidget {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
-      ),
+      )
+),
     );
   }
 

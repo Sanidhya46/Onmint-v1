@@ -100,13 +100,13 @@ class _BloodbankScreenState extends State<BloodbankScreen> {
           backgroundColor: const Color(0xFFFF416C),
           foregroundColor: Colors.white,
         ),
-        body: Column(
+        body: SafeArea(top: false, bottom: true, child: Column(
           children: [
             _buildEmergencySection(),
             _buildBloodGroupsSection(),
             Expanded(child: _buildBloodBanksList()),
           ],
-        ),
+        )),
       ),
     );
   }

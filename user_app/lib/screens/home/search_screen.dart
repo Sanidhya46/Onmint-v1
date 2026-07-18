@@ -56,7 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           // Search Bar
           Container(
@@ -124,7 +124,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
           ),
         ],
-      ),
+      )),
     );
   }
 

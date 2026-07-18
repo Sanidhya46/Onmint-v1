@@ -13,7 +13,7 @@ class NotFoundScreen extends StatelessWidget {
         foregroundColor: Colors.black87,
         elevation: 0,
       ),
-      body: Center(
+      body: SafeArea(top: false, bottom: true, child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -45,7 +45,7 @@ class NotFoundScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }

@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:user_app/screens/home/home_screen.dart';
 import 'package:api_client/api_client.dart' as api_client;
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:dio/dio.dart';
 import 'dart:async';
 
 class DownloadPrescriptionScreen extends StatefulWidget {
@@ -173,7 +176,7 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(top: false, bottom: true, child: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -200,8 +203,8 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 100),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -392,12 +395,27 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
                 child: ElevatedButton.icon(
                   onPressed: () async {
                     if (_prescriptionUrl != null && _prescriptionUrl.toString().startsWith('http')) {
-                      final uri = Uri.parse(_prescriptionUrl.toString());
-                      if (await url_launcher.canLaunchUrl(uri)) {
-                        await url_launcher.launchUrl(uri, mode: url_launcher.LaunchMode.externalApplication);
-                      } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Downloading prescription...')));
+                      }
+                      try {
+                        final dio = Dio();
+                        final dir = await getApplicationDocumentsDirectory();
+                        final urlString = _prescriptionUrl.toString();
+                        String ext = urlString.split('.').last.split('?').first;
+                        if (ext.length > 4) ext = 'pdf'; // fallback
+                        final fileName = 'prescription_${widget.bookingId}.$ext';
+                        final savePath = '${dir.path}/$fileName';
+                        
+                        await dio.download(urlString, savePath);
+                        
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not open prescription link.')));
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Downloaded! Opening file...')));
+                        }
+                        await OpenFile.open(savePath);
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not download prescription.')));
                         }
                       }
                     } else {
@@ -459,7 +477,7 @@ class _DownloadPrescriptionScreenState extends State<DownloadPrescriptionScreen>
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

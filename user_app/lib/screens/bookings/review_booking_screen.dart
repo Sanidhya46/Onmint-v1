@@ -65,7 +65,7 @@ class _ReviewBookingScreenState extends State<ReviewBookingScreen> {
       appBar: AppBar(
         title: const Text('Review Appointment'),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +218,7 @@ class _ReviewBookingScreenState extends State<ReviewBookingScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

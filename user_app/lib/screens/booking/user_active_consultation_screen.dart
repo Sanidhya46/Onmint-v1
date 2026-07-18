@@ -147,7 +147,7 @@ class _UserActiveConsultationScreenState extends State<UserActiveConsultationScr
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(top: false, bottom: true, child: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -162,7 +162,7 @@ class _UserActiveConsultationScreenState extends State<UserActiveConsultationScr
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: const Center(child: Text('Consultation not found')),
+        body: SafeArea(top: false, bottom: true, child: const Center(child: Text('Consultation not found'))),
       );
     }
 
@@ -216,8 +216,8 @@ class _UserActiveConsultationScreenState extends State<UserActiveConsultationScr
           child: Container(color: Colors.grey.shade100, height: 1.0),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0, bottom: 100),
         child: Column(
           children: [
             Row(
@@ -379,7 +379,7 @@ class _UserActiveConsultationScreenState extends State<UserActiveConsultationScr
             const SizedBox(height: 24),
           ],
         ),
-      ),
+      )),
     );
   }
 

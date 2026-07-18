@@ -298,7 +298,7 @@ class _AmbulanceTrackingScreenState extends State<AmbulanceTrackingScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -344,7 +344,7 @@ class _AmbulanceTrackingScreenState extends State<AmbulanceTrackingScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 

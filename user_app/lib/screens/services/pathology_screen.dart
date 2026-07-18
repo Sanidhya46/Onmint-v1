@@ -109,14 +109,14 @@ class _PathologyScreenState extends State<PathologyScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           _buildQuickBookSection(),
           _buildCityFilterSection(),
           _buildCategoriesSection(),
           Expanded(child: _buildLabsList()),
         ],
-      ),
+      )),
     );
   }
 

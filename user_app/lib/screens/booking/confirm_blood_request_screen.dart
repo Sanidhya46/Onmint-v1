@@ -93,7 +93,8 @@ class _ConfirmBloodRequestScreenState extends State<ConfirmBloodRequestScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SafeArea(
+child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -171,8 +172,9 @@ class _ConfirmBloodRequestScreenState extends State<ConfirmBloodRequestScreen> {
             ],
           ),
         ),
-      ),
-      body: SingleChildScrollView(
+      )
+),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -363,7 +365,7 @@ class _ConfirmBloodRequestScreenState extends State<ConfirmBloodRequestScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                                  child: Icon(Icons.chat, color: Colors.green, size: 20),
+                                  child: Image.asset('assets/images/whatsap_icon.png', width: 24, height: 24),
                                 ),
                                 const SizedBox(height: 4),
                                 Text('WhatsApp', style: TextStyle(fontSize: 10, color: Colors.grey[800], fontWeight: FontWeight.bold)),
@@ -405,7 +407,7 @@ class _ConfirmBloodRequestScreenState extends State<ConfirmBloodRequestScreen> {
             const SizedBox(height: 30),
           ],
         ),
-      ),
+      )),
     ));
   }
 

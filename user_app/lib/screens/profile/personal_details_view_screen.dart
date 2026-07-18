@@ -14,7 +14,7 @@ class PersonalDetailsViewScreen extends StatelessWidget {
 
     if (user == null) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(top: false, bottom: true, child: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -54,7 +54,7 @@ class PersonalDetailsViewScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Container(
           decoration: BoxDecoration(
@@ -121,7 +121,7 @@ class PersonalDetailsViewScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 

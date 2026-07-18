@@ -22,7 +22,7 @@ class HelpSupportScreen extends StatelessWidget {
         foregroundColor: Colors.black87,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,7 +69,7 @@ class HelpSupportScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

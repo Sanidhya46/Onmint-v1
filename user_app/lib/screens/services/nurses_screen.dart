@@ -128,7 +128,7 @@ class _NursesScreenState extends State<NursesScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           // Search and Filters
           Container(
@@ -362,7 +362,7 @@ class _NursesScreenState extends State<NursesScreen> {
                       ),
           ),
         ],
-      ),
+      )),
     );
   }
 

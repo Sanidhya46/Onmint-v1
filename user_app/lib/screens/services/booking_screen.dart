@@ -160,7 +160,7 @@ class _BookingScreenState extends State<BookingScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
@@ -402,7 +402,7 @@ class _BookingScreenState extends State<BookingScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

@@ -111,7 +111,8 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF4F8FB),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SafeArea(
+child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -183,8 +184,9 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
             SizedBox(height: MediaQuery.of(context).padding.bottom > 0 ? 0 : 4),
           ],
         ),
-      ),
-      body: SingleChildScrollView(
+      )
+),
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         child: Column(
           children: [
             // Top Section
@@ -419,7 +421,7 @@ class _ConfirmNurseBookingScreenState extends State<ConfirmNurseBookingScreen> {
             ),
           ],
         ),
-      ),
+      )),
     ));
   }
 

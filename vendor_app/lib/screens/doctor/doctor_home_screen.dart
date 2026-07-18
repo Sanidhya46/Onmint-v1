@@ -131,7 +131,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const BookingsScreen(),
+                            builder: (context) => const BookingsScreen(isTab: false),
                           ),
                         ).then((_) => _loadDashboard());
                       },

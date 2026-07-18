@@ -627,11 +627,13 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
                           child: ElevatedButton.icon(
                             onPressed: () async {
                               final url = "https://wa.me/${phone.replaceAll(RegExp(r'[^\d]'), '')}";
-                              if (await canLaunchUrl(Uri.parse(url))) {
-                                await launchUrl(Uri.parse(url));
+                              try {
+                                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                              } catch (e) {
+                                debugPrint("Could not launch WhatsApp: $e");
                               }
                             },
-                            icon: const Icon(Icons.chat_bubble, color: Colors.white, size: 18),
+                            icon: Image.asset('assets/images/whatsap_icon.png', width: 24, height: 24),
                             label: const Text(
                               'WhatsApp',
                               style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
@@ -1034,16 +1036,16 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildActionButton(Icons.phone, 'Call Patient'),
-          _buildActionButton(Icons.chat_bubble, 'Chat'),
-          _buildActionButton(Icons.map, 'Open Map'),
-          _buildActionButton(Icons.assignment, 'Test Details'),
+          _buildActionButton(const Icon(Icons.phone, color: Color(0xFF0D47A1), size: 20), 'Call Patient'),
+          _buildActionButton(Image.asset('assets/images/whatsap_icon.png', width: 24, height: 24), 'WhatsApp'),
+          _buildActionButton(const Icon(Icons.map, color: Color(0xFF0D47A1), size: 20), 'Open Map'),
+          _buildActionButton(const Icon(Icons.assignment, color: Color(0xFF0D47A1), size: 20), 'Test Details'),
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label) {
+  Widget _buildActionButton(Widget iconWidget, String label) {
     return Column(
       children: [
         Container(
@@ -1053,7 +1055,7 @@ class _LabTestBookingScreenState extends State<LabTestBookingScreen> {
             color: const Color(0xFFE3F2FD), // Light blue
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: const Color(0xFF0D47A1), size: 20),
+          child: Center(child: iconWidget),
         ),
         const SizedBox(height: 8),
         Text(

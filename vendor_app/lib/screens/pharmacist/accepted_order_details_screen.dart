@@ -535,16 +535,11 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
       return;
     }
     final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
-    final Uri url = Uri.parse('whatsapp://send?phone=$cleanPhone');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      final Uri webUrl = Uri.parse('https://wa.me/$cleanPhone');
-      if (await canLaunchUrl(webUrl)) {
-        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
-      } else {
-        ToastUtils.showError('Could not launch WhatsApp');
-      }
+    final Uri webUrl = Uri.parse('https://wa.me/$cleanPhone');
+    try {
+      await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      ToastUtils.showError('Could not launch WhatsApp');
     }
   }
 
@@ -585,11 +580,11 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(child: _buildActionButton(Icons.call, 'Call Customer', () => _callPatient(_orderData!['patientPhone'] ?? _orderData!['patient']?['phone']))),
+                Expanded(child: _buildActionButton(const Icon(Icons.call, color: Color(0xFF0033CC), size: 24), 'Call Customer', () => _callPatient(_orderData!['patientPhone'] ?? _orderData!['patient']?['phone']))),
                 Container(width: 1, height: 30, color: Colors.grey[300]),
-                Expanded(child: _buildActionButton(Icons.chat, 'Chat', () => _chatPatient(_orderData!['patientPhone'] ?? _orderData!['patient']?['phone']))),
+                Expanded(child: _buildActionButton(Image.asset('assets/images/whatsap_icon.png', width: 24, height: 24), 'WhatsApp', () => _chatPatient(_orderData!['patientPhone'] ?? _orderData!['patient']?['phone']))),
                 Container(width: 1, height: 30, color: Colors.grey[300]),
-                Expanded(child: _buildActionButton(Icons.map, 'Open Map', () {})),
+                Expanded(child: _buildActionButton(const Icon(Icons.map, color: Color(0xFF0033CC), size: 24), 'Open Map', () {})),
               ],
             ),
             if (currentIndex < statuses.length - 1) ...[
@@ -624,13 +619,13 @@ class _AcceptedOrderDetailsScreenState extends State<AcceptedOrderDetailsScreen>
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildActionButton(Widget icon, String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: const Color(0xFF0033CC), size: 24),
+          icon,
           const SizedBox(height: 4),
           Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF001F4D))),
         ],

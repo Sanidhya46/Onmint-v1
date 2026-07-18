@@ -97,7 +97,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: SafeArea(top: false, bottom: true, child: Column(
         children: [
           // Filter dropdown
           Container(
@@ -179,7 +179,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                       ),
           ),
         ],
-      ),
+      )),
     );
   }
 

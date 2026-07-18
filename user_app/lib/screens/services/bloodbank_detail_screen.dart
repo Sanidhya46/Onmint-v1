@@ -83,7 +83,7 @@ class _BloodBankDetailScreenState extends State<BloodBankDetailScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: _isLoading
+      body: SafeArea(top: false, bottom: true, child: _isLoading
           ? const LoadingWidget()
           : _error != null
               ? CustomErrorWidget(
@@ -107,7 +107,7 @@ class _BloodBankDetailScreenState extends State<BloodBankDetailScreen> {
                           const SizedBox(height: 80),
                         ],
                       ),
-                    ),
+                    )),
       bottomNavigationBar: _bloodBank != null ? _buildRequestButton() : null,
     );
   }

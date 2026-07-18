@@ -7,6 +7,8 @@ import 'package:user_app/screens/home/home_screen.dart';
 import 'package:user_app/screens/booking/user_active_consultation_screen.dart' as user_active;
 import 'package:user_app/screens/booking/user_consultation_ended_screen.dart' as user_ended;
 import 'package:user_app/screens/booking/user_video_call_screen.dart';
+import 'package:user_app/screens/booking/book_appointment_screen.dart';
+import 'package:user_app/screens/profile/help_support_screen.dart';
 
 class DoctorRequestSentScreen extends StatefulWidget {
   final String bookingId;
@@ -116,14 +118,10 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await _apiClient.patch('/realtime-bookings/${widget.bookingId}/status', data: {'status': 'cancelled'});
+      await _apiClient.patient.cancelRealtimeBooking(widget.bookingId, reason: 'Cancelled by user');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Booking Cancelled')));
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false,
-        );
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
       }
     } catch (e) {
       if (mounted) {
@@ -134,20 +132,18 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
   }
 
   Future<void> _handleReschedule() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('To reschedule, please cancel and book a new appointment.')),
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => BookAppointmentScreen(doctor: widget.bookingData['provider'] ?? {})),
+      (route) => route.isFirst,
     );
   }
 
   Future<void> _handleContactSupport() async {
-    final uri = Uri.parse('tel:+918000000000');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not launch dialer')));
-      }
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HelpSupportScreen()),
+    );
   }
 
   Widget _buildAcceptedUI(String pName, String phone, String age, String gender, String category, DateTime dt, String formattedDate) {
@@ -568,7 +564,12 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
     final status = _booking['status'] ?? 'pending';
     final isAccepted = (status == 'accepted' || status == 'confirmed') && _booking['scheduledTime'] != null;
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
+        return false;
+      },
+      child: Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -577,11 +578,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF152238)),
           onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/home',
-              (route) => false,
-            );
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
           },
         ),
         title: const Text(
@@ -604,7 +601,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
           child: Container(color: Colors.grey.shade100, height: 1.0),
         ),
       ),
-      body: Stack(
+      body: SafeArea(top: false, bottom: true, child: Stack(
         children: [
           SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
@@ -615,19 +612,6 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
                   _buildAcceptedUI(pName, phone, age, gender, category, dt, formattedDate)
                 else
                   _buildPendingUI(pName, phone, age, gender, category, dt, formattedDate),
-                
-                const SizedBox(height: 24),
-                
-                // Bottom Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildActionButton('Reschedule', Icons.calendar_month, Colors.blue, _handleReschedule),
-                    _buildActionButton('Cancel\nAppointment', Icons.close, Colors.red, _handleCancel, isRed: true),
-                    _buildActionButton('Contact\nSupport', Icons.headset_mic_outlined, Colors.blue, _handleContactSupport),
-                  ],
-                ),
-                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -637,7 +621,8 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
               child: const Center(child: CircularProgressIndicator()),
             ),
         ],
-      ),
+      )),
+    ),
     );
   }
 

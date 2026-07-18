@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
-import 'package:user_app/screens/booking/order_detail_file.dart';
+import 'package:user_app/screens/booking/doctor_request_sent_screen.dart';
 
 class ConfirmDoctorBookingScreenNew extends StatefulWidget {
   final String categoryTitle;
@@ -56,7 +56,7 @@ class _ConfirmDoctorBookingScreenNewState
         );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => OrderDetailFile(
+            builder: (context) => DoctorRequestSentScreen(
               bookingId: newBookingId,
               bookingData: resp,
             ),
@@ -85,7 +85,8 @@ class _ConfirmDoctorBookingScreenNewState
         scrolledUnderElevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SafeArea(
+child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -166,8 +167,9 @@ class _ConfirmDoctorBookingScreenNewState
             SizedBox(height: MediaQuery.of(context).padding.bottom > 0 ? 0 : 6),
           ],
         ),
-      ),
-      body: SingleChildScrollView(
+      )
+),
+      body: SafeArea(top: false, bottom: false, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -357,7 +359,7 @@ class _ConfirmDoctorBookingScreenNewState
             const SizedBox(height: 24),
           ],
         ),
-      ),
+      )),
     );
   }
 

@@ -370,14 +370,14 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Booking Details')),
-        body: const Center(child: CircularProgressIndicator()),
+        body: SafeArea(top: false, bottom: true, child: const Center(child: CircularProgressIndicator())),
       );
     }
 
     if (_booking == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Booking Details')),
-        body: const Center(child: Text('Booking not found')),
+        body: SafeArea(top: false, bottom: true, child: const Center(child: Text('Booking not found'))),
       );
     }
 
@@ -1528,7 +1528,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -1607,7 +1607,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             ],
           ),
         ),
-      ),
+      )),
       bottomNavigationBar: status == 'accepted' ? _buildDoctorBottomActions() : null,
     );
   }

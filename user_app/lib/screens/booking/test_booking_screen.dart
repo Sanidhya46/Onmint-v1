@@ -1,3 +1,4 @@
+import '../home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_client/api_client.dart';
@@ -123,9 +124,7 @@ class _TestBookingScreenState extends State<TestBookingScreen> {
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Go back to lab detail
-              Navigator.of(context).pop(); // Go back to labs list
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (route) => false);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -149,7 +148,7 @@ class _TestBookingScreenState extends State<TestBookingScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, bottom: true, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: 100),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -370,7 +369,7 @@ class _TestBookingScreenState extends State<TestBookingScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

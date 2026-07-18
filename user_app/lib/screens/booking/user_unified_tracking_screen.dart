@@ -65,8 +65,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
     try {
       await launchUrl(waUri, mode: LaunchMode.externalApplication);
     } catch (e) {
-      final Uri smsUri = Uri(scheme: 'sms', path: phoneNumber);
-      await launchUrl(smsUri);
+      debugPrint("Could not launch WhatsApp: $e");
     }
   }
 
@@ -178,9 +177,9 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
-        body: const Center(
+        body: SafeArea(top: false, bottom: true, child: const Center(
             child: Text('Booking not found',
-                style: TextStyle(color: Colors.black))),
+                style: TextStyle(color: Colors.black)))),
       );
     }
 
@@ -212,7 +211,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
+      body: SafeArea(top: false, bottom: true, child: RefreshIndicator(
         onRefresh: _loadBooking,
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -258,7 +257,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
             );
           },
         ),
-      ),
+      )),
     );
   }
 
@@ -494,7 +493,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildCircleAction(
-                    Icons.call,
+                    const Icon(Icons.phone, color: Color(0xFF0047CB), size: 20),
                     'Call',
                     () {
                       if (providerPhone != null) {
@@ -506,7 +505,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
                   ),
                   const SizedBox(width: 8),
                   _buildCircleAction(
-                    Icons.chat,
+                    Image.asset('assets/images/whatsap_icon.png', width: 24, height: 24),
                     'WhatsApp',
                     () {
                       if (providerPhone != null) {
@@ -525,7 +524,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
     );
   }
 
-  Widget _buildCircleAction(IconData icon, String label, VoidCallback onTap,
+  Widget _buildCircleAction(Widget iconWidget, String label, VoidCallback onTap,
       {Color? iconColor, Color? bgColor}) {
     return GestureDetector(
       onTap: onTap,
@@ -545,7 +544,7 @@ class _UserUnifiedTrackingScreenState extends State<UserUnifiedTrackingScreen> {
                     offset: const Offset(0, 2),
                   )
                 ]),
-            child: Icon(icon, color: iconColor ?? const Color(0xFF0047CB), size: 20),
+            child: Center(child: iconWidget),
           ),
           const SizedBox(height: 4),
           Text(
