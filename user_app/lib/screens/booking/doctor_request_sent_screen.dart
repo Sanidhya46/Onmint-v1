@@ -156,7 +156,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
     String timeStr = _booking['scheduledTime'] ?? DateFormat('hh:mm a').format(dt);
     if (_booking['scheduledTime'] != null && _booking['scheduledTime'].toString().contains('T')) {
       try {
-        final st = DateTime.parse(_booking['scheduledTime']).toLocal().subtract(const Duration(hours: 5, minutes: 30));
+        final st = DateTime.parse(_booking['scheduledTime']).toLocal();
         timeStr = DateFormat('dd MMM yyyy, hh:mm a').format(st);
       } catch (_) {}
     }
@@ -558,7 +558,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
     
     final dateStr = _booking['createdAt'] ?? DateTime.now().toIso8601String();
     DateTime dt = DateTime.now();
-    try { dt = DateTime.parse(dateStr).toLocal().subtract(const Duration(hours: 5, minutes: 30)); } catch (_) {}
+    try { dt = DateTime.parse(dateStr).toLocal(); } catch (_) {}
     final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(dt);
 
     final status = _booking['status'] ?? 'pending';

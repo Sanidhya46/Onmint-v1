@@ -17,7 +17,7 @@ class ApiConfig {
   // Example: 'https://api.yourdomain.com/api/v1'
   
   // Change to true ONLY if you have separate dev & production environments
-  static const bool _isProduction = true; // MAKE TRUE WHILE HOSTING ..
+  static const bool _isProduction = true; // Set to false for local dev backend (localhost:5000)
   
   // ════════════════════════════════════════════════════════════════════════════
   // ADVANCED: Only change this if you have separate production server

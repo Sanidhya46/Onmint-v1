@@ -11,6 +11,7 @@ import '../../config/app_config.dart';
 import 'fill_price_labtest_screen.dart';
 import '../booking/waiting_for_patient_screen.dart';
 import '../home/widgets/active_booking_floating_widget.dart';
+import '../notifications/notifications_screen.dart';
 import 'dart:async';
 
 class PathologyHomeScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
   List<Map<String, dynamic>> _activeBookings = [];
   bool _isLoading = true;
   bool _showAllRequests = false;
+  bool _hasUnreadNotifications = false;
   static bool _mockDataHandled = false;
   Timer? _pollingTimer;
 
@@ -39,6 +41,20 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
     });
   }
 
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await _apiClient.get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
     _pollingTimer?.cancel();
@@ -46,6 +62,7 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
   }
 
   Future<void> _loadDashboard() async {
+    _checkUnreadNotifications();
     if (_dashboardData == null) {
       setState(() => _isLoading = true);
     }
@@ -195,10 +212,9 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                            // Circular profile image
                               Container(
-                                width: 80,
-                                height: 80,
+                                width: 70,
+                                height: 70,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white,
@@ -209,17 +225,14 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                                       ? DecorationImage(
                                           image: NetworkImage(user!.profilePicture!),
                                           fit: BoxFit.cover,
-                                          onError: (exception, stackTrace) {
-                                            // Handle invalid image URL
-                                          },
                                         )
                                       : null,
                                 ),
                                 child: (user?.profilePicture == null || user!.profilePicture!.isEmpty)
-                                    ? const Icon(Icons.person, size: 44, color: Color(0xFF0D47A1))
+                                    ? const Icon(Icons.person, size: 40, color: Color(0xFF0D47A1))
                                     : null,
                               ),
-                              const SizedBox(width: 18),
+                              const SizedBox(width: 14),
                               Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -229,21 +242,55 @@ class _PathologyHomeScreenState extends State<PathologyHomeScreen> {
                                       user?.fullName ?? 'Shubham Singh',
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 22,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 0.3,
                                       ),
                                     ),
-                                    const SizedBox(height: 5),
+                                    const SizedBox(height: 4),
                                     const Text(
                                       '( Lab Technician )',
                                       style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
+                                        color: Colors.white70,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ],
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const VendorNotificationsScreen(),
+                                    ),
+                                  );
+                                  _checkUnreadNotifications();
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
+                                      if (_hasUnreadNotifications)
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
+                                          child: Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                              color: Colors.green,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(color: Colors.white, width: 1.5),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],

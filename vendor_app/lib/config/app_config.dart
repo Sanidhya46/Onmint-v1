@@ -7,6 +7,7 @@ class AppConfig {
   static const String appName = 'Onmint Partner';
   
   static String get apiBaseUrl {
+    if (!isDevelopmentMode) return 'https://api.onmint.in/api/v1';
     if (kIsWeb) return 'http://localhost:5000/api/v1';
     try {
       if (Platform.isAndroid) return 'http://10.0.2.2:5000/api/v1';
@@ -17,7 +18,7 @@ class AppConfig {
   // Toggle for new UI changes
   static const bool useNewFlow = true;
 
-  static const bool isDevelopmentMode = true;
+  static const bool isDevelopmentMode = false;
   
   // Vendor roles
   static const List<String> vendorRoles = [

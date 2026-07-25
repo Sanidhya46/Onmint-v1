@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:async';
+import 'package:api_client/src/config/api_config.dart';
 
 /// Socket.IO service for real-time communication
 /// Handles connection, room management, and event listeners
@@ -40,7 +41,9 @@ class SocketService {
 
     String socketUrl = baseUrl ?? 'https://api.onmint.in';
     if (baseUrl == null) {
-      if (kIsWeb) {
+      if (ApiConfig.baseUrl.contains('api.onmint.in')) {
+        socketUrl = 'https://api.onmint.in';
+      } else if (kIsWeb) {
         socketUrl = 'http://localhost:5000';
       } else {
         try {

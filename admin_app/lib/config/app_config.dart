@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 class AppConfig {
   /// Development mode - always show login screen for testing
   /// Set to false for production to enable normal authentication flow
-  static const bool developmentMode = true;  // Set to true to always show login first
+  static const bool developmentMode = false;  // Set to true to always show login first
   
   /// Force logout on app start (for testing)
-  static const bool forceLogoutOnStart = true;  // Set to true to clear cached auth
+  static const bool forceLogoutOnStart = false;  // Set to true to clear cached auth
   
   /// Show debug information in console
-  static const bool showDebugLogs = true;
+  static const bool showDebugLogs = false;
   
   // API Configuration
   static const String appName = 'OnMint Admin';

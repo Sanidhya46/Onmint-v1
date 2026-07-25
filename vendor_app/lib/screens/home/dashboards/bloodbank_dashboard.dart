@@ -5,6 +5,7 @@ import 'package:api_client/api_client.dart';
 import '../../blood_bank/blood_request_details_screen.dart';
 import '../../blood_bank/blood_bank_bookings_screen.dart';
 import '../../bloodbank/fill_price_bloodbank_screen.dart';
+import '../../notifications/notifications_screen.dart';
 import 'dart:async';
 
 class BloodBankDashboard extends StatefulWidget {
@@ -22,6 +23,7 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
   int _acceptedRequests = 0;
   int _completedRequests = 0;
   bool _showAllRequests = false;
+  bool _hasUnreadNotifications = false;
   Timer? _pollingTimer;
 
   @override
@@ -32,6 +34,20 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
     _pollingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       if (mounted) _loadDashboard();
     });
+  }
+
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await _apiClient.get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
   }
 
   @override
@@ -243,9 +259,36 @@ class _BloodBankDashboardState extends State<BloodBankDashboard> {
                 ),
               ),
               // Notification bell
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                onPressed: () {},
+              GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const VendorNotificationsScreen(),
+                    ),
+                  );
+                  _checkUnreadNotifications();
+                },
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.notifications_outlined, color: Colors.white, size: 24),
+                    if (_hasUnreadNotifications)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 9,
+                          height: 9,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),

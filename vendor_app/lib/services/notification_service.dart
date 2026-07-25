@@ -17,18 +17,18 @@ class NotificationService {
 
   String? get fcmToken => _fcmToken;
 
-  /// Initialize notification service
+  /// Initialize notification service for Vendor/Doctor App
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     if (kIsWeb) {
-      print('ℹ️ [UserApp] Push notifications are handled natively on mobile. Skipping web FCM initialization.');
+      print('ℹ️ [VendorApp] Push notifications are handled natively on mobile. Skipping web FCM initialization.');
       return;
     }
 
     try {
       if (Firebase.apps.isEmpty) {
-        print('⚠️ [UserApp] Firebase not initialized. Skipping push notification setup.');
+        print('⚠️ [VendorApp] Firebase not initialized. Skipping push notification setup.');
         return;
       }
 
@@ -42,11 +42,11 @@ class NotificationService {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional) {
-        print('✅ [UserApp] Notification permission granted');
+        print('✅ [VendorApp] Notification permission granted');
 
         // Get FCM token
         _fcmToken = await _firebaseMessaging.getToken();
-        print('📱 [UserApp] FCM Token: $_fcmToken');
+        print('📱 [VendorApp] FCM Token: $_fcmToken');
 
         if (_fcmToken != null) {
           await sendTokenToBackend(_fcmToken!);
@@ -60,10 +60,10 @@ class NotificationService {
 
         _isInitialized = true;
       } else {
-        print('❌ [UserApp] Notification permission denied');
+        print('❌ [VendorApp] Notification permission denied');
       }
     } catch (e) {
-      print('⚠️ [UserApp] Error initializing notifications: $e');
+      print('⚠️ [VendorApp] Error initializing notifications: $e');
     }
   }
 
@@ -88,11 +88,11 @@ class NotificationService {
       },
     );
 
-    // Create high-priority notification channel for Android
+    // Create high-importance channel for Android vendor alerts
     const androidChannel = AndroidNotificationChannel(
-      'onmint_high_importance_channel',
-      'High Importance Notifications',
-      description: 'This channel is used for important notifications.',
+      'onmint_vendor_high_importance_channel',
+      'OnMint Vendor Notifications',
+      description: 'This channel is used for important vendor order/booking notifications.',
       importance: Importance.max,
     );
 
@@ -123,7 +123,7 @@ class NotificationService {
         sendTokenToBackend(newToken);
       });
     } catch (e) {
-      print('⚠️ [UserApp] Error setting up message handlers: $e');
+      print('⚠️ [VendorApp] Error setting up message handlers: $e');
     }
   }
 
@@ -132,7 +132,7 @@ class NotificationService {
     final notification = message.notification;
     final data = message.data;
 
-    String title = notification?.title ?? data['title'] ?? 'OnMint Healthcare';
+    String title = notification?.title ?? data['title'] ?? 'OnMint Healthcare Vendor';
     String body = notification?.body ?? data['body'] ?? data['message'] ?? '';
 
     await _showLocalNotification(
@@ -155,9 +155,9 @@ class NotificationService {
     String? payload,
   }) async {
     const androidDetails = AndroidNotificationDetails(
-      'onmint_high_importance_channel',
-      'High Importance Notifications',
-      channelDescription: 'This channel is used for important notifications.',
+      'onmint_vendor_high_importance_channel',
+      'OnMint Vendor Notifications',
+      channelDescription: 'This channel is used for important vendor order/booking notifications.',
       importance: Importance.max,
       priority: Priority.high,
       showWhen: true,
@@ -193,25 +193,7 @@ class NotificationService {
 
   /// Handle notification navigation
   void _handleNotificationNavigation(Map<String, dynamic> data) {
-    print('Notification tapped with data: $data');
-  }
-
-  /// Subscribe to topic
-  Future<void> subscribeToTopic(String topic) async {
-    try {
-      await _firebaseMessaging.subscribeToTopic(topic);
-    } catch (e) {
-      print('Error subscribing to topic $topic: $e');
-    }
-  }
-
-  /// Unsubscribe from topic
-  Future<void> unsubscribeFromTopic(String topic) async {
-    try {
-      await _firebaseMessaging.unsubscribeFromTopic(topic);
-    } catch (e) {
-      print('Error unsubscribing from topic $topic: $e');
-    }
+    print('Vendor notification tapped with data: $data');
   }
 
   /// Send FCM token to backend
@@ -219,9 +201,9 @@ class NotificationService {
     try {
       final apiClient = OnMintApiClient();
       await apiClient.auth.updateDeviceToken(token);
-      print('✅ [UserApp] FCM Device token successfully registered on backend');
+      print('✅ [VendorApp] FCM Device token successfully registered on backend');
     } catch (e) {
-      print('❌ [UserApp] Failed to update FCM device token on backend: $e');
+      print('❌ [VendorApp] Failed to update FCM device token on backend: $e');
     }
   }
 }
@@ -229,5 +211,5 @@ class NotificationService {
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print("Handling background message: ${message.messageId}");
+  print("Handling vendor background message: ${message.messageId}");
 }

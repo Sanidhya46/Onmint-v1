@@ -6,6 +6,7 @@ class AppConfig {
   static const String appName = 'OnMint';
   
   static String get apiBaseUrl {
+    if (!developmentMode) return 'https://api.onmint.in/api/v1';
     if (kIsWeb) return 'http://localhost:5000/api/v1';
     try {
       if (Platform.isAndroid) return 'http://10.0.2.2:5000/api/v1';
@@ -17,7 +18,7 @@ class AppConfig {
   static const bool useNewFlow = true;
 
   // Development mode
-  static const bool developmentMode = true;
+  static const bool developmentMode = false;
   static const bool forceLogoutOnStart = false;
 
   // Theme

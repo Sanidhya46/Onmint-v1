@@ -312,18 +312,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                               Navigator.pop(context);
                               // Open URL in new window/browser
                               final uri = Uri.parse(joinUrl);
-                              if (await canLaunchUrl(uri)) {
+                              try {
                                 await launchUrl(
                                   uri,
                                   mode: LaunchMode.externalApplication,
                                 );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Opening video call in browser...'),
-                                    backgroundColor: Colors.blue,
-                                  ),
-                                );
-                              } else {
+                              } catch (err) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('Could not open: $joinUrl'),

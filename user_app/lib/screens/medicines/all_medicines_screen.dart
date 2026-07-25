@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
+import '../../config/app_config.dart';
 
 class AllMedicinesScreen extends StatefulWidget {
   final String? category;
@@ -669,11 +670,9 @@ class _AllMedicinesScreenState extends State<AllMedicinesScreen>
       }
     }
 
-    // Fix relative URLs
-    if (imageUrl != null && imageUrl.startsWith('/images/')) {
-      imageUrl = 'https://api.onmint.in$imageUrl';
-    } else if (imageUrl != null && imageUrl.startsWith('/')) {
-      imageUrl = 'https://api.onmint.in$imageUrl';
+    final String backendHost = AppConfig.apiBaseUrl.replaceAll('/api/v1', '');
+    if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = '$backendHost$imageUrl';
     }
 
     if (imageUrl != null && imageUrl.isNotEmpty) {

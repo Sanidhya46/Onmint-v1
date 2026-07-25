@@ -6,6 +6,8 @@ import 'earnings_screen.dart';
 import 'bookings_screen.dart';
 
 /// Doctor home screen - Main dashboard for doctors
+import '../notifications/notifications_screen.dart';
+
 class DoctorHomeScreen extends StatefulWidget {
   const DoctorHomeScreen({super.key});
 
@@ -17,6 +19,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   final _apiClient = OnMintApiClient();
   DashboardStats? _stats;
   bool _isLoading = true;
+  bool _hasUnreadNotifications = false;
 
   @override
   void initState() {
@@ -24,7 +27,22 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     _loadDashboard();
   }
 
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await _apiClient.get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
   Future<void> _loadDashboard() async {
+    _checkUnreadNotifications();
     setState(() => _isLoading = true);
     try {
       await _apiClient.initialize();
@@ -50,9 +68,34 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
         title: const Text('Doctor Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Navigate to notifications
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.notifications),
+                if (_hasUnreadNotifications)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VendorNotificationsScreen(),
+                ),
+              );
+              _checkUnreadNotifications();
             },
           ),
         ],

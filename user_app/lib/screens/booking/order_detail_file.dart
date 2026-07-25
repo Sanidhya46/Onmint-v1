@@ -173,18 +173,16 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     }
   }
 
-  DateTime _parseLocalTime(String? timeStr) {
-    if (timeStr == null || timeStr.isEmpty) return DateTime.now();
+  DateTime _parseDateString(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return DateTime.now();
     try {
-      String t = timeStr;
-      if (t.endsWith('Z')) {
-        t = t.substring(0, t.length - 1);
-      }
-      return DateTime.parse(t).subtract(const Duration(hours: 5, minutes: 30));
+      return DateTime.parse(dateStr).toLocal();
     } catch (e) {
       return DateTime.now();
     }
   }
+
+  DateTime _parseLocalTime(String? timeStr) => _parseDateString(timeStr);
 
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '';
@@ -1392,13 +1390,13 @@ class _OrderDetailFileState extends State<OrderDetailFile>
     try {
       final scheduledTime = booking['scheduledTime'] ?? booking['createdAt'];
       if (scheduledTime != null) {
-        final sDate = DateTime.parse(scheduledTime).toLocal().subtract(const Duration(hours: 5, minutes: 30));
+        final sDate = DateTime.parse(scheduledTime).toLocal();
         consultationDate = DateFormat('dd MMM yyyy').format(sDate);
         consultationTime = DateFormat('hh:mm a').format(sDate);
       }
       final acceptedAt = booking['acceptedAt'] ?? booking['createdAt'];
       if (acceptedAt != null) {
-        final aDate = DateTime.parse(acceptedAt).toLocal().subtract(const Duration(hours: 5, minutes: 30));
+        final aDate = DateTime.parse(acceptedAt).toLocal();
         acceptedDateStr = DateFormat('dd MMM, hh:mm a').format(aDate);
       }
     } catch (_) {}

@@ -1,4 +1,4 @@
-jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjimport 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
@@ -6,6 +6,7 @@ import 'ride_requests_screen.dart';
 import 'ride_details_screen.dart';
 import 'fill_price_ambulance_screen.dart';
 import '../booking/waiting_for_patient_screen.dart';
+import '../notifications/notifications_screen.dart';
 
 /// Ambulance home screen - Main dashboard for ambulance drivers
 class AmbulanceHomeScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
   bool _isAvailable = true;
   List<Map<String, dynamic>> _recentRequests = [];
   bool _showAllRequests = false;
+  bool _hasUnreadNotifications = false;
 
   @override
   void initState() {
@@ -29,7 +31,22 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
     _loadDashboard();
   }
 
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await _apiClient.get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
   Future<void> _loadDashboard() async {
+    _checkUnreadNotifications();
     setState(() => _isLoading = true);
     try {
       await _apiClient.initialize();
@@ -166,14 +183,37 @@ class _AmbulanceHomeScreenState extends State<AmbulanceHomeScreen> {
                                       ),
                                     ],
                                   ),
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                                        onPressed: () {},
-                                      ),
-                                    ],
-                                  ),
+                                       GestureDetector(
+                                         onTap: () async {
+                                           await Navigator.push(
+                                             context,
+                                             MaterialPageRoute(
+                                               builder: (context) => const VendorNotificationsScreen(),
+                                             ),
+                                           );
+                                           _checkUnreadNotifications();
+                                         },
+                                         child: Stack(
+                                           clipBehavior: Clip.none,
+                                           children: [
+                                             const Icon(Icons.notifications_outlined, color: Colors.white, size: 24),
+                                             if (_hasUnreadNotifications)
+                                               Positioned(
+                                                 right: 0,
+                                                 top: 0,
+                                                 child: Container(
+                                                   width: 9,
+                                                   height: 9,
+                                                   decoration: BoxDecoration(
+                                                     color: Colors.green,
+                                                     shape: BoxShape.circle,
+                                                     border: Border.all(color: Colors.white, width: 1.5),
+                                                   ),
+                                                 ),
+                                               ),
+                                           ],
+                                         ),
+                                       ),
                                 ],
                               ),
                               const SizedBox(height: 16),

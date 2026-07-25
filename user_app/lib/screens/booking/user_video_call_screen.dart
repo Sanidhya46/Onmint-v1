@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:api_client/api_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'user_consultation_ended_screen.dart';
@@ -146,14 +147,15 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
       _zoomLaunched = true;
       try {
         final uri = Uri.parse(_zoomJoinUrl!);
-        if (await canLaunchUrl(uri)) {
+        try {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } catch (_) {
+          await launchUrl(uri, mode: LaunchMode.platformDefault);
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Please install Zoom app to join the meeting')),
+            SnackBar(content: Text('Error opening link: $e')),
           );
         }
       }
@@ -173,8 +175,15 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
   }
 
   void _leaveCall() {
-    // Patient can only leave (go back), not end the consultation
-    Navigator.pop(context);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Consultation is live. Please wait for the doctor to complete the session.'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   void _navigateToEndedScreen(dynamic duration) {
@@ -342,16 +351,7 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
                 fontSize: 24,
                 fontWeight: FontWeight.w300)),
         const SizedBox(height: 16),
-        if (_zoomJoinUrl != null)
-          TextButton.icon(
-            onPressed: () {
-              _zoomLaunched = false;
-              _launchZoomMeeting();
-            },
-            icon: const Icon(Icons.videocam, color: Colors.blue, size: 16),
-            label: const Text('Rejoin Zoom',
-                style: TextStyle(color: Colors.blue, fontSize: 12)),
-          ),
+        if (_zoomJoinUrl != null) _buildZoomLinkWidget(_zoomJoinUrl!),
       ],
     );
   }
@@ -388,17 +388,93 @@ class _UserVideoCallScreenState extends State<UserVideoCallScreen>
         const Text('Waiting for doctor...',
             style: TextStyle(color: Colors.white54, fontSize: 13)),
         const SizedBox(height: 16),
-        if (_zoomJoinUrl != null)
-          TextButton.icon(
-            onPressed: () {
-              _zoomLaunched = false;
-              _launchZoomMeeting();
-            },
-            icon: const Icon(Icons.videocam, color: Colors.blue, size: 16),
-            label: const Text('Rejoin Zoom',
-                style: TextStyle(color: Colors.blue, fontSize: 12)),
-          ),
+        if (_zoomJoinUrl != null) _buildZoomLinkWidget(_zoomJoinUrl!),
       ],
+    );
+  }
+
+  Widget _buildZoomLinkWidget(String url) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.withOpacity(0.6), width: 1.5),
+      ),
+      child: InkWell(
+        onTap: () async {
+          final uri = Uri.parse(url);
+          try {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } catch (_) {
+            await launchUrl(uri, mode: LaunchMode.platformDefault);
+          }
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.video_call, color: Colors.blue, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Zoom Meeting URL (Tap to Join)',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            SelectableText(
+              url,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: url));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Zoom link copied to clipboard!'),
+                    backgroundColor: Colors.blue,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.blue.withOpacity(0.5)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.copy, color: Colors.blue, size: 14),
+                    SizedBox(width: 6),
+                    Text(
+                      'Copy Link',
+                      style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

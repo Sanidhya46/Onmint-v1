@@ -10,6 +10,7 @@ import '../../nurse/bookings_screen.dart';
 import '../../../config/app_config.dart';
 import '../../nurse/fill_price_nurse_screen.dart';
 import '../../booking/waiting_for_patient_screen.dart';
+import '../../notifications/notifications_screen.dart';
 import 'dart:async';
 
 class NurseDashboard extends StatefulWidget {
@@ -25,6 +26,7 @@ class _NurseDashboardState extends State<NurseDashboard> {
   List<Map<String, dynamic>> _pendingBookings = [];
   bool _isLoading = true;
   bool _showAllRequests = false;
+  bool _hasUnreadNotifications = false;
   Timer? _pollingTimer;
 
   @override
@@ -36,6 +38,20 @@ class _NurseDashboardState extends State<NurseDashboard> {
     });
   }
 
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await _apiClient.get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
     _pollingTimer?.cancel();
@@ -43,6 +59,7 @@ class _NurseDashboardState extends State<NurseDashboard> {
   }
 
   Future<void> _loadDashboard() async {
+    _checkUnreadNotifications();
     if (_dashboardData == null) setState(() => _isLoading = true);
     try {
       await _apiClient.initialize();
@@ -197,10 +214,10 @@ class _NurseDashboardState extends State<NurseDashboard> {
                                         ),
                                         child: user?.profilePicture == null
                                             ? const Icon(Icons.person,
-                                                size: 44, color: Colors.blue,)
+                                                size: 40, color: Colors.blue)
                                             : null,
                                       ),
-                                      const SizedBox(width: 18),
+                                      const SizedBox(width: 14),
                                       Expanded(
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
@@ -210,12 +227,12 @@ class _NurseDashboardState extends State<NurseDashboard> {
                                               user?.fullName ?? 'Nurse',
                                               style: const TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 22,
+                                                fontSize: 20,
                                                 fontWeight: FontWeight.w700,
                                                 letterSpacing: 0.3,
                                               ),
                                             ),
-                                            const SizedBox(height: 5),
+                                            const SizedBox(height: 4),
                                             const Text(
                                               'Certified Nurse Provider',
                                               style: TextStyle(
@@ -225,6 +242,40 @@ class _NurseDashboardState extends State<NurseDashboard> {
                                               ),
                                             ),
                                           ],
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => const VendorNotificationsScreen(),
+                                            ),
+                                          );
+                                          _checkUnreadNotifications();
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
+                                              if (_hasUnreadNotifications)
+                                                Positioned(
+                                                  right: 0,
+                                                  top: 0,
+                                                  child: Container(
+                                                    width: 10,
+                                                    height: 10,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.green,
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(color: Colors.white, width: 1.5),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ],

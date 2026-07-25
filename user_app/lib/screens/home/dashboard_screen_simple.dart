@@ -17,6 +17,8 @@ import '../services/doctor_detail_screen.dart';
 import 'package:provider/provider.dart';
 import '../../services/cart_service.dart';
 import 'package:auth_service/auth_service.dart';
+import '../notifications/notifications_screen.dart';
+import '../../config/app_config.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -26,6 +28,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final GlobalKey _medicineSectionKey = GlobalKey();
   final PatientService _patientService = PatientService();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -35,6 +38,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLocationLoading = false;
   String _currentCity = 'Mumbai';
   String _currentState = 'Maharashtra';
+  bool _hasUnreadNotifications = false;
+  Timer? _notificationCheckTimer;
 
   // Healthcare service categories with images
   final List<Map<String, dynamic>> _serviceCategories = [
@@ -73,6 +78,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     _getCurrentLocation();
     _loadData();
+    _checkUnreadNotifications();
+    _notificationCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _checkUnreadNotifications();
+    });
     
     // Fetch cart data to persist floating cart bar
     Future.microtask(() {
@@ -88,9 +97,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void dispose() {
+    _notificationCheckTimer?.cancel();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await OnMintApiClient().get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> _getCurrentLocation() async {
@@ -319,10 +343,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 20),
 
                 // 1. Generic Medicines Section
-                if (!_isLoading && _medicines.isNotEmpty) ...[
-                  _buildMedicineSection('Genric medicines', _medicines),
-                  const SizedBox(height: 24),
-                ],
+                Container(
+                  key: _medicineSectionKey,
+                  child: (!_isLoading && _medicines.isNotEmpty)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildMedicineSection('Genric medicines', _medicines),
+                            const SizedBox(height: 24),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
 
                 // 2. Pet Care Section
                 _buildPetCareSection(),
@@ -421,21 +453,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 8),
                 // Notification icon - top right
                 GestureDetector(
-                  onTap: () {
-                    // Navigate to notifications
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsScreen(),
+                      ),
+                    );
+                    _checkUnreadNotifications();
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey[300]!, width: 1),
-                    ),
-                    child: Icon(
-                      Icons.notifications_outlined,
-                      color: Colors.grey[700],
-                      size: 20,
-                    ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey[300]!, width: 1),
+                        ),
+                        child: Icon(
+                          Icons.notifications_outlined,
+                          color: Colors.grey[700],
+                          size: 20,
+                        ),
+                      ),
+                      if (_hasUnreadNotifications)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 1.5),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -1424,6 +1481,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               return GestureDetector(
                 onTap: () {
                   print('Selected category: ${category['name']}');
+                  if (_medicineSectionKey.currentContext != null) {
+                    Scrollable.ensureVisible(
+                      _medicineSectionKey.currentContext!,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                    );
+                  }
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -1605,10 +1669,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     }
 
-    if (imageUrl != null && imageUrl.startsWith('/images/')) {
-      imageUrl = 'https://api.onmint.in$imageUrl';
-    } else if (imageUrl != null && imageUrl.startsWith('/')) {
-      imageUrl = 'https://api.onmint.in$imageUrl';
+    final String backendHost = AppConfig.apiBaseUrl.replaceAll('/api/v1', '');
+    if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = '$backendHost$imageUrl';
     }
 
     return Container(

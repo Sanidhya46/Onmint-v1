@@ -147,7 +147,7 @@ class _OrderRequestScreenState extends State<OrderRequestScreen> {
     final dateStr = data['createdAt'] ?? data['date'];
     if (dateStr == null) return 'Just now';
     try {
-      final date = DateTime.parse(dateStr).toLocal().subtract(const Duration(hours: 5, minutes: 30));
+      final date = DateTime.parse(dateStr).toLocal();
       return DateFormat('dd MMM yyyy, hh:mm a').format(date);
     } catch (e) {
       return 'Just now';

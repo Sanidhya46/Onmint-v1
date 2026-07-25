@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/cart_service.dart';
 import '../../utils/app_colors.dart';
+import '../../config/app_config.dart';
 
 class MedicineDetailsScreen extends StatefulWidget {
   const MedicineDetailsScreen({super.key});
@@ -91,10 +92,9 @@ class _MedicineDetailsScreenState extends State<MedicineDetailsScreen> {
       }
     }
 
-    if (imageUrl != null && imageUrl.startsWith('/images/')) {
-      imageUrl = 'https://api.onmint.in$imageUrl';
-    } else if (imageUrl != null && imageUrl.startsWith('/')) {
-      imageUrl = 'https://api.onmint.in$imageUrl';
+    final String backendHost = AppConfig.apiBaseUrl.replaceAll('/api/v1', '');
+    if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = '$backendHost$imageUrl';
     }
 
     return Scaffold(

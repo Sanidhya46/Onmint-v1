@@ -4,6 +4,7 @@ import 'package:api_client/api_client.dart';
 import '../../services/cart_service.dart';
 import '../../utils/app_colors.dart';
 import 'widgets/cart_floating_bar.dart';
+import '../../config/app_config.dart';
 
 class MedicinesListScreen extends StatefulWidget {
   const MedicinesListScreen({super.key});
@@ -336,10 +337,9 @@ class _MedicinesListScreenState extends State<MedicinesListScreen> {
       }
     }
 
-    if (imageUrl != null && imageUrl.startsWith('/images/')) {
-      imageUrl = 'https://api.onmint.in$imageUrl';
-    } else if (imageUrl != null && imageUrl.startsWith('/')) {
-      imageUrl = 'https://api.onmint.in$imageUrl';
+    final String backendHost = AppConfig.apiBaseUrl.replaceAll('/api/v1', '');
+    if (imageUrl != null && imageUrl.startsWith('/')) {
+      imageUrl = '$backendHost$imageUrl';
     }
 
     return Card(

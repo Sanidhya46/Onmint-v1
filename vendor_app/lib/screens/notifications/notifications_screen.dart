@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:api_client/api_client.dart';
 
-/// User App Notifications Screen - Sleek, Dynamic & Service-Aware
-class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
+/// Vendor App Notifications Screen - Modern, Dynamic & Service-Aware
+class VendorNotificationsScreen extends StatefulWidget {
+  const VendorNotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
+  State<VendorNotificationsScreen> createState() => _VendorNotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class _VendorNotificationsScreenState extends State<VendorNotificationsScreen> {
   final OnMintApiClient _apiClient = OnMintApiClient();
   List<Map<String, dynamic>> _notifications = [];
   bool _isLoading = true;
@@ -44,7 +44,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             }
             return {
               'id': item['_id']?.toString() ?? '',
-              'title': item['title']?.toString() ?? 'Notification',
+              'title': item['title']?.toString() ?? 'Partner Notification',
               'body': item['message']?.toString() ?? '',
               'type': item['type']?.toString() ?? 'general',
               'serviceType': item['data']?['serviceType']?.toString() ?? item['type']?.toString() ?? 'general',
@@ -56,9 +56,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         });
       }
       return;
-    } catch (e) {
-      debugPrint('Fetch notifications error: $e');
-    }
+    } catch (_) {}
 
     if (mounted) {
       setState(() {
@@ -116,63 +114,63 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  Map<String, dynamic> _getServiceStyle(String type, String serviceType, String title, String body) {
-    final t = '$type $serviceType $title $body'.toLowerCase();
-    if (t.contains('doctor') || t.contains('consultation') || t.contains('priya') || t.contains('dr.')) {
+  Map<String, dynamic> _getServiceStyle(String type, String serviceType) {
+    final t = '$type $serviceType'.toLowerCase();
+    if (t.contains('doctor') || t.contains('consultation')) {
       return {
         'icon': Icons.medical_services_rounded,
-        'badge': 'Doctor Consultation',
+        'badge': 'Doctor Booking',
         'color': const Color(0xFF2563EB),
         'bg': const Color(0xFFEFF6FF),
       };
     } else if (t.contains('nurse')) {
       return {
         'icon': Icons.healing_rounded,
-        'badge': 'Nurse Service',
+        'badge': 'Nurse Request',
         'color': const Color(0xFF0D9488),
         'bg': const Color(0xFFF0FDFA),
       };
-    } else if (t.contains('ambulance') || t.contains('emergency') || t.contains('driver')) {
+    } else if (t.contains('ambulance') || t.contains('emergency')) {
       return {
         'icon': Icons.airport_shuttle_rounded,
-        'badge': 'Ambulance Service',
+        'badge': 'Ambulance Call',
         'color': const Color(0xFFDC2626),
         'bg': const Color(0xFFFEF2F2),
       };
-    } else if (t.contains('pharmacist') || t.contains('pharmacy') || t.contains('medicine') || t.contains('prescription')) {
+    } else if (t.contains('pharmacist') || t.contains('pharmacy') || t.contains('medicine') || t.contains('order')) {
       return {
-        'icon': Icons.medication_rounded,
+        'icon': Icons.shopping_bag_rounded,
         'badge': 'Medicine Order',
         'color': const Color(0xFFD97706),
         'bg': const Color(0xFFFFFBEE),
       };
-    } else if (t.contains('pathology') || t.contains('lab') || t.contains('report') || t.contains('sample')) {
+    } else if (t.contains('pathology') || t.contains('lab') || t.contains('report')) {
       return {
         'icon': Icons.science_rounded,
-        'badge': 'Lab Test',
+        'badge': 'Lab Request',
         'color': const Color(0xFF7C3AED),
         'bg': const Color(0xFFF5F3FF),
       };
-    } else if (t.contains('blood') || t.contains('donor')) {
+    } else if (t.contains('blood') || t.contains('bank')) {
       return {
         'icon': Icons.bloodtype_rounded,
-        'badge': 'Blood Bank',
+        'badge': 'Blood Request',
         'color': const Color(0xFFE11D48),
         'bg': const Color(0xFFFFE4E6),
       };
-    } else if (t.contains('booking')) {
+    } else if (t.contains('registration') || t.contains('account')) {
       return {
-        'icon': Icons.medical_services_rounded,
-        'badge': 'Doctor Consultation',
-        'color': const Color(0xFF2563EB),
-        'bg': const Color(0xFFEFF6FF),
+        'icon': Icons.verified_user_rounded,
+        'badge': 'Registration',
+        'color': const Color(0xFF4F46E5),
+        'bg': const Color(0xFFEEF2FF),
       };
     } else {
       return {
         'icon': Icons.notifications_active_rounded,
-        'badge': 'Service Alert',
-        'color': const Color(0xFF4F46E5),
-        'bg': const Color(0xFFEEF2FF),
+        'badge': 'Partner Notification',
+        'color': const Color(0xFF0284C7),
+        'bg': const Color(0xFFF0F9FF),
       };
     }
   }
@@ -191,12 +189,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Notifications',
+              'Partner Notifications',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             if (unreadCount > 0)
               Text(
-                '$unreadCount unread notification${unreadCount > 1 ? 's' : ''}',
+                '$unreadCount new update${unreadCount > 1 ? 's' : ''}',
                 style: const TextStyle(fontSize: 11, color: Color(0xFF2563EB), fontWeight: FontWeight.w500),
               ),
           ],
@@ -233,12 +231,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'No Notifications Yet',
+                          'No Partner Notifications',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Service updates and alerts will appear here.',
+                          'New booking requests and service alerts will appear here.',
                           style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                         ),
                       ],
@@ -264,9 +262,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final DateTime time = notification['time'] as DateTime;
     final String type = notification['type'] as String;
     final String serviceType = notification['serviceType'] as String;
-    final String title = notification['title'] as String;
-    final String body = notification['body'] as String;
-    final style = _getServiceStyle(type, serviceType, title, body);
+    final style = _getServiceStyle(type, serviceType);
 
     final IconData iconData = style['icon'] as IconData;
     final String badgeText = style['badge'] as String;

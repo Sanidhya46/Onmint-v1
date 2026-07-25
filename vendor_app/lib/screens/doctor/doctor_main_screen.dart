@@ -6,6 +6,8 @@ import 'bookings_screen.dart';
 import 'earnings_screen.dart';
 import '../profile/profile_screen.dart';
 
+import '../../services/notification_service.dart';
+
 class DoctorMainScreen extends StatefulWidget {
   const DoctorMainScreen({super.key});
 
@@ -16,6 +18,12 @@ class DoctorMainScreen extends StatefulWidget {
 class _DoctorMainScreenState extends State<DoctorMainScreen> {
   int _selectedIndex = 0;
   final List<int> _refreshCounters = [0, 0, 0, 0];
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService().initialize();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
 import 'package:api_client/api_client.dart';
 import '../../doctor/appointment_details_screen.dart';
+import '../../notifications/notifications_screen.dart';
 import 'dart:async';
 
 class DoctorDashboard extends StatefulWidget {
@@ -18,6 +19,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
   List<Booking> _pendingAppointments = [];
   bool _isLoading = true;
   bool _showAllRequests = false;
+  bool _hasUnreadNotifications = false;
   Timer? _pollingTimer;
 
   @override
@@ -35,7 +37,22 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
     super.dispose();
   }
 
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await _apiClient.get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
   Future<void> _loadDashboard() async {
+    _checkUnreadNotifications();
     if (_dashboardData == null) {
       setState(() => _isLoading = true);
     }
@@ -164,11 +181,44 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                                       ],
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.notifications_none,
-                                        color: Colors.white, size: 28),
-                                    onPressed: () {},
-                                  ),
+                                   GestureDetector(
+                                     onTap: () async {
+                                       await Navigator.push(
+                                         context,
+                                         MaterialPageRoute(
+                                           builder: (context) => const VendorNotificationsScreen(),
+                                         ),
+                                       );
+                                       _checkUnreadNotifications();
+                                     },
+                                     child: Stack(
+                                       clipBehavior: Clip.none,
+                                       children: [
+                                         const Padding(
+                                           padding: EdgeInsets.all(4.0),
+                                           child: Icon(
+                                             Icons.notifications_none,
+                                             color: Colors.white,
+                                             size: 28,
+                                           ),
+                                         ),
+                                         if (_hasUnreadNotifications)
+                                           Positioned(
+                                             right: 2,
+                                             top: 2,
+                                             child: Container(
+                                               width: 10,
+                                               height: 10,
+                                               decoration: BoxDecoration(
+                                                 color: Colors.green,
+                                                 shape: BoxShape.circle,
+                                                 border: Border.all(color: Colors.white, width: 1.5),
+                                               ),
+                                             ),
+                                           ),
+                                       ],
+                                     ),
+                                   ),
                                 ],
                               ),
                               const SizedBox(height: 16),

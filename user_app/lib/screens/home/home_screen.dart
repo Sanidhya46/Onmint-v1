@@ -17,6 +17,7 @@ import '../booking/user_unified_tracking_screen.dart';
 import '../bookings/pharmacist_order_tracking_screen.dart';
 import '../booking/order_request_screen.dart';
 import '../booking/user_active_consultation_screen.dart';
+import '../../services/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final int initialIndex;
@@ -51,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    NotificationService().initialize();
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),

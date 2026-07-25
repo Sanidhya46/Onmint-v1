@@ -6,6 +6,7 @@ import 'package:auth_service/auth_service.dart';
 import '../../../config/app_colors.dart';
 import '../../pharmacist/pending_orders_screen.dart';
 import '../../pharmacist/pending_order_details_screen.dart';
+import '../../notifications/notifications_screen.dart';
 import 'dart:async';
 
 class PharmacistDashboard extends StatefulWidget {
@@ -21,6 +22,7 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
   List<dynamic> _pendingOrders = [];
   bool _isLoading = true;
   bool _showAllOrders = false; // Added to expand orders inline
+  bool _hasUnreadNotifications = false;
   Timer? _pollingTimer;
 
   @override
@@ -32,6 +34,20 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
     });
   }
 
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await _apiClient.get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
     _pollingTimer?.cancel();
@@ -39,6 +55,7 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
   }
 
   Future<void> _loadDashboard() async {
+    _checkUnreadNotifications();
     if (_dashboardData == null) {
       setState(() => _isLoading = true);
     }
@@ -174,6 +191,40 @@ class _PharmacistDashboardState extends State<PharmacistDashboard> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const VendorNotificationsScreen(),
+                      ),
+                    );
+                    _checkUnreadNotifications();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
+                        if (_hasUnreadNotifications)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 1.5),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ],

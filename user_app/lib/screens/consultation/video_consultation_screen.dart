@@ -123,16 +123,43 @@ class _VideoConsultationScreenState extends State<VideoConsultationScreen> {
               ),
               if (_meetingConfig != null && _meetingConfig!.containsKey('joinUrl'))
                 Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final uri = Uri.parse(_meetingConfig!['joinUrl']);
-                      if (await canLaunchUrl(uri)) {
+                  padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+                  child: InkWell(
+                    onTap: () async {
+                      final url = _meetingConfig!['joinUrl'].toString();
+                      final uri = Uri.parse(url);
+                      try {
                         await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      } catch (_) {
+                        await launchUrl(uri, mode: LaunchMode.platformDefault);
                       }
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                    child: const Text('Open Zoom Meeting', style: TextStyle(color: Colors.white)),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.blue, width: 1),
+                      ),
+                      child: Column(
+                        children: [
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.video_call, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text('Zoom Meeting Link (Tap to Open)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          SelectableText(
+                            _meetingConfig!['joinUrl'].toString(),
+                            style: const TextStyle(color: Colors.lightBlueAccent, decoration: TextDecoration.underline),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 )
             ],

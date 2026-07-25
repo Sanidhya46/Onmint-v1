@@ -21,6 +21,12 @@ import '../pathology/pathology_bookings_screen.dart';
 import '../pathology/pathology_home_screen.dart';
 import '../blood_bank/blood_bank_bookings_screen.dart';
 
+import '../notifications/notifications_screen.dart';
+import '../../services/notification_service.dart';
+
+import 'package:api_client/api_client.dart';
+import 'dart:async';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -31,6 +37,38 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final List<int> _refreshCounters = [0, 0, 0, 0];
+  bool _hasUnreadNotifications = false;
+  Timer? _notificationCheckTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService().initialize();
+    _checkUnreadNotifications();
+    _notificationCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _checkUnreadNotifications();
+    });
+  }
+
+  @override
+  void dispose() {
+    _notificationCheckTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _checkUnreadNotifications() async {
+    try {
+      final res = await OnMintApiClient().get('/auth/notifications/unread-count');
+      if (res.data != null && res.data['data'] != null) {
+        final count = res.data['data']['unreadCount'] ?? 0;
+        if (mounted) {
+          setState(() {
+            _hasUnreadNotifications = count > 0;
+          });
+        }
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +133,34 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Navigate to notifications
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.notifications_outlined),
+                if (_hasUnreadNotifications)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VendorNotificationsScreen(),
+                ),
+              );
+              _checkUnreadNotifications();
             },
           ),
           PopupMenuButton<String>(
