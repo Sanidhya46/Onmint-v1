@@ -360,6 +360,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                           ],
 
                           // Video Consultation Button
+                          // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+                          // Consultation feature will be restored in a future release.
+                          /*
                           if (_booking!['consultationType']
                                       ?.toString()
                                       .toLowerCase() ==
@@ -392,6 +395,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                 ),
                               ),
                             ),
+                          */
 
                           if (_booking!['consultationType']
                                       ?.toString()
