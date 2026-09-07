@@ -61,6 +61,9 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
         final docName = provider['fullName'] ?? '${provider['firstName'] ?? ''} ${provider['lastName'] ?? ''}'.trim();
         final docImage = provider['profilePic'] ?? provider['profilePicture'];
 
+        // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+        // Consultation feature will be restored in a future release.
+        /*
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -71,6 +74,7 @@ class _DoctorRequestSentScreenState extends State<DoctorRequestSentScreen> {
             ),
           ),
         );
+        */
       } else if (status == 'completed' || status == 'ended') {
         _timer?.cancel();
         Navigator.pushReplacement(

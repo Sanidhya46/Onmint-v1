@@ -77,6 +77,9 @@ class OnMintUserApp extends StatelessWidget {
               settings: settings,
             );
           }
+          // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+          // Consultation feature will be restored in a future release.
+          /*
           if (settings.name == '/video-consultation') {
             final args = settings.arguments as Map<String, dynamic>;
             return MaterialPageRoute(
@@ -85,6 +88,7 @@ class OnMintUserApp extends StatelessWidget {
               ),
             );
           }
+          */
           if (settings.name != null && settings.name!.startsWith('/pharmacist-tracking')) {
             final uri = Uri.parse(settings.name!);
             final bookingId = uri.queryParameters['id'] ?? '';

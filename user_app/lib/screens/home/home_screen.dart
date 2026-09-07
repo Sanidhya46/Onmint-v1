@@ -203,6 +203,9 @@ class _HomeScreenState extends State<HomeScreen>
         );
       }
     } else {
+      // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+      // Consultation feature will be restored in a future release.
+      /*
       if ((_activeServiceType == 'doctor' || _activeServiceType == 'consultation') && status == 'in_progress') {
         Navigator.push(
           context,
@@ -212,7 +215,9 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
         );
-      } else if (_activeServiceType == 'bloodbank' || _activeServiceType == 'blood bank') {
+      } else
+      */
+      if (_activeServiceType == 'bloodbank' || _activeServiceType == 'blood bank') {
         Navigator.push(
           context,
           MaterialPageRoute(

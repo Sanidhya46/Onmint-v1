@@ -46,7 +46,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
         _isLoading = false;
       });
       
-      // Automatic redirect to live consultation if in progress
+      // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+      // Consultation feature will be restored in a future release.
+      /*
       if (_booking?.status == 'in_progress') {
         if (mounted) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -61,6 +63,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           });
         }
       }
+      */
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -668,6 +671,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                     _booking!.consultationType?.toLowerCase() ==
                                         'video call') &&
                                 _booking!.videoCallCompleted != true) ...[
+                              // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+                              // Consultation feature will be restored in a future release.
+                              /*
                               ElevatedButton.icon(
                                 onPressed: () => _joinVideoCall(),
                                 icon: const Icon(Icons.videocam),
@@ -681,6 +687,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
+                              */
                             ],
 
                             // Show message if video call is completed
@@ -1661,11 +1668,15 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
               ],
             ),
           ),
+          // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+          // Consultation feature will be restored in a future release.
+          /*
           ElevatedButton(
             onPressed: () => _joinVideoCall(),
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1565C0)),
             child: const Text('Join', style: TextStyle(color: Colors.white)),
           ),
+          */
         ],
       ),
     );

@@ -184,6 +184,9 @@ class _BookingsScreenState extends State<BookingsScreen>
             ),
           ).then((_) => _loadBookings());
         } else if (serviceType.toLowerCase() == 'doctor' || serviceType.toLowerCase() == 'consultation') {
+          // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+          // Consultation feature will be restored in a future release.
+          /*
           if (status == 'in_progress') {
             Navigator.push(
               context,
@@ -194,6 +197,7 @@ class _BookingsScreenState extends State<BookingsScreen>
               ),
             ).then((_) => _loadBookings());
           } else {
+          */
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -202,7 +206,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                 ),
               ),
             ).then((_) => _loadBookings());
-          }
+          //}
         } else {
           Navigator.push(
             context,

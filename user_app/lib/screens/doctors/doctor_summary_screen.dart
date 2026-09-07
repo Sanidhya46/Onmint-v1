@@ -60,6 +60,15 @@ class _DoctorSummaryScreenState extends State<DoctorSummaryScreen> {
   }
 
   Future<void> _handlePayAndConsult() async {
+    // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+    // Consultation feature will be restored in a future release.
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Online consultation is temporarily disabled for maintenance.'),
+      ),
+    );
+    return;
+    /*
     setState(() => _isBooking = true);
     try {
       final double consultationFee = 499.0; // Dynamic if available
@@ -99,6 +108,7 @@ class _DoctorSummaryScreenState extends State<DoctorSummaryScreen> {
         );
       }
     }
+    */
   }
 
   @override

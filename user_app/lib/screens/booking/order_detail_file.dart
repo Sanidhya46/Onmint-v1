@@ -148,6 +148,9 @@ class _OrderDetailFileState extends State<OrderDetailFile>
         
         final consultationEnded = _booking?['consultation_ended'] == true || _booking?['videoCallCompleted'] == true;
 
+        // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+        // Consultation feature will be restored in a future release.
+        /*
         if (serviceType == 'doctor' && isDoctorOnCall && !consultationEnded) {
           final provD = _booking?['provider'] ?? _booking?['acceptedProvider'] ?? {};
           final drName = provD['fullName'] ??
@@ -161,6 +164,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
             ),
           ).then((_) => _loadBookingDetails());
         }
+        */
       }
     } catch (e) {
       // Fallback to passed booking data if api fails
@@ -801,6 +805,10 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                       width: double.infinity,
                       height: 44,
                       child: ElevatedButton.icon(
+                        // TEMPORARILY DISABLED FOR RELEASE 1.0.1+11
+                        // Consultation feature will be restored in a future release.
+                        onPressed: () {},
+                        /*
                         onPressed: () {
                           final provD = booking['provider'] ?? booking['acceptedProvider'] ?? {};
                           final drName = provD['fullName'] ??
@@ -814,6 +822,7 @@ class _OrderDetailFileState extends State<OrderDetailFile>
                             ),
                           ).then((_) => _loadBookingDetails());
                         },
+                        */
                         icon: const Icon(Icons.videocam, size: 20),
                         label: const Text('Join Video Call',
                             style: TextStyle(
