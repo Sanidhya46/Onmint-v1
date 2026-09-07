@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
 import 'package:ui_components/ui_components.dart';
@@ -312,44 +311,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           ),
                                           SizedBox(width: 8 * s),
                                           Expanded(
-                                            child: RichText(
-                                              text: TextSpan(
-                                                text: 'I agree to the ',
-                                                style: TextStyle(color: Colors.grey.shade700, fontSize: 11 * s, fontFamily: 'Poppins'),
-                                                children: [
-                                                  TextSpan(
-                                                    text: 'Terms & Conditions',
-                                                    style: const TextStyle(
-                                                      color: Color(0xFF0D6EFD),
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                    recognizer: TapGestureRecognizer()
-                                                      ..onTap = () async {
-                                                        final approved = await showTermsPrivacyDialog(context, isPrivacyPolicy: false);
-                                                        if (approved) {
-                                                          setState(() => _agreeTerms = true);
-                                                        }
-                                                      },
-                                                  ),
-                                                  const TextSpan(text: ' and '),
-                                                  TextSpan(
-                                                    text: 'Privacy Policy',
-                                                    style: const TextStyle(
-                                                      color: Color(0xFF0D6EFD),
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                    recognizer: TapGestureRecognizer()
-                                                      ..onTap = () async {
-                                                        final approved = await showTermsPrivacyDialog(context, isPrivacyPolicy: true);
-                                                        if (approved) {
-                                                          setState(() => _agreeTerms = true);
-                                                        }
-                                                      },
-                                                  ),
-                                                  ], // TextSpan children
-                                                ), // TextSpan
-                                              ), // RichText
-                                            ), // Expanded
+                                             child: Wrap(
+                                               crossAxisAlignment: WrapCrossAlignment.center,
+                                               children: [
+                                                 Text(
+                                                   'I agree to the ',
+                                                   style: TextStyle(
+                                                     color: Colors.grey.shade700,
+                                                     fontSize: 11 * s,
+                                                     fontFamily: 'Poppins',
+                                                   ),
+                                                 ),
+                                                 GestureDetector(
+                                                   behavior: HitTestBehavior.opaque,
+                                                   onTap: () async {
+                                                     final approved = await showTermsPrivacyDialog(context, isPrivacyPolicy: false);
+                                                     if (approved) {
+                                                       setState(() => _agreeTerms = true);
+                                                     }
+                                                   },
+                                                   child: Padding(
+                                                     padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 1),
+                                                     child: Text(
+                                                       'Terms & Conditions',
+                                                       style: TextStyle(
+                                                         color: const Color(0xFF0D6EFD),
+                                                         fontWeight: FontWeight.bold,
+                                                         fontSize: 11 * s,
+                                                         fontFamily: 'Poppins',
+                                                       ),
+                                                     ),
+                                                   ),
+                                                 ),
+                                                 Text(
+                                                   ' and ',
+                                                   style: TextStyle(
+                                                     color: Colors.grey.shade700,
+                                                     fontSize: 11 * s,
+                                                     fontFamily: 'Poppins',
+                                                   ),
+                                                 ),
+                                                 GestureDetector(
+                                                   behavior: HitTestBehavior.opaque,
+                                                   onTap: () async {
+                                                     final approved = await showTermsPrivacyDialog(context, isPrivacyPolicy: true);
+                                                     if (approved) {
+                                                       setState(() => _agreeTerms = true);
+                                                     }
+                                                   },
+                                                   child: Padding(
+                                                     padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 1),
+                                                     child: Text(
+                                                       'Privacy Policy',
+                                                       style: TextStyle(
+                                                         color: const Color(0xFF0D6EFD),
+                                                         fontWeight: FontWeight.bold,
+                                                         fontSize: 11 * s,
+                                                         fontFamily: 'Poppins',
+                                                       ),
+                                                     ),
+                                                   ),
+                                                 ),
+                                               ],
+                                             ),
+                                           ),
                                           ], // Row children
                                         ), // Row
                                       ], // Form inner Column children

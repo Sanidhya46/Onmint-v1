@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:auth_service/auth_service.dart';
 import 'package:ui_components/ui_components.dart';
-import '../../config/app_colors.dart';
 import '../../widgets/terms_privacy_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -313,26 +312,70 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
 
                                   SizedBox(height: 12 * s),
-                                  Center(
-                                    child: Text.rich(
-                                      TextSpan(
-                                        text: 'By logging in, you agree to our ',
-                                        style: TextStyle(fontSize: 9 * s, color: Colors.grey.shade500),
-                                        children: [
-                                          TextSpan(
-                                            text: 'Terms & Conditions',
-                                            style: TextStyle(fontWeight: FontWeight.bold, color: const Color(0xFF0D6EFD)),
-                                          ),
-                                          const TextSpan(text: ' and '),
-                                          TextSpan(
-                                            text: 'Privacy Policy',
-                                            style: TextStyle(fontWeight: FontWeight.bold, color: const Color(0xFF0D6EFD)),
-                                          ),
-                                        ],
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
+                                   Center(
+                                     child: Wrap(
+                                       alignment: WrapAlignment.center,
+                                       crossAxisAlignment: WrapCrossAlignment.center,
+                                       children: [
+                                         Text(
+                                           'By logging in, you agree to our ',
+                                           style: TextStyle(
+                                             fontSize: 10 * s,
+                                             color: Colors.grey.shade600,
+                                           ),
+                                         ),
+                                         GestureDetector(
+                                           behavior: HitTestBehavior.opaque,
+                                           onTap: () {
+                                             showTermsPrivacyDialog(
+                                               context,
+                                               isPrivacyPolicy: false,
+                                               showAgreeButton: false,
+                                             );
+                                           },
+                                           child: Padding(
+                                             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                                             child: Text(
+                                               'Terms & Conditions',
+                                               style: TextStyle(
+                                                 fontWeight: FontWeight.bold,
+                                                 color: const Color(0xFF0D6EFD),
+                                                 fontSize: 10 * s,
+                                               ),
+                                             ),
+                                           ),
+                                         ),
+                                         Text(
+                                           ' and ',
+                                           style: TextStyle(
+                                             fontSize: 10 * s,
+                                             color: Colors.grey.shade600,
+                                           ),
+                                         ),
+                                         GestureDetector(
+                                           behavior: HitTestBehavior.opaque,
+                                           onTap: () {
+                                             showTermsPrivacyDialog(
+                                               context,
+                                               isPrivacyPolicy: true,
+                                               showAgreeButton: false,
+                                             );
+                                           },
+                                           child: Padding(
+                                             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                                             child: Text(
+                                               'Privacy Policy',
+                                               style: TextStyle(
+                                                 fontWeight: FontWeight.bold,
+                                                 color: const Color(0xFF0D6EFD),
+                                                 fontSize: 10 * s,
+                                               ),
+                                             ),
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   ),
                                 ],
                               ),
                             ),

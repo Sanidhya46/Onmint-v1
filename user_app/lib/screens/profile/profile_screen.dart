@@ -11,6 +11,7 @@ import 'help_support_screen.dart';
 import 'personal_details_view_screen.dart';
 import 'address_view_screen.dart';
 import 'not_found_screen.dart';
+import '../../widgets/terms_privacy_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -437,11 +438,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icons.privacy_tip_outlined,
                       title: 'Privacy Policy',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const NotFoundScreen(title: 'Privacy Policy')),
-                        );
+                        showTermsPrivacyDialog(context, isPrivacyPolicy: true);
                       },
                     ),
                     _buildDivider(),
