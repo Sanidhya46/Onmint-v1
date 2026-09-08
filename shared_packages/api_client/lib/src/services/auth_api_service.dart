@@ -22,8 +22,11 @@ class AuthApiService {
   // Login
   Future<Map<String, dynamic>> login(Map<String, dynamic> credentials) async {
     final response = await _client.post('/auth/login', data: credentials);
-    if (response.data['success'] == true && response.data['data']?['accessToken'] != null) {
-      await _client.setToken(response.data['data']['accessToken']);
+    if (response.data is Map<String, dynamic> && response.data['success'] == true && response.data['data'] != null) {
+      final token = response.data['data']['accessToken'] ?? response.data['data']['token'];
+      if (token != null) {
+        await _client.setToken(token.toString());
+      }
     }
     return response.data;
   }
@@ -81,6 +84,10 @@ class AuthApiService {
     String? phone,
     String? email,
   }) async {
+    // Ensure token is loaded before delete attempt
+    if (_client.token == null) {
+      await _client.loadToken();
+    }
     try {
       // 1. Authenticated DELETE request
       final response = await _client.delete(

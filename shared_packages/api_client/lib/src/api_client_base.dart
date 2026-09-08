@@ -18,27 +18,16 @@ class ApiClient {
       headers: ApiConfig.defaultHeaders,
     ));
 
-    // Add interceptors
-    _dio.interceptors.add(PrettyDioLogger(
-      request: true,
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-      responseHeader: false,
-      error: true,
-      compact: true,
-    ));
-
+    // Add auth interceptor first so Authorization header is added before logging
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         // Ensure token is loaded before making request
-        if (!_tokenLoaded) {
+        if (_token == null) {
           await loadToken();
-          _tokenLoaded = true;
         }
         
-        // Add token to headers if available
-        if (_token != null) {
+        // Add token to headers if available and not already set
+        if (_token != null && !options.headers.containsKey('Authorization')) {
           options.headers['Authorization'] = 'Bearer $_token';
         }
         return handler.next(options);
@@ -50,6 +39,17 @@ class ApiClient {
         }
         return handler.next(error);
       },
+    ));
+
+    // Add logging interceptor after auth interceptor so logs display Authorization header
+    _dio.interceptors.add(PrettyDioLogger(
+      request: true,
+      requestHeader: true,
+      requestBody: true,
+      responseBody: true,
+      responseHeader: false,
+      error: true,
+      compact: true,
     ));
   }
 

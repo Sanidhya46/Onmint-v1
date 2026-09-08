@@ -56,7 +56,8 @@ class AuthProvider extends ChangeNotifier {
       
       // If we have a valid token, set it in the API client
       if (_currentToken != null && _currentToken!.isValid) {
-        _apiClient.setAuthToken(_currentToken!.token);
+        await _apiClient.setAuthToken(_currentToken!.token);
+        await _authService.setToken(_currentToken!.token);
         debugPrint('Token loaded and set in API client');
       } else {
         debugPrint('No valid token found, clearing auth data');
@@ -284,7 +285,8 @@ class AuthProvider extends ChangeNotifier {
       _currentToken = AuthToken.fromJwtPayload(tokenString, cleanedUserData);
       
       // Set token in API client for authenticated requests
-      _apiClient.setAuthToken(tokenString);
+      await _apiClient.setAuthToken(tokenString);
+      await _authService.setToken(tokenString);
       
       // Save to storage for persistence
       await _saveUserToStorage(_currentUser!);
@@ -338,7 +340,8 @@ class AuthProvider extends ChangeNotifier {
     _currentToken = null;
     
     // Clear token from API client
-    _apiClient.clearAuthToken();
+    await _apiClient.clearAuthToken();
+    await _authService.clearToken();
     
     await _secureStorage.delete(key: _userKey);
     await _secureStorage.delete(key: _tokenKey);
@@ -439,6 +442,12 @@ class AuthProvider extends ChangeNotifier {
     _clearError();
 
     try {
+      // Ensure auth service has the active token
+      if (_currentToken != null && _currentToken!.token.isNotEmpty) {
+        await _authService.setToken(_currentToken!.token);
+        await _apiClient.setAuthToken(_currentToken!.token);
+      }
+
       final user = _currentUser;
       await _authService.deleteAccount(
         confirmPassword: confirmPassword,

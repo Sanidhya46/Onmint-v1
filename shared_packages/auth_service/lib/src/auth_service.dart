@@ -5,6 +5,16 @@ import 'package:dio/dio.dart';
 class AuthService {
   final OnMintApiClient _apiClient = OnMintApiClient();
 
+  /// Explicitly set the authentication token for API calls
+  Future<void> setToken(String token) async {
+    await _apiClient.setAuthToken(token);
+  }
+
+  /// Explicitly clear authentication token
+  Future<void> clearToken() async {
+    await _apiClient.clearAuthToken();
+  }
+
   /// Register new user
   Future<Map<String, dynamic>> register(Map<String, dynamic> registrationData, {Map<String, String>? files, List<dynamic>? xFiles, Map<String, dynamic>? namedXFiles}) async {
     try {
