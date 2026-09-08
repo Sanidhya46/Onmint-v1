@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "in.onmint.partner"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -49,10 +49,15 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String?
-            keyPassword = keystoreProperties["keyPassword"] as String?
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-            storePassword = keystoreProperties["storePassword"] as String?
+            val storeFilePath = keystoreProperties["storeFile"] as String?
+            if (keystorePropertiesFile.exists() && !storeFilePath.isNullOrEmpty() && file(storeFilePath).exists()) {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                storeFile = file(storeFilePath)
+                storePassword = keystoreProperties["storePassword"] as String?
+            } else {
+                initWith(getByName("debug"))
+            }
         }
     }
 
