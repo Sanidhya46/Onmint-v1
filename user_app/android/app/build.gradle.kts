@@ -24,9 +24,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    val isBuildingBundle = gradle.startParameter.taskNames.any { it.contains("bundle", ignoreCase = true) }
+
     splits {
         abi {
-            isEnable = true
+            isEnable = !isBuildingBundle
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86_64")
             isUniversalApk = true

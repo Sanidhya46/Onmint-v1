@@ -111,11 +111,15 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     setState(() => _isLoading = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final finalReason = _selectedReason != null
-        ? (_selectedReason == 'Other reason'
-            ? _reasonController.text.trim()
-            : '\$_selectedReason: \${_reasonController.text.trim()}')
-        : _reasonController.text.trim();
+    final extraText = _reasonController.text.trim();
+    final String finalReason;
+    if (_selectedReason == null || _selectedReason == 'Other reason') {
+      finalReason = extraText;
+    } else if (extraText.isNotEmpty) {
+      finalReason = '$_selectedReason: $extraText';
+    } else {
+      finalReason = _selectedReason!;
+    }
 
     try {
       final success = await authProvider.deleteAccount(
@@ -133,7 +137,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ToastUtils.showError('Error: \${e.toString().replaceAll("Exception: ", "")}');
+        ToastUtils.showError('Error: ${e.toString().replaceAll("Exception: ", "")}');
       }
     } finally {
       if (mounted) {
