@@ -74,4 +74,31 @@ class AuthService {
       throw Exception('Device token update failed: $e');
     }
   }
+
+  /// Permanently delete account
+  Future<void> deleteAccount({
+    required String confirmPassword,
+    String? reason,
+    String? role,
+    String? phone,
+    String? email,
+  }) async {
+    try {
+      await _apiClient.auth.deleteAccount(
+        confirmPassword: confirmPassword,
+        reason: reason,
+        role: role,
+        phone: phone,
+        email: email,
+      );
+    } on DioException catch (e) {
+      if (e.response?.data != null && e.response?.data is Map) {
+        final message = e.response?.data['message'] ?? 'Account deletion failed';
+        throw Exception(message);
+      }
+      throw Exception('Account deletion failed: ${e.message}');
+    } catch (e) {
+      throw Exception('Account deletion failed: $e');
+    }
+  }
 }

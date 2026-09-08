@@ -430,4 +430,34 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-}
+  /// Permanently delete account
+  Future<bool> deleteAccount({
+    required String confirmPassword,
+    String? reason,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final user = _currentUser;
+      await _authService.deleteAccount(
+        confirmPassword: confirmPassword,
+        reason: reason,
+        role: user?.role,
+        phone: user?.phone,
+        email: user?.email,
+      );
+
+      // Server deletion succeeded; clear all local auth state and storage
+      await _clearAuthData();
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      final msg = e.toString().replaceAll('Exception: ', '');
+      _setError(msg);
+      _setLoading(false);
+      return false;
+    }
+  }
+
+}

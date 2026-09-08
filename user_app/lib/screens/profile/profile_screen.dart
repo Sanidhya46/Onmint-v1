@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../config/app_colors.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
+import 'delete_account_screen.dart';
 import 'addresses_screen.dart';
 import 'help_support_screen.dart';
 import 'personal_details_view_screen.dart';
@@ -450,6 +451,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const HelpSupportScreen()),
+                        );
+                      },
+                    ),
+                    _buildDivider(),
+                    _buildListTile(
+                      icon: Icons.delete_outline,
+                      title: 'Delete Account',
+                      iconColor: Colors.red[600],
+                      titleColor: Colors.red[600],
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const DeleteAccountScreen()),
                         );
                       },
                     ),

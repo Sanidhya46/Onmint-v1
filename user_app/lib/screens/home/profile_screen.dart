@@ -5,6 +5,7 @@ import 'package:ui_components/ui_components.dart';
 import '../../config/app_colors.dart';
 import '../profile/edit_profile_screen.dart';
 import '../profile/change_password_screen.dart';
+import '../profile/delete_account_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -189,6 +190,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.info,
                         label: 'About',
                         onTap: () => _showAbout(),
+                      ),
+                      _buildActionTile(
+                        icon: Icons.delete_outline,
+                        label: 'Delete Account',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const DeleteAccountScreen()),
+                          );
+                        },
                       ),
                     ],
                   ),

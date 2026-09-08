@@ -72,4 +72,56 @@ class AuthApiService {
     await _client.post('/auth/logout-all');
     await _client.clearToken();
   }
+
+  // Delete account (GDPR permanent erasure)
+  Future<Map<String, dynamic>> deleteAccount({
+    required String confirmPassword,
+    String? reason,
+    String? role,
+    String? phone,
+    String? email,
+  }) async {
+    try {
+      // 1. Authenticated DELETE request
+      final response = await _client.delete(
+        '/account/delete',
+        data: {
+          'confirmPassword': confirmPassword,
+          if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+        },
+      );
+      await _client.clearToken();
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      }
+      return {'success': true, 'message': 'Account deleted successfully'};
+    } catch (e) {
+      // Fallback: Direct POST request
+      try {
+        final directPayload = <String, dynamic>{
+          'role': role ?? 'patient',
+          'password': confirmPassword,
+          'confirmPassword': confirmPassword,
+          if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+        };
+        if (email != null && email.isNotEmpty) {
+          directPayload['email'] = email;
+        } else if (phone != null && phone.isNotEmpty) {
+          final cleanPhone = phone.replaceAll(RegExp(r'[\s\-\(\)\+]'), '');
+          final rawPhone = cleanPhone.startsWith('91') && cleanPhone.length == 12
+              ? cleanPhone.substring(2)
+              : cleanPhone;
+          directPayload['phone'] = rawPhone;
+        }
+        final directRes = await _client.post('/account/delete', data: directPayload);
+        await _client.clearToken();
+        if (directRes.data is Map<String, dynamic>) {
+          return directRes.data as Map<String, dynamic>;
+        }
+        return {'success': true, 'message': 'Account deleted successfully'};
+      } catch (_) {
+        rethrow;
+      }
+    }
+  }
 }
