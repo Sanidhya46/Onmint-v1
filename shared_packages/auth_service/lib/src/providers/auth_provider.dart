@@ -215,6 +215,24 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(false);
   }
 
+  /// Delete account and erase all associated data (GDPR compliance)
+  Future<bool> deleteAccount({String? password, String? reason}) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      await _authService.deleteAccount(confirmPassword: password, reason: reason);
+      await _clearAuthData();
+      return true;
+    } catch (e) {
+      _setError('Failed to delete account: $e');
+      debugPrint('Delete account failed: $e');
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   /// Refresh authentication token
   Future<bool> refreshToken() async {
     if (_currentToken == null) return false;

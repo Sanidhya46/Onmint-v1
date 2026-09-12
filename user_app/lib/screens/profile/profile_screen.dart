@@ -468,6 +468,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         }
                       },
                     ),
+                    _buildDivider(),
+                    _buildListTile(
+                      icon: Icons.delete_forever_outlined,
+                      title: 'Delete Account',
+                      iconColor: Colors.red.shade700,
+                      titleColor: Colors.red.shade700,
+                      hideArrow: true,
+                      onTap: () {
+                        _showDeleteAccountDialog(context, authProvider);
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -476,6 +487,175 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       )),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, AuthProvider authProvider) {
+    final passwordController = TextEditingController();
+    final reasonController = TextEditingController();
+    bool isDeleting = false;
+    bool obscurePassword = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+              SizedBox(width: 8),
+              Text(
+                'Delete Account',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Are you sure you want to delete your account? This action is permanent and IRREVERSIBLE.',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: const Text(
+                    '• All your personal profile details will be permanently erased.\n'
+                    '• Your medical records, orders, and booking history will be deleted.\n'
+                    '• You will immediately lose access to your Onmint account.',
+                    style: TextStyle(fontSize: 11, color: Colors.red, height: 1.4),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Enter Password to Confirm:',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black87),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: passwordController,
+                  obscureText: obscurePassword,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your password',
+                    hintStyle: const TextStyle(fontSize: 12),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        size: 18,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setDialogState(() {
+                          obscurePassword = !obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Reason for leaving (Optional):',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black87),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    hintText: 'Tell us why you want to delete your account...',
+                    hintStyle: const TextStyle(fontSize: 12),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isDeleting ? null : () => Navigator.pop(dialogContext),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: isDeleting
+                  ? null
+                  : () async {
+                      final password = passwordController.text.trim();
+                      if (password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter your password to confirm deletion'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      setDialogState(() {
+                        isDeleting = true;
+                      });
+
+                      try {
+                        await authProvider.deleteAccount(
+                          password: password,
+                          reason: reasonController.text.trim(),
+                        );
+                        if (dialogContext.mounted) {
+                          Navigator.pop(dialogContext);
+                        }
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Your account has been deleted successfully'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                        }
+                      } catch (e) {
+                        setDialogState(() {
+                          isDeleting = false;
+                        });
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to delete account: ${e.toString().replaceAll("Exception: ", "")}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+              child: isDeleting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Text('Delete Permanently', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -517,23 +697,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Color? titleColor,
     bool hideArrow = false,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: iconColor ?? Colors.black87, size: 18),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: titleColor ?? Colors.black87,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: Icon(icon, color: iconColor ?? Colors.black87, size: 18),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: titleColor ?? Colors.black87,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
+        trailing: hideArrow
+            ? null
+            : const Icon(Icons.chevron_right, color: Colors.grey, size: 16),
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+        visualDensity: const VisualDensity(vertical: -2),
+        dense: true,
       ),
-      trailing: hideArrow
-          ? null
-          : const Icon(Icons.chevron_right, color: Colors.grey, size: 16),
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      visualDensity: const VisualDensity(vertical: -2),
-      dense: true,
     );
   }
 

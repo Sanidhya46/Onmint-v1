@@ -106,8 +106,8 @@ class OnMintApiClient {
     return await _client.patch(path, data: data, queryParameters: queryParameters);
   }
 
-  Future<dynamic> delete(String path, {Map<String, dynamic>? queryParameters}) async {
-    return await _client.delete(path, queryParameters: queryParameters);
+  Future<dynamic> delete(String path, {dynamic data, Map<String, dynamic>? queryParameters}) async {
+    return await _client.delete(path, data: data, queryParameters: queryParameters);
   }
 
   Future<dynamic> uploadMultipartData(String path, Map<String, dynamic> data, {List<String>? filePaths, String fileFieldName = 'images', Map<String, String>? namedFiles, dynamic xFiles, dynamic namedXFiles}) async {

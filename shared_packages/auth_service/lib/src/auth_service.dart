@@ -74,4 +74,19 @@ class AuthService {
       throw Exception('Device token update failed: $e');
     }
   }
+
+  /// Delete account and wipe all data (GDPR compliance)
+  Future<void> deleteAccount({String? confirmPassword, String? reason}) async {
+    try {
+      await _apiClient.auth.deleteAccount(confirmPassword: confirmPassword, reason: reason);
+    } on DioException catch (e) {
+      if (e.response?.data != null && e.response?.data is Map) {
+        final message = e.response?.data['message'] ?? 'Failed to delete account';
+        throw Exception(message);
+      }
+      throw Exception('Failed to delete account: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
+    }
+  }
 }

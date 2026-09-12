@@ -71,4 +71,19 @@ class AuthApiService {
     await _client.post('/auth/logout-all');
     await _client.clearToken();
   }
+
+  // Delete account (GDPR compliance)
+  Future<Map<String, dynamic>> deleteAccount({String? confirmPassword, String? reason}) async {
+    final Map<String, dynamic> body = {};
+    if (confirmPassword != null && confirmPassword.isNotEmpty) {
+      body['confirmPassword'] = confirmPassword;
+      body['password'] = confirmPassword;
+    }
+    if (reason != null && reason.isNotEmpty) {
+      body['reason'] = reason;
+    }
+    final response = await _client.delete('/account/delete', data: body);
+    await _client.clearToken();
+    return response is Map<String, dynamic> ? response : (response.data is Map<String, dynamic> ? response.data : {'success': true});
+  }
 }
